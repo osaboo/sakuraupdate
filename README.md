@@ -1,2 +1,2 @@
 # sakuraupdate
-Sakura-Editor Update Plugin
+Sakura-Editor Update Plugin (alpha version)
