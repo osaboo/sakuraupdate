@@ -16,6 +16,8 @@ Dim oEX
 Dim WSC_PATH
 Dim Tools
 Dim WorkDir
+Dim CurlExe
+Dim UnzipExe
 Dim DebugLvl
 
 Sub Main()
@@ -33,7 +35,11 @@ Sub Main()
 	DebugLvl = Plugin.GetOption("サクラエディタ", "DEBUGLVL")
     Tools.DebugLvl = DebugLvl
 
+	CurlExe = """" & Plugin.GetPluginDir() & "\Curl.exe"""
+	'UnzipExe = """" & Plugin.GetPluginDir() & "\Unzip.exe"""
+	UnzipExe = """" & Plugin.GetPluginDir() & "\7za.exe"""
 	'Editor.ActivateWinOutput
+
 	Dim lastcheck
 	Dim checkfreq
 	lastcheck = Plugin.GetOption("サクラエディタ", "LASTCHECK")
@@ -62,15 +68,21 @@ Sub Main()
     Dim wnewver
     wcurver = Editor.ExpandParameter("$V")
 
-    Select Case Plugin.GetOption("サクラエディタ", "DOWNLOADSITE")
-        Case "0" 'GitHub
-        	wurl = Plugin.GetOption("サクラエディタ", "GITHUBURL")
-            wnewver = GetGitHub(wurl)
-        Case "1" 'SourceForge
-        	wurl = Plugin.GetOption("サクラエディタ", "SFRSSURL")
-            wnewver = GetSFRSS(wurl)
+    Select Case Plugin.GetOption("サクラエディタ", "SITEPRIORITY")
+    Case 0
+        wurl = Plugin.GetOption("サクラエディタ", "GITHUBURL")
+    Case 1
+        wurl = Plugin.GetOption("サクラエディタ", "SFRSSURL")
+    Case 2
+        wurl = Plugin.GetOption("サクラエディタ", "CUSTOMURL")
     End Select
-	'wnewver = "2.3.2.0"
+
+	If Instr(wurl,"sourceforge.net")>0 then
+        wnewver = GetSFRSS(wurl, "sakura2")
+	ElseIf Instr(wurl,"github.com")>0 then
+        wnewver = GetGitHub(wurl)
+    End If
+
     If wnewver = "" then
         TraceOut "最新版を確認できませんでした。"
         Exit Sub
@@ -90,28 +102,41 @@ Sub Main()
 End Sub
 
 ' Get SourceForge RSS 
-function GetSFRSS(byref aurl)
+function GetSFRSS(byref aurl, apath)
     Dim rCode
     Dim Itemtitle
     Dim i
     Dim wlink
     Dim wver
-    
-    TraceOut "SourceForge確認中... " & aurl
-    
+    Dim wcmd
+    Dim wtmpfile
+
+    wlink = aurl & "?path=/" & apath
+    TraceOut "SourceForge確認中... " & wlink
+
+    wtmpfile = WorkDir & "\_temp.htm"
+    wcmd = CurlExe & " -L """ & wlink & """ -o " & wtmpfile
+    If DebugLvl > 0 Then TraceOut ">" & wcmd
+    'Tools.DoCmd wcmd, ""
+    oSH.Run wcmd, 7, True '
+
     Dim XmlDoc 'As Object
     Set XmlDoc = CreateObject("Microsoft.XMLDOM")
     XmlDoc.async = False
     'RSSのURLからデータを取得
     'rCode = XmlDoc.Load("https://sourceforge.net/projects/sakura-editor/rss?path=/sakura2")
-	rCode = XmlDoc.Load(aurl)
+	'rCode = XmlDoc.Load(aurl & "?path=/" & apath)
+    rCode = XmlDoc.Load(wtmpfile)
 
     '取得確認
-    If rCode = False Then
-        TraceOut "読み込めませんでした。"
-        getSFRSS = -1
-        Exit function
-    End If
+    'If rCode = False Then
+        If (XmlDoc.parseError.ErrorCode <> 0) Then 'ロード失敗
+            TraceOut "読み込めませんでした。"
+            TraceOut XmlDoc.parseError.reason   'エラー内容を出力
+            getSFRSS = -1
+            Exit function
+        End If
+    'End If
 
     'ブログ記事のタイトルを取得
     Set Itemtitle = XmlDoc.SelectNodes("//item/link")
@@ -120,9 +145,10 @@ function GetSFRSS(byref aurl)
     'ブログ記事4つ出力
     For i = 0 To Itemtitle.Length - 1
         wlink = Itemtitle(i).Text
-        If InStr(wlink, ".zip") > 0 Then
+        If Instr(wlink, "sakura2-") > 0 And InStr(wlink, ".zip") > 0 Then
             'Editor.TraceOut(wlink)
             aurl = wlink
+            Editor.TraceOut "見つかったファイル:" & wlink 
             Exit For
         End If
     Next
@@ -180,6 +206,20 @@ function GetGitHub(byref aurl)
 '        RunWait, actor_download\MicrosoftEasyFix51044.exe /passive /promptrestart
 '    }
 '    
+if false Then
+'================== http://madia.world.coocan.jp/cgi-bin/VBBBS/wwwlng.cgi?print+200801/08010037.txt
+Const WinHttpRequestOption_SslErrorIgnoreFlags = &H4& 
+Const SslErrorFlag_UnknownCA = &H100& 
+
+'SSLエラーを無視するかどうかを決めるフラグ。 
+'初期値は0(エラーを無視しない)。 
+Dim flag 'As Long 
+flag = req.Option(WinHttpRequestOption_SslErrorIgnoreFlags) 
+
+'「信頼されていないCA(認証局)」のSSLエラーを無視する。 
+req.Option(WinHttpRequestOption_SslErrorIgnoreFlags) = flag Or SslErrorFlag_UnknownCA 
+end if
+
     req.Send
     If req.Status <> 200 Then
         If DebugLvl > 1 Then TraceOut "Status Error: " & req.Status
@@ -215,6 +255,7 @@ function GetGitHub(byref aurl)
             For Each match In matchs
                 'Debug.Print match.Value
                 wver = match.Value
+                Editor.TraceOut "見つかったファイル:" & wlink
             Next
         End With
     End If

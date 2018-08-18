@@ -51,7 +51,15 @@ Sub Main()
     Dim wcurver
     Dim wnewver
     wcurver = Editor.ExpandParameter("$V")
-	wurl = Plugin.GetOption("サクラエディタ", "SAKURAURL")
+    
+    Select Case Plugin.GetOption("サクラエディタ", "SITEPRIORITY")
+    Case "0"
+        wurl = Plugin.GetOption("サクラエディタ", "GITHUBURL")
+    Case "1"
+        wurl = Plugin.GetOption("サクラエディタ", "SFRSSURL")
+    Case "2"
+        wurl = Plugin.GetOption("サクラエディタ", "CUSTOMURL")
+    End Select
 
 	If Instr(wurl,"sourceforge.net")>0 then
         wnewver = GetSFRSS(wurl, "sakura2")
@@ -68,7 +76,8 @@ Sub Main()
     TraceOut "最新のサクラエディタのバージョン:" & wnewver
 
     if wnewver <= wcurver Then
-        If  MessageBox("すでに最新版ですが、更新しますか?",4) = 7 then 
+        If oSH.Popup("すでに最新版ですが、更新しますか?", 0, "", 4) = 7 Then
+        'If  MessageBox("すでに最新版ですが、更新しますか?",4) = 7 then 
 	        Exit Sub
 	    End if
     End If
@@ -83,6 +92,7 @@ Sub Main()
     'Set TS = Nothing
     
     ' サクラエディタのzipダウンロード
+
     Dim wcmd
     Dim wzipfile
     
@@ -100,9 +110,11 @@ Sub Main()
         wlink = wurl
     End If
     
+    If DebugLvl > 0 Then TraceOut "サクラエディタをダウンロードします.. " & wlink
+    
     'wcmd = "bitsadmin.exe /TRANSFER sakura2 " & wurl & " " & wzipfile
     wcmd = CurlExe & " -L """ & wlink & """ -o " & wzipfile
-    If DebugLvl > 0 Then TraceOut ">" & wcmd
+    If DebugLvl > 1 Then TraceOut ">" & wcmd
     'Tools.DoCmd wcmd, ""
     oSH.Run wcmd, 7, True '
 
@@ -207,7 +219,7 @@ End If
     'Tools.DoCmd wcmd, ""
     oSH.Run wcmd, 7, False
 
-    Editor.ExitAll
+    'Editor.ExitAll
 
 End Sub
 
