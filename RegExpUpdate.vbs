@@ -5,13 +5,13 @@ Option Explicit
 Dim vbCrLf '= Chr(13) & Chr(10)
 Dim vbLf '= Chr(10)
 
+vbCrLf = Chr(13) & Chr(10)
+vbLf = Chr(10)
+
+Dim wSH
 Dim oSH
-Dim oEX
 Dim WSC_PATH
 Dim Tools
-Dim WorkDir
-Dim CurlExe
-Dim DebugLvl
 
 Sub Main()
 
@@ -23,23 +23,7 @@ Sub Main()
     Set Tools = GetObject("script:" & WSC_PATH)
     Set Tools.Editor = Editor
     Set Tools.Plugin = Plugin
-
-	DebugLvl = Plugin.GetOption("サクラエディタ", "DEBUGLVL")
-    Tools.DebugLvl = DebugLvl
-
-	CurlExe = """" & Plugin.GetPluginDir() & "\Curl\Curl.exe"""
-	'Editor.ActivateWinOutput
-	
-    Set oSH = CreateObject("Wscript.Shell")
-    WorkDir = oSH.ExpandEnvironmentStrings("%TEMP%") & "\sakuraupdate"
-	If DebugLvl > 1 Then TraceOut "更新作業用フォルダ " & WorkDir
-    If not Tools.IsExistDir(WorkDir) Then
-    	If DebugLvl > 1 Then TraceOut "更新作業用フォルダを作成します"
-        Tools.CreateDir fs, workdir
-    End If
-
-    vbCrLf = Chr(13) & Chr(10)
-    vbLf = Chr(10)
+    Tools.Init
 
 	TraceOut "正規表現DLLファイルのリリース済みバージョンを確認します。"
 
@@ -68,7 +52,7 @@ Sub Main()
                 sb.AppendFormat "{0,0:00}", matchs(0).SubMatches(0)
                 sb.Append_3 "."
                 sb.AppendFormat "{0,0:00}", matchs(0).SubMatches(1)
-                wcurver = sb.ToString()
+                wcurver = sb.ToString()
             End If
         End If
     End With

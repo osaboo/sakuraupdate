@@ -4,6 +4,31 @@
         <property name="Editor"/>
         <property name="Plugin"/>
         <property name="DebugLvl"/>
+        <property name="FS"/>
+        <property name="WSH"/>
+        <property name="CurlExe"/>
+        <property name="UnzipExe"/>
+        <property name="WorkDir"/>
+        <property name="PluginDir"/>
+        <property name="SakuraDir"/>
+        <method name="Init" />
+        <method name="log">
+                <PARAMETER name="amsg"/>
+                <PARAMETER name="alvl"/>
+        </method>
+        <method name="GetSFRSS">
+                <PARAMETER name="aurl"/>
+                <PARAMETER name="apath"/>
+        </method>
+        <method name="GetSFLink">
+                <PARAMETER name="aurl"/>
+        </method>
+        <method name="GetGitHub">
+                <PARAMETER name="aurl"/>
+        </method>
+        <method name="GetBitBucket">
+                <PARAMETER name="aurl"/>
+        </method>
         <method name="YYYYMMDD">
                 <PARAMETER name="aDT"/>
         </method>
@@ -11,9 +36,11 @@
                 <PARAMETER name="aDT"/>
         </method>
         <method name="IsExistFile">
+                <PARAMETER name="fs"/>
                 <PARAMETER name="afile"/>
         </method>
         <method name="IsExistDir">
+                <PARAMETER name="fs"/>
                 <PARAMETER name="adir"/>
         </method>
         <method name="CreateDir">
@@ -59,87 +86,125 @@ Dim Editor
 Dim Plugin
 Dim DebugLvl
 
-dim WorkDir
-dim WorkId
+Dim WorkDir
+Dim PluginDir
+Dim SakuraDir
+
+Dim CurlExe
+Dim UnzipExe
+
+Dim FS
+Dim WSH
 
 'Dim vbCrLf '= Chr(13) & Chr(10)
 'Dim vbLf '= Chr(10)
 
-Function IsExistFile(afile)
-  Dim fs
-  Set fs = CreateObject("Scripting.FileSystemObject")
+' 初期化
+Sub Init
+  Set FS = CreateObject("Scripting.FileSystemObject")
+
+  DebugLvl = Plugin.GetOption("サクラエディタ", "DEBUGLVL")
+
+  PluginDir = Plugin.GetPluginDir()
+  SakuraDir = FS.GetParentFolderName(Editor.ExpandParameter("$S"))
+
+  CurlExe = """" & Plugin.GetPluginDir() & "\Curl.exe"""
+    'UnzipExe = """" & Plugin.GetPluginDir() & "\Unzip.exe"""
+    UnzipExe = """" & Plugin.GetPluginDir() & "\7za.exe"""
+    'Editor.ActivateWinOutput
+
+  Set WSH = CreateObject("Wscript.Shell")
+  WorkDir = WSH.ExpandEnvironmentStrings("%TEMP%") & "\sakuraupdate"
+    log "更新作業用フォルダ " & WorkDir, 1
+  If Not IsExistDir(FS, WorkDir) Then
+    log "更新作業用フォルダを作成します", 1
+    CreateDir FS, WorkDir
+  End If
+
+End Sub
+
+' DebugLvl>=alvlで、amsgをTraceOutする。
+Sub log(amsg, alvl)
+  If DebugLvl = "" Then
+    Exit Sub
+  End If
+  If (DebugLvl+0) >= (alvl+0) Then
+    Editor.TraceOut amsg
+  End If
+End Sub
+
+Function IsExistFile(fs, afile)
+'  Dim fs
+'  Set fs = CreateObject("Scripting.FileSystemObject")
   IsExistFile = fs.FileExists(afile)
-  Set fs = Nothing
+'  Set fs = Nothing
 End Function
 
-Function IsExistDir(adir)
-  Dim fs
-  Set fs = CreateObject("Scripting.FileSystemObject")
+Function IsExistDir(fs, adir)
+'  Dim fs
+'  Set fs = CreateObject("Scripting.FileSystemObject")
   IsExistDir = fs.FolderExists(adir)
-  set fs = Nothing
+'  set fs = Nothing
 End Function
 
 Function CreateDir(fs, adir)
-  on error resume next
+  On Error Resume Next
 
-  err.clear
+  Err.Clear
   fs.CreateFolder adir
-  If err.number <> 0 then
-    Editor.ErrorMsg(adir & "フォルダを作成できませんでした。")
-  End if
+  If Err.Number <> 0 Then
+    Editor.ErrorMsg (adir & "フォルダを作成できませんでした。")
+  End If
 End Function
 
 Function DeleteDir(fs, adir)
-  on error resume next
+  On Error Resume Next
   
-  err.clear
+  Err.Clear
   fs.DeleteFolder adir
-  If err.number <> 0 then
-     Editor.ErrorMsg(adir & "フォルダを削除できませんでした。")
-  End if
+  If Err.Number <> 0 Then
+     Editor.ErrorMsg (adir & "フォルダを削除できませんでした。")
+  End If
 End Function
 
 '    日付変換
 Function YYYYMMDD(aDT)
-    on error resume next
-    YYYYMMDD  = "00000000"
-    If isDate(aDT) Then
-        YYYYMMDD = Right("0000"& Year(aDT), 4) & Right("00" & Month(aDT), 2) & Right("00" & Day(aDT), 2)
+    On Error Resume Next
+    YYYYMMDD = "00000000"
+    If IsDate(aDT) Then
+        YYYYMMDD = Right("0000" & Year(aDT), 4) & Right("00" & Month(aDT), 2) & Right("00" & Day(aDT), 2)
     End If
 End Function
 
 '   時刻変換
 Function HHNNSS(aDT)
-    on error resume next
+    On Error Resume Next
     HHNNSS = "000000"
     HHNNSS = Right("00" & Hour(aDT), 2) & Right("00" & Minute(aDT), 2) & Right("00" & Second(aDT), 2)
 End Function
 
 Function DoCmd(acmd, aenc)
-  Dim oSH
   Dim oEX
   Dim wbuff
   Dim wconout
   Dim wlogfile
   
-  Set oSH = CreateObject("Wscript.Shell")
-  
-  if aenc <> "" Then
-    wconout = oSH.ExpandEnvironmentStrings("%TEMP%") & "\conout.txt"
+  If aenc <> "" Then
+    wconout = WSH.ExpandEnvironmentStrings("%TEMP%") & "\conout.txt"
     acmd = "%ComSpec% /c " & acmd & " >" & wconout & " 2>&1"
   End If
   
   wbuff = vbCrLf & ">" & acmd & vbCrLf
-  Editor.TraceOut(wbuff)
+  log wbuff, 2
 
   'wlogfile = LogDir & "\" & LogFile
   'Call AppendText(wbuff , wlogfile, "Shift_JIS")
   
-  'Set oEX = oSH.Exec("%ComSpec% /c echo " & acmd)
-  'Set oEX = oSH.Exec("%ComSpec% /c " & acmd)
-  Set oEX = oSH.Exec(acmd)
+  'Set oEX = WSH.Exec("%ComSpec% /c echo " & acmd)
+  'Set oEX = WSH.Exec("%ComSpec% /c " & acmd)
+  Set oEX = WSH.Exec(acmd)
 
-  Do While oEx.Status = 0
+  Do While oEX.Status = 0
     Editor.Sleep 100
   Loop
   
@@ -168,10 +233,10 @@ Function GetFileEncode(afile)
     st.Type = 1  'バイナリ
 
     st.Open         'Streamのオープン
-    st.LoadFromFile(afile)  'ファイル読み込み
-    if err.number = 0 Then
+    st.LoadFromFile (afile) 'ファイル読み込み
+    If Err.Number = 0 Then
       wbuff = st.Read(-1)
-      if IsNull(wbuff) Then
+      If IsNull(wbuff) Then
         wbuff = Array(0)
       End If
     Else
@@ -183,7 +248,7 @@ Function GetFileEncode(afile)
   
   GetFileEncode = "Shift_JIS"
   
-  If ubound(wbuff) < 2 Then
+  If UBound(wbuff) < 2 Then
     Exit Function
   End If
   
@@ -191,12 +256,12 @@ Function GetFileEncode(afile)
   Dim b1, b2, b3
   Dim sjis, utf8
 
-  b1 = AscB(MidB(wbuff,1,1))
-  b2 = AscB(MidB(wbuff,2,1))
-  b3 = AscB(MidB(wbuff,3,1))
+  b1 = AscB(MidB(wbuff, 1, 1))
+  b2 = AscB(MidB(wbuff, 2, 1))
+  b3 = AscB(MidB(wbuff, 3, 1))
   
-  if b1 = &HEF and b2 = &HBB and b3 = &HBF Then 'BOM
-    Editor.TraceOut("BOMあり")
+  If b1 = &HEF And b2 = &HBB And b3 = &HBF Then 'BOM
+    log "BOMあり", 2
     GetFileEncode = "utf-8"
     'Exit Function
   End If
@@ -204,11 +269,11 @@ Function GetFileEncode(afile)
   
   sjis = 0
   
-  For i = 0 to ubound(wbuff)-2
-    b1 = AscB(MidB(wbuff,1+i+0,1))
-    b2 = AscB(MidB(wbuff,1+i+1,1))
-    if ( (&H81 <= b1 and b1 <= &H9F) or (&HE0 <= b1 and b1 <= &HFC) ) and _
-       ( (&H40 <= b2 and b2 <= &H7E) or (&H80 <= b2 and b2 <= &HFC) ) Then
+  For i = 0 To UBound(wbuff) - 2
+    b1 = AscB(MidB(wbuff, 1 + i + 0, 1))
+    b2 = AscB(MidB(wbuff, 1 + i + 1, 1))
+    If ((&H81 <= b1 And b1 <= &H9F) Or (&HE0 <= b1 And b1 <= &HFC)) And _
+       ((&H40 <= b2 And b2 <= &H7E) Or (&H80 <= b2 And b2 <= &HFC)) Then
        sjis = sjis + 2
        i = i + 1
     End If
@@ -216,34 +281,34 @@ Function GetFileEncode(afile)
 
   utf8 = 0
   
-  For i = 0 to ubound(wbuff)-2
-    b1 = AscB(MidB(wbuff,1+i+0,1))
-    b2 = AscB(MidB(wbuff,1+i+1,1))
-    if (&HC0 <= b1 and b1 <= &HDF) and _
-       (&H80 <= b2 and b2 <= &HBF) Then
+  For i = 0 To UBound(wbuff) - 2
+    b1 = AscB(MidB(wbuff, 1 + i + 0, 1))
+    b2 = AscB(MidB(wbuff, 1 + i + 1, 1))
+    If (&HC0 <= b1 And b1 <= &HDF) And _
+       (&H80 <= b2 And b2 <= &HBF) Then
        utf8 = utf8 + 2
        i = i + 1
-    ElseIf i < ubound(wbuff)-2 Then
-       b3 = AscB(MidB(wbuff,1+i+2,1))
-       if (&HE0 <= b1 and b1 <= &HEF) and _
-          (&H80 <= b2 and b2 <= &HBF) and _
-          (&H80 <= b3 and b3 <= &HBF) Then
+    ElseIf i < UBound(wbuff) - 2 Then
+       b3 = AscB(MidB(wbuff, 1 + i + 2, 1))
+       If (&HE0 <= b1 And b1 <= &HEF) And _
+          (&H80 <= b2 And b2 <= &HBF) And _
+          (&H80 <= b3 And b3 <= &HBF) Then
           utf8 = utf8 + 3
           i = i + 2
        End If
     End If
   Next
 
-'  Editor.TraceOut("sjis=" & sjis & ",utf8=" & utf8)
+' log("sjis=" & sjis & ",utf8=" & utf8, 2)
   
-  if sjis < utf8 Then
+  If sjis < utf8 Then
     GetFileEncode = "utf-8"
   End If
 
 End Function
 
 Function LoadText(afile, aenc)
-  on error resume next
+  On Error Resume Next
   Dim wbuff
   
   wbuff = ""
@@ -275,8 +340,8 @@ Function LoadText(afile, aenc)
     st.LineSeparator = 10 '改行LF（10）
     
     st.Open         'Streamのオープン
-    st.LoadFromFile(afile)  'ファイル読み込み
-    if err.number = 0 Then
+    st.LoadFromFile (afile) 'ファイル読み込み
+    If Err.Number = 0 Then
       wbuff = st.ReadText(-1)
     Else
       wbuff = "#ERROR#"
@@ -349,7 +414,7 @@ End Function
 ' Encode special characters of a string
 ' this is useful when you want to put a string in the URL
 ' inspired by http://stackoverflow.com/questions/218181/how-can-i-url-encode-a-string-in-excel-vba
-Function URLEncode( StringVal )
+Function URLEncode(StringVal)
     Dim sc
     Set sc = CreateObject("ScriptControl")
     sc.Language = "JScript"
@@ -375,9 +440,9 @@ End Function
 
 Function FindApp(app)
     Dim oXL
-    on error resume next
+    On Error Resume Next
     
-    set FindApp = Nothing
+    Set FindApp = Nothing
 
 '    Dim oWD 'As Word.Application
 '    Dim task 'As Word.task
@@ -436,18 +501,18 @@ Function CreateHttpRequest() ' As Object
                   "Msxml2.XMLHTTP.3.0", _
                   "Msxml2.XMLHTTP", _
                   "Microsoft.XMLHTTP")
-  progIDs = Array( "Msxml2.XMLHTTP")
+  progIDs = Array("Msxml2.XMLHTTP")
   On Error Resume Next
   For i = LBound(progIDs) To UBound(progIDs)
     Set ret = CreateObject(progIDs(i))
     If Not ret Is Nothing Then
-    	If DebugLvl > 1 Then Editor.TraceOut "XMLHTTPRequestを" & progIDs(i) & "で初期化しました。"
-    	Exit For
+        log "XMLHTTPRequestを" & progIDs(i) & "で初期化しました。", 2
+        Exit For
     End If
   Next
   On Error GoTo 0
-  If ret is Nothing Then
-  	If DebugLvl > 1 Then Editor.TraceOut "XMLHTTPRequestを初期化できませんでした。"
+  If ret Is Nothing Then
+    log "XMLHTTPRequestを初期化できませんでした。", 0
   End If
   Set CreateHttpRequest = ret
 End Function
@@ -461,11 +526,500 @@ Function GetOSInfo(ByRef aos, ByRef aver, ByRef abit)
   Set colItems = objWMIService.ExecQuery("Select * from Win32_OperatingSystem")
   
   For Each item In colItems
-      aos  = item.Caption
+      aos = item.Caption
       aver = item.Version
       abit = item.OSArchitecture
   Next
 End Function
+
+' Get SourceForge RSS
+Function GetSFRSS(ByRef aurl, apath)
+    Dim rCode
+    Dim Itemtitle
+    Dim i
+    Dim wlink
+    Dim wver
+    Dim wcmd
+    Dim wtmpfile
+
+    If apath <> "" Then
+        wlink = aurl & "?path=/" & apath
+    Else
+        wlink = aurl
+    End If
+    
+    log "SourceForge確認中... " & wlink, 0
+
+    wtmpfile = WorkDir & "\_temp.htm"
+    wcmd = CurlExe & " -L """ & wlink & """ -o " & wtmpfile
+    log ">" & wcmd, 1
+    'DoCmd wcmd, ""
+    WSH.Run wcmd, 7, True '
+
+    Dim XmlDoc 'As Object
+    Set XmlDoc = CreateObject("Microsoft.XMLDOM")
+    XmlDoc.async = False
+    'RSSのURLからデータを取得
+    'rCode = XmlDoc.Load("https://sourceforge.net/projects/sakura-editor/rss?path=/sakura2")
+    'rCode = XmlDoc.Load(aurl & "?path=/" & apath)
+    rCode = XmlDoc.Load(wtmpfile)
+
+    '取得確認
+    'If rCode = False Then
+        If (XmlDoc.parseError.ErrorCode <> 0) Then 'ロード失敗
+            log "読み込めませんでした。", 0
+            log XmlDoc.parseError.reason, 0   'エラー内容を出力
+            GetSFRSS = -1
+            Exit Function
+        End If
+    'End If
+
+    'ブログ記事のタイトルを取得
+    Set Itemtitle = XmlDoc.SelectNodes("//item/link")
+
+    wlink = ""
+    'ブログ記事4つ出力
+    For i = 0 To Itemtitle.Length - 1
+        wlink = Itemtitle(i).Text
+        If InStr(wlink, "sakura2-") > 0 And InStr(wlink, ".zip") > 0 Then
+            'log wlink, 1
+            aurl = wlink
+            Exit For
+        End If
+    Next
+    
+    If wlink <> "" Then
+        Dim re, match, matchs
+        Set re = CreateObject("VBScript.RegExp")
+        With re
+            .Pattern = "[0-9]\.[0-9]\.[0-9]\.[0-9]"
+            .Global = True
+            Set matchs = .Execute(wlink)
+            'Debug.Print matchs.Count
+            For Each match In matchs
+                'Debug.Print match.Value
+                wver = match.Value
+                log "見つかったファイル:" & wlink, 2
+            Next
+    End With
+
+    End If
+
+    GetSFRSS = wver
+
+End Function
+
+' Get GitHub Release API
+Function GetGitHub(ByRef aurl)
+    Dim req
+    Dim wjson
+    Dim wlink
+    Dim wver
+    Dim wpage
+    Dim mesg
+    Dim i, j, k
+    Dim wcmd
+    Dim wtmpfile
+
+    wlink = aurl
+      log "GitHub確認中.. " & wlink, 0
+
+    wtmpfile = WorkDir & "\_temp.htm"
+    wcmd = CurlExe & " -L """ & wlink & """ -o " & wtmpfile
+    log ">" & wcmd, 1
+    'DoCmd wcmd, ""
+    WSH.Run wcmd, 7, True '
+
+If False Then
+    Set req = Nothing '初期化
+    Set req = CreateHttpRequest()
+    If req Is Nothing Then Exit Function
+    req.Open "GET", aurl, False
+  
+    'XMLHTTPRequestを考慮してキャッシュ対策
+    'http://vird2002.s8.xrea.com/javascript/XMLHttpRequest.html#XMLHttpRequest_Cache-Control
+    'http://www.atmarkit.co.jp/ait/articles/0305/10/news002.html 参考
+    req.setRequestHeader "Pragma", "no-cache"
+    req.setRequestHeader "Cache-Control", "no-cache"
+    req.setRequestHeader "If-Modified-Since", "Thu, 01 Jun 1970 00:00:00 GMT"
+
+'https://support.microsoft.com/en-us/help/3140245/update-to-enable-tls-1-1-and-tls-1-2-as-a-default-secure-protocols-in
+'    If (A_OSVersion = "WIN_7") {
+'        Win7FixPatch_URL = http://download.microsoft.com/download/0/6/5/0658B1A7-6D2E-474F-BC2C-D69E5B9E9A68/MicrosoftEasyFix51044.msi
+'        Log("MicrosoftEasyFix51044をダウンロード"
+'        Download(Win7FixPatch_URL, "actor_download\" . "MicrosoftEasyFix51044.msi")
+'        Log("MicrosoftEasyFix51044をインストール")
+'        RunWait, actor_download\MicrosoftEasyFix51044.exe /passive /promptrestart
+'    }
+'
+If False Then
+'================== http://madia.world.coocan.jp/cgi-bin/VBBBS/wwwlng.cgi?print+200801/08010037.txt
+Const WinHttpRequestOption_SslErrorIgnoreFlags = &H4&
+Const SslErrorFlag_UnknownCA = &H100&
+
+'SSLエラーを無視するかどうかを決めるフラグ。
+'初期値は0(エラーを無視しない)。
+Dim flag 'As Long
+flag = req.Option(WinHttpRequestOption_SslErrorIgnoreFlags)
+
+'「信頼されていないCA(認証局)」のSSLエラーを無視する。
+req.Option(WinHttpRequestOption_SslErrorIgnoreFlags) = flag Or SslErrorFlag_UnknownCA
+End If
+
+    req.Send
+    If req.Status <> 200 Then
+        log "Status Error: " & req.Status, 1
+        Exit Function
+    End If
+      
+    'set wjson = ParseJson(req.responseText)
+    'wlink = wjson.assets(0).browser_download_url
+    wpage = req.responseText
+    log "Status : " & req.Status, 2
+End If
+
+    'Dim fs, ts
+    'Set fs = CreateObject("Scripting.FileSystemObject")
+    'Set ts = fs.OpenTextFile(wtmpfile)
+    wpage = LoadText(wtmpfile, "utf-8")
+
+    mesg = "browser_download_url"":"
+    i = InStr(wpage, mesg)
+    If i > 0 Then
+        wlink = Mid(wpage, i + Len(mesg))
+        '    "xxxxxx"
+        ' j  1
+        ' k         8
+        '     2----7  (9-2-3)
+        j = InStr(wlink, """")
+        If j > 0 Then
+            k = InStr(j + 1, wlink, """")
+            If k > 0 Then
+                wlink = Mid(wlink, j + 1, k - j - 1)
+                aurl = wlink
+            End If
+        Else
+            wlink = ""
+        End If
+    End If
+     
+    If wlink <> "" Then
+        Dim re, match, matchs
+        Set re = CreateObject("VBScript.RegExp")
+        With re
+            .Pattern = "[0-9]\.[0-9]\.[0-9]\.[0-9]"
+            .Global = True
+            Set matchs = .Execute(wlink)
+            'Debug.Print matchs.Count
+            For Each match In matchs
+                'Debug.Print match.Value
+                wver = match.Value
+                log "見つかったファイル:" & wlink, 1
+            Next
+        End With
+    End If
+
+    GetGitHub = wver
+
+End Function
+
+function GetBitBucket(byref aurl)
+    Dim req
+    Dim wjson
+    Dim wlink
+    Dim wver
+    Dim wpage
+    Dim mesg
+    Dim i, j
+
+	log "BitBucket確認中.. " & aurl, 0
+
+    Set req = Nothing '初期化
+    Set req = CreateHttpRequest()
+    If req Is Nothing Then Exit function
+    req.Open "GET", aurl, False
+  
+    'XMLHTTPRequestを考慮してキャッシュ対策
+    'http://vird2002.s8.xrea.com/javascript/XMLHttpRequest.html#XMLHttpRequest_Cache-Control
+    'http://www.atmarkit.co.jp/ait/articles/0305/10/news002.html 参考
+    req.setRequestHeader "Pragma", "no-cache"
+    req.setRequestHeader "Cache-Control", "no-cache"
+    req.setRequestHeader "If-Modified-Since", "Thu, 01 Jun 1970 00:00:00 GMT"
+
+'https://support.microsoft.com/en-us/help/3140245/update-to-enable-tls-1-1-and-tls-1-2-as-a-default-secure-protocols-in
+'    If (A_OSVersion = "WIN_7") {
+'        Win7FixPatch_URL = http://download.microsoft.com/download/0/6/5/0658B1A7-6D2E-474F-BC2C-D69E5B9E9A68/MicrosoftEasyFix51044.msi
+'        Log("MicrosoftEasyFix51044をダウンロード"
+'        Download(Win7FixPatch_URL, "actor_download\" . "MicrosoftEasyFix51044.msi")
+'        Log("MicrosoftEasyFix51044をインストール")
+'        RunWait, actor_download\MicrosoftEasyFix51044.exe /passive /promptrestart
+'    }
+'    
+
+    req.Send
+    If req.Status <> 200 Then
+        log "Status Error: " & req.Status, 0
+        Exit Function
+    End If
+      
+    'set wjson = ParseJson(req.responseText)
+    'wlink = wjson.assets(0).browser_download_url
+    wpage = req.responseText
+    log "Status : " & req.Status, 1
+    
+    Dim re, match, matchs
+    Set re = CreateObject("VBScript.RegExp")
+    re.pattern = "https://[^""]+/bron(\d+)\.zip"
+
+    With re
+        '.pattern = "[0-9]\.[0-9]\.[0-9]\.[0-9]"
+        .Global = True
+        Set matchs = .Execute(wpage)
+        If matchs.Count > 0 Then
+            wlink = matchs(0)
+            log "見つかったファイル:" & wlink, 1
+            If matchs(0).SubMatches.Count > 0 Then
+                wver = matchs(0).SubMatches(0)
+                Dim sb
+                Set sb=CreateObject("System.Text.StringBuilder")
+                sb.AppendFormat "{0,0:00}", left(wver,1)
+                sb.Append_3 "."
+                sb.AppendFormat "{0,0:00}", mid(wver,2)
+                wver = sb.ToString()
+            End If
+        End If
+    End With
+
+    GetBitBucket = wver
+
+End function
+
+'<noscript>
+'    <meta http-equiv="refresh" content="5; url=https://downloads.sourceforge.net/project/sakura-editor/sakura2/2.3.2.0/sakura2-3-2-0.zip?r=&amp;ts=1533634137&amp;use_mirror=jaist">
+'</noscript>
+
+Function GetSFLink(aurl)
+    Dim wtmpfile
+    Dim wcmd
+    
+    wtmpfile = WorkDir & "\_temp2.htm"
+    wcmd = CurlExe & " -L """ & aurl & """ -o " & wtmpfile
+    log ">" & wcmd, 1
+    'Tools.DoCmd wcmd, ""
+    WSH.Run wcmd, 7, True '
+    
+If False Then
+    'WinHttpRequest/XMLHTTPRequest + ADODB.Streamでファイルをダウンロード
+    Dim req 'As Object
+    Const adTypeBinary = 1
+    Const adSaveCreateOverWrite = 2
+    
+    GetSFLink = ""
+    
+    Set req = Nothing '初期化
+    Set req = CreateHttpRequest()
+    If req Is Nothing Then Exit Function
+    'req.Option(17) = False 'WinHttpRequestOption_EnableHttp1_1
+    req.Open "GET", aurl, False
+     
+    '.Option(WinHttpRequestOption_EnableRedirects)
+    'XMLHTTPRequestを考慮してキャッシュ対策
+    'http://vird2002.s8.xrea.com/javascript/XMLHttpRequest.html#XMLHttpRequest_Cache-Control
+    'http://www.atmarkit.co.jp/ait/articles/0305/10/news002.html 参考
+    req.setRequestHeader "Pragma", "no-cache"
+    req.setRequestHeader "Cache-Control", "no-cache"
+    req.setRequestHeader "If-Modified-Since", "Thu, 01 Jun 1970 00:00:00 GMT"
+    
+    req.Send
+End If
+    
+    Dim i
+    Dim j
+    Dim wpage
+    Dim ohtml
+    Dim welems
+    Dim wattr
+    Dim wnode
+    Dim wnode1
+    Dim wnode2
+    Dim mesg
+    Dim wlink
+    Dim witem
+    
+'    If req.Status <> 200 Then
+'      Exit Function
+'    End If
+    
+    'wpage = req.responseText
+    Dim fs, ts
+    Set fs = CreateObject("Scripting.FileSystemObject")
+    Set ts = fs.OpenTextFile(wtmpfile)
+    wpage = ts.ReadAll
+    
+    mesg = "<meta http-equiv=""refresh"" content="""
+    i = InStr(wpage, mesg)
+    If i > 0 Then
+        wlink = Mid(wpage, i + Len(mesg))
+        i = InStr(wlink, "url=")
+        j = InStr(wlink, """")
+        If i > 0 And j > 0 Then
+            wlink = Mid(wlink, i + 4, j - i - 4)
+            wlink = Replace(wlink, "&amp;", "&")
+        Else
+            wlink = ""
+        End If
+    End If
+    
+    GetSFLink = wlink
+    Exit Function
+    
+    
+    Set ohtml = CreateObject("htmlfile") '= MSHTML.HTMLDocument
+    ohtml.Write wpage
+    
+    
+    mesg = ""
+    wlink = ""
+    
+    Set welems = ohtml.getElementsByTagName("meta")
+
+    For Each wnode In welems
+      wattr = wnode.getAttribute("http-equiv")
+      'Debug.Print wnode.Name
+      'Debug.Print (wattr)
+      'Debug.Print wnode.httpEquiv
+      If wattr = "refresh" Or wnode.httpEquiv = "refresh" Then
+        mesg = wnode.getAttribute("content")
+        If InStr(mesg, "url=") > 0 Then
+            wlink = Mid(mesg, InStr(mesg, "url=") + 4)
+            wlink = Left(wlink, InStr(wlink, """") - 1)
+            Exit For
+        End If
+        'For Each witem In wnode.ChildNodes
+        '    If witem.nodeName = "#text" Then
+        '        If Len(witem.NodeValue) > 1 Then
+                    'WScript.Echo witem.nodeName & ":(" & Len(witem.firstChild.nodeValue) & ")" & witem.firstChild.nodeValue & ";"
+        '            mesg = Trim(witem.NodeValue)
+                    'Set wnode = node
+                    'Exit For
+        '        End If
+        '    End If
+        'Next
+      End If
+      'WScript.Echo mesg
+      
+    Next
+    
+    GetSFLink = wlink
+    
+End Function
+
+
+
+' @see https://www.ka-net.org/blog/?p=4855#HttpRequest
+Private Sub DownloadFile(ByVal url, ByVal SaveFilePath)
+  'WinHttpRequest/XMLHTTPRequest + ADODB.Streamでファイルをダウンロード
+    Dim req 'As Object
+    Const adTypeBinary = 1
+    Const adSaveCreateOverWrite = 2
+    
+    Set req = Nothing '初期化
+    Set req = CreateHttpRequest() 'CreateObject("WinHttp.WinHttpRequest.5.1") '
+    'Set req = CreateObject("MSXML2.XMLHTTP")
+    If req Is Nothing Then Exit Sub
+  
+    log "ダウンロード中... " & url, 0
+    
+    req.Open "GET", url, False
+     
+    '2：SXH_OPTION_IGNORE_SERVER_SSL_CERT_ERROR_FLAGS
+    '3：SXH_OPTION_SELECT_CLIENT_SSL_CERT
+    '13056: SXH_OPTION_IGNORE_SERVER_SSL_CERT_ERROR_FLAGS
+    'req.SetOption 2, 13056
+  
+    'XMLHTTPRequestを考慮してキャッシュ対策
+    'http://vird2002.s8.xrea.com/javascript/XMLHttpRequest.html#XMLHttpRequest_Cache-Control
+    'http://www.atmarkit.co.jp/ait/articles/0305/10/news002.html 参考
+    req.setRequestHeader "Pragma", "no-cache"
+    req.setRequestHeader "Cache-Control", "no-cache"
+    req.setRequestHeader "If-Modified-Since", "Thu, 01 Jun 1970 00:00:00 GMT"
+     
+    req.Send
+    Select Case req.Status
+      Case 200
+        With CreateObject("ADODB.Stream")
+          .Type = adTypeBinary
+          .Open
+          .Write req.responseBody
+          .SaveToFile SaveFilePath, adSaveCreateOverWrite
+          .Close
+        End With
+      Case Else
+        MsgBox "エラーが発生しました。" & vbCrLf & _
+               "ステータスコード：" & req.Status, _
+               vbCritical + vbSystemModal
+        Exit Sub
+    End Select
+  End Sub
+  
+  
+  'Declare PtrSafe Function URLDownloadToFile Lib "urlmon" Alias "URLDownloadToFileA" ( ByVal pCaller As Long, _
+  '    ByVal szURL As String, _
+  '    ByVal szFileName As String, _
+  '    ByVal dwReserved As Long, _
+  '    ByVal lpfnCB As Long ) As Long
+  
+  'Function URLDownload(strURL, strPath)
+  'Dim lngRes 'As Long
+  'Dim strURL As String
+  'Dim strPath As String
+       
+      'strPath = "C:\Users\users\Desktop\File\画像.png"
+      'strURL = "https://www.google.co.jp/images/branding/googlelogo/1x/googlelogo_color_272x92dp.png";
+      
+  ' Tools.log "ダウンロード中... " & strURL, 0
+  
+  '    URLDownload = URLDownloadToFile(0, strURL, strPath, 0, 0)
+      ' URLDownload = 0 : 正常
+  'End Sub
+  
+  Public Function GetRedirectUrl(ByVal url)
+    Dim req
+    Dim ret
+    Const WinHttpRequestOption_EnableRedirects = 6 'WinHttp.WinHttpRequestOption
+    ret = url
+    
+    log "リダイレクトチェック " & url, 1
+    
+    On Error Resume Next
+    Err.Clear
+    Set req = CreateObject("WinHttp.WinHttpRequest.5.1")
+  
+    If req Is Nothing Then
+        log "GetRedirectUrl(0): WinHttpRequestオブジェクト初期化失敗", 1
+        Exit Function
+    Else
+        log "GetRedirectUrl(0): WinHttpRequestオブジェクト初期化成功", 1
+    End If
+    
+    With req
+       If Err.Number <> 0 Then log "GetRedirectUrl(1): Error " & Error, 0: Exit Function
+      .Open "HEAD", url, False
+       If Err.Number <> 0 Then log "GetRedirectUrl(2): Error " & Error, 0: Exit Function
+      .Option(WinHttpRequestOption_EnableRedirects) = False 'リダイレクト無効
+       If Err.Number <> 0 Then log "GetRedirectUrl(3): Error " & Error, 0: Exit Function
+      .Send
+       If Err.Number <> 0 Then log "GetRedirectUrl(4): Error " & Error, 0: Exit Function
+      log "GetRedirectUrl(5): Status " & .Status, 1
+      Select Case .Status
+        Case 302: ret = .GetResponseHeader("Location")
+      End Select
+    End With
+  
+    On Error GoTo 0
+    GetRedirectUrl = ret
+  End Function
+
 
 ]]>
 </script>
