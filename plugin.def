@@ -11,16 +11,16 @@ Author=osaboo
 [Command]
 C[1]=CheckOnDemand.vbs
 C[1].Label=更新チェック(&C)
-C[2]=AllUpdate.vbs
-C[2].Label=まとめて更新(&S)
-C[3]=SakuraUpdate.vbs
-C[3].Label=サクラエディタ更新(&S)
-C[4]=HelpUpdate.vbs
-C[4].Label=ヘルプファイル更新(&H)
-C[5]=RegexpUpdate.vbs
-C[5].Label=正規表現モジュール更新(&R)
-C[6]=PluginUpdate.vbs
-C[6].Label=このプラグインの更新(&U)
+;C[2]=AllUpdate.vbs
+;C[2].Label=まとめて更新(&S)
+C[2]=SakuraUpdate.vbs
+C[2].Label=サクラエディタ更新(&S)
+C[3]=HelpUpdate.vbs
+C[3].Label=ヘルプファイル更新(&H)
+C[4]=RegexpUpdate.vbs
+C[4].Label=正規表現モジュール更新(&R)
+;C[6]=PluginUpdate.vbs
+;C[6].Label=このプラグインの更新(&U)
 
 [Option]
 O[1].Section=サクラエディタ

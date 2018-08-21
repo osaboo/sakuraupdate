@@ -8,17 +8,11 @@ Dim vbLf '= Chr(10)
 vbCrLf = Chr(13) & Chr(10)
 vbLf = Chr(10)
 
-Dim wSH
-Dim oSH
-Dim WSC_PATH
 Dim Tools
 
 Sub Main()
 
-
-    Dim fs
-    Dim fl
-    Set fs = CreateObject("Scripting.FileSystemObject")
+    Dim WSC_PATH
 
     WSC_PATH = Plugin.GetPluginDir() & "\Tools.wsc"
     Set Tools = GetObject("script:" & WSC_PATH)
@@ -28,7 +22,13 @@ Sub Main()
     
 	Editor.ActivateWinOutput
 
-    Tools.log "リリース済みバージョンを確認します。", 0
+    Tools.log "サクラエディタ本体を最新バージョンに更新します。", 0
+
+    Dim wos, wosver, wosbit
+    Tools.GetOSInfo wos, wosver, wosbit
+    'Tools.log "wos=" & wos, 2
+    Tools.log "wosver=" & wosver, 2
+    'Tools.log "wosbit=" & wosbit, 2
 
     Dim wurl
     Dim wlink
@@ -93,7 +93,7 @@ Sub Main()
     'Tools.DoCmd wcmd, ""
     Tools.WSH.Run wcmd, 7, True '
 
-	If Not fs.FileExists(wzipfile) then
+	If Not Tools.FS.FileExists(wzipfile) then
 	    Tools.log "ダウンロードできませんでした。", 0
 		Exit Sub
 	End If
@@ -108,7 +108,7 @@ Sub Main()
     Tools.WSH.Run wcmd, 7, False
     
     Sleep 500
-    If Not fs.FileExists(Tools.WorkDir & "\sakura.exe") then
+    If Not Tools.FS.FileExists(Tools.WorkDir & "\sakura.exe") then
 	    Tools.log Tools.WorkDir & "\sakura.exeがダウンロードファイルにありませんでした。", 0
 		Exit Sub
 	End If
@@ -124,41 +124,68 @@ Sub Main()
     '    C:\program files\sakuraの場合はセキュリティ警告がでる。
     Dim wcmdfile
     Dim wcmdparam
-    Dim sakuraexe
-    Dim sakuraold
     Dim programfiles
-    sakuraexe = Editor.ExpandParameter("$S")
-    sakuraold = sakuraexe & ".old"
     programfiles = "C:\Program Files"
-
-'   workdir + "/_temp.ps1" に、
-'   plugindir + "/fileupdate.ps1" + パラメータ1, 2, 3
-'   を呼ぶ処理を保存して、_temp.ps1を、start-process -Verb runasで呼ぶ
-    wcmdfile = """" & Tools.PluginDir & "\fileupdate.ps1"""
-    wcmd     = "& " & wcmdfile & " " & _
-                Tools.WorkDir  & " " & _
-                """" & Tools.SakuraDir & """ " & _
-                "sakura.exe" + vbCrLf
-
-    wcmdfile = Tools.WorkDir & "\_fileupdate.ps1"
-    Tools.SaveText wcmd, wcmdfile, "Shift_JIS"
     
-    wcmdparam = "Start-Process PowerShell -ArgumentList " & wcmdfile & " "
-    If left(sakuraexe, Len(programfiles)) = programfiles Then
-        '管理者モードでコピー
-        wcmdparam = wcmdparam + " -Verb runas" ' -Wait
+    wcmd     = "set srcfolder=" & Tools.WorkDir & vbCrLf & _
+	           "set targetfolder=" & Tools.SakuraDir & vbCrLf & _
+	           "set targetfile=sakura.exe" & vbCrLf
+
+	If (left(wosver,2) = "6." or left(wosver,3) = "10.") and left(Tools.SakuraDir, Len(programfiles)) = programfiles Then
+        wcmd = wcmd & "set _runas=-Verb runas"
     End If
+    
+    wcmdfile = Tools.WorkDir & "\_setenv.bat"
+	Tools.SaveText wcmd, wcmdfile, "Shift_JIS"
+	
+    wcmd = """" & Tools.PluginDir & "\mainupdate.bat"""
+'	wcmdparam = "Start-Process -File " & wcmdfile
+'	If (left(wosver,2) = "6." or left(wosver,3) = "10.") and left(Tools.SakuraDir, Len(programfiles)) = programfiles Then
+'	    '管理者モードでコピー
+'	    wcmdparam = wcmdparam + " -Verb runas" ' -Wait
+'       'wcmd = "powershell -NoProfile -ExecutionPolicy unrestricted -Command ""Start-Process PowerShell -ArgumentList " & wcmdparam & """"
+'        wcmd = "powershell -NoProfile -ExecutionPolicy unrestricted -Command """ & wcmdparam & """"
+'        '-NoNewWindow -PassThru
+'    Else
+'        wcmd = wcmdfile
+'	End If
 
-    'wcmd = "powershell -NoProfile -ExecutionPolicy unrestricted -Command ""Start-Process PowerShell -ArgumentList " & wcmdparam & """"
-    wcmd = "powershell -NoProfile -ExecutionPolicy unrestricted -Command """ & wcmdparam & """"
-    '-NoNewWindow -PassThru
+    If false Then
+	'   workdir + "/_temp.ps1" に、
+	'   plugindir + "/fileupdate.ps1" + パラメータ1, 2, 3
+	'   を呼ぶ処理を保存して、_temp.ps1を、start-process -Verb runasで呼ぶ
+	    wcmdfile = """" & Tools.PluginDir & "\fileupdate.ps1"""
+	    wcmd     = "& " & wcmdfile & " " & _
+	                Tools.WorkDir  & " " & _
+	                """" & Tools.SakuraDir & """ " & _
+	                "sakura.exe" + vbCrLf
+
+	    wcmdfile = Tools.WorkDir & "\_fileupdate.ps1"
+	    Tools.SaveText wcmd, wcmdfile, "Shift_JIS"
+	    
+	    wcmdparam = "Start-Process PowerShell -ArgumentList " & wcmdfile & " "
+	    If left(Tools.SakuraDir, Len(programfiles)) = programfiles Then
+	        '管理者モードでコピー
+	        wcmdparam = wcmdparam + " -Verb runas" ' -Wait
+	    End If
+
+	    'wcmd = "powershell -NoProfile -ExecutionPolicy unrestricted -Command ""Start-Process PowerShell -ArgumentList " & wcmdparam & """"
+	    wcmd = "powershell -NoProfile -ExecutionPolicy unrestricted -Command """ & wcmdparam & """"
+	    '-NoNewWindow -PassThru
+    End If
+    
+    'If Tools.DebugLvl >= 1 Then
+	'	If Tools.WSH.Popup("サクラエディタを終了しますか。",0,"ソフトウェアの更新",1) = 1 Then
+	'	
+	'    End If
+	'End If
+
     Tools.log ">" & wcmd, 1
-
     'Tools.DoCmd wcmd, ""
-    Tools.WSH.Run wcmd, 7, False
+    Tools.WSH.Run wcmd, 7, false
 
     Editor.ExitAll
-
+    
 End Sub
 
 

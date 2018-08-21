@@ -14,22 +14,19 @@ Dim vbLf '= Chr(10)
 vbCrLf = Chr(13) & Chr(10)
 vbLf = Chr(10)
 
-Dim wSH
-Dim oSH
-Dim WSC_PATH
 Dim Tools
 
 Sub Main()
 
-    Dim fs
-    Dim fl
-    Set fs = CreateObject("Scripting.FileSystemObject")
+    Dim WSC_PATH
 
     WSC_PATH = Plugin.GetPluginDir() & "\Tools.wsc"
     Set Tools = GetObject("script:" & WSC_PATH)
     Set Tools.Editor = Editor
     Set Tools.Plugin = Plugin
     Tools.Init
+
+	Editor.ActivateWinOutput
 
 	Dim lastcheck
 	Dim checkfreq
@@ -39,7 +36,7 @@ Sub Main()
 	lastcheck = Date
 	Plugin.SetOption "サクラエディタ", "LASTCHECK", lastcheck
 	
-    Tools.log "リリース済みバージョンを確認します。", 0
+    Tools.log "サクラエディタ本体の最新バージョンを確認します。", 0
 
     Dim wurl
     Dim wlink

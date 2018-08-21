@@ -14,13 +14,11 @@ Dim vbLf '= Chr(10)
 vbCrLf = Chr(13) & Chr(10)
 vbLf = Chr(10)
 
-Dim wSH
-Dim oSH
-Dim WSC_PATH
 Dim Tools
 
 Sub Main()
 
+    Dim WSC_PATH
     Dim fs
     Dim fl
     Set fs = CreateObject("Scripting.FileSystemObject")

@@ -53,7 +53,6 @@
         </method>
         <method name="DoCmd">
                 <PARAMETER name="acmd"/>
-                <PARAMETER name="aenc"/>
         </method>
         <method name="GetFileEncode">
                 <PARAMETER name="afile"/>
@@ -133,10 +132,10 @@ Sub log(amsg, alvl)
   End If
 End Sub
 
-Function IsExistFile(fs, afile)
+Function IsExistFile(afile)
 '  Dim fs
 '  Set fs = CreateObject("Scripting.FileSystemObject")
-  IsExistFile = fs.FileExists(afile)
+  IsExistFile = FS.FileExists(afile)
 '  Set fs = Nothing
 End Function
 
@@ -183,39 +182,56 @@ Function HHNNSS(aDT)
     HHNNSS = Right("00" & Hour(aDT), 2) & Right("00" & Minute(aDT), 2) & Right("00" & Second(aDT), 2)
 End Function
 
-Function DoCmd(acmd, aenc)
-  Dim oEX
-  Dim wbuff
-  Dim wconout
-  Dim wlogfile
-  
-  If aenc <> "" Then
-    wconout = WSH.ExpandEnvironmentStrings("%TEMP%") & "\conout.txt"
-    acmd = "%ComSpec% /c " & acmd & " >" & wconout & " 2>&1"
-  End If
-  
-  wbuff = vbCrLf & ">" & acmd & vbCrLf
-  log wbuff, 2
+'Function DoCmd(acmd, aenc)
+'  Dim oEX
+'  Dim wbuff
+'  Dim wconout
+'  Dim wlogfile
+'  
+'  If aenc <> "" Then
+'    wconout = WSH.ExpandEnvironmentStrings("%TEMP%") & "\conout.txt"
+'    acmd = "%ComSpec% /c " & acmd & " >" & wconout & " 2>&1"
+'  End If
+'  
+'  wbuff = vbCrLf & ">" & acmd & vbCrLf
+'  log wbuff, 2
+'
+'  'wlogfile = LogDir & "\" & LogFile
+'  'Call AppendText(wbuff , wlogfile, "Shift_JIS")
+'  
+'  'Set oEX = WSH.Exec("%ComSpec% /c echo " & acmd)
+'  'Set oEX = WSH.Exec("%ComSpec% /c " & acmd)
+'  Set oEX = WSH.Exec(acmd)
+'
+'  Do While oEX.Status = 0
+'    Editor.Sleep 100
+'  Loop
+'  
+'  wbuff = ""
+'  
+'  If aenc <> "" Then
+'    wbuff = LoadText(wconout, aenc)
+'    Call AppendText(wbuff, wlogfile, "Shift_JIS")
+'  End If
+'  
+'  DoCmd = wbuff
+'End Function
 
-  'wlogfile = LogDir & "\" & LogFile
-  'Call AppendText(wbuff , wlogfile, "Shift_JIS")
-  
-  'Set oEX = WSH.Exec("%ComSpec% /c echo " & acmd)
-  'Set oEX = WSH.Exec("%ComSpec% /c " & acmd)
+Function DoCmd(acmd)
+  Dim oEX
+
   Set oEX = WSH.Exec(acmd)
 
   Do While oEX.Status = 0
     Editor.Sleep 100
   Loop
+
+  DoCmd = oEX.StdOut.ReadAll()
+  'Do Until oEX.StdOut.AtEndOfStream
+  '   aout = aout & oEX.StdOut.ReadLine() &vbCrLf
+  'Loop
   
-  wbuff = ""
-  
-  If aenc <> "" Then
-    wbuff = LoadText(wconout, aenc)
-    Call AppendText(wbuff, wlogfile, "Shift_JIS")
-  End If
-  
-  DoCmd = wbuff
+  'DoCmd = oEX.ExitCode
 End Function
 
 Function GetFileEncode(afile)
@@ -518,18 +534,32 @@ Function CreateHttpRequest() ' As Object
 End Function
 
 Function GetOSInfo(ByRef aos, ByRef aver, ByRef abit)
-  Dim objWMIService
-  Dim colItems
-  Dim item
+'  Dim objWMIService
+'  Dim colItems
+'  Dim item
 
-  Set objWMIService = GetObject("winmgmts:{impersonationLevel=impersonate}!\\.\root\cimv2")
-  Set colItems = objWMIService.ExecQuery("Select * from Win32_OperatingSystem")
-  
-  For Each item In colItems
-      aos = item.Caption
-      aver = item.Version
-      abit = item.OSArchitecture
-  Next
+'  Set objWMIService = GetObject("winmgmts:{impersonationLevel=impersonate}!\\.\root\cimv2")
+'  Set colItems = objWMIService.ExecQuery("Select * from Win32_OperatingSystem")
+'  
+'  For Each item In colItems
+'      aos = item.Caption
+'      aver = item.Version
+'      abit = item.OSArchitecture
+'  Next
+
+   Dim wtext
+   Dim i
+   
+   wtext = DoCmd("cmd /c ver")
+   i = instr(wtext, "Version ")
+   if i > 0 then
+       wtext = mid(wtext, i+len("Version "))
+       i = instr(wtext, "]")
+       if i > 0 then
+           aver = trim(left(wtext, i-1))
+       end if
+   End If
+   
 End Function
 
 ' Get SourceForge RSS
@@ -723,6 +753,7 @@ End If
 
 End Function
 
+' Get BitBucket Release API 
 function GetBitBucket(byref aurl)
     Dim req
     Dim wjson
@@ -731,41 +762,24 @@ function GetBitBucket(byref aurl)
     Dim wpage
     Dim mesg
     Dim i, j
+    Dim wcmd
+    Dim wtmpfile
 
-	log "BitBucket確認中.. " & aurl, 0
+    wlink = aurl
+	log "BitBucket確認中.. " & wlink, 0
 
-    Set req = Nothing '初期化
-    Set req = CreateHttpRequest()
-    If req Is Nothing Then Exit function
-    req.Open "GET", aurl, False
-  
-    'XMLHTTPRequestを考慮してキャッシュ対策
-    'http://vird2002.s8.xrea.com/javascript/XMLHttpRequest.html#XMLHttpRequest_Cache-Control
-    'http://www.atmarkit.co.jp/ait/articles/0305/10/news002.html 参考
-    req.setRequestHeader "Pragma", "no-cache"
-    req.setRequestHeader "Cache-Control", "no-cache"
-    req.setRequestHeader "If-Modified-Since", "Thu, 01 Jun 1970 00:00:00 GMT"
+    wtmpfile = WorkDir & "\_temp.htm"
+    wcmd = CurlExe & " -L """ & wlink & """ -o " & wtmpfile
+    log ">" & wcmd, 1
+    'DoCmd wcmd, ""
+    WSH.Run wcmd, 7, True '
 
-'https://support.microsoft.com/en-us/help/3140245/update-to-enable-tls-1-1-and-tls-1-2-as-a-default-secure-protocols-in
-'    If (A_OSVersion = "WIN_7") {
-'        Win7FixPatch_URL = http://download.microsoft.com/download/0/6/5/0658B1A7-6D2E-474F-BC2C-D69E5B9E9A68/MicrosoftEasyFix51044.msi
-'        Log("MicrosoftEasyFix51044をダウンロード"
-'        Download(Win7FixPatch_URL, "actor_download\" . "MicrosoftEasyFix51044.msi")
-'        Log("MicrosoftEasyFix51044をインストール")
-'        RunWait, actor_download\MicrosoftEasyFix51044.exe /passive /promptrestart
-'    }
-'    
+    wpage = LoadText(wtmpfile, "utf-8")
 
-    req.Send
-    If req.Status <> 200 Then
-        log "Status Error: " & req.Status, 0
-        Exit Function
-    End If
-      
     'set wjson = ParseJson(req.responseText)
     'wlink = wjson.assets(0).browser_download_url
-    wpage = req.responseText
-    log "Status : " & req.Status, 1
+    'wpage = req.responseText
+    'If DebugLvl > 1 Then TraceOut "Status : " & req.Status
     
     Dim re, match, matchs
     Set re = CreateObject("VBScript.RegExp")
@@ -777,7 +791,8 @@ function GetBitBucket(byref aurl)
         Set matchs = .Execute(wpage)
         If matchs.Count > 0 Then
             wlink = matchs(0)
-            log "見つかったファイル:" & wlink, 1
+            Editor.TraceOut "見つかったファイル:" & wlink
+            aurl = wlink
             If matchs(0).SubMatches.Count > 0 Then
                 wver = matchs(0).SubMatches(0)
                 Dim sb
@@ -805,7 +820,7 @@ Function GetSFLink(aurl)
     wtmpfile = WorkDir & "\_temp2.htm"
     wcmd = CurlExe & " -L """ & aurl & """ -o " & wtmpfile
     log ">" & wcmd, 1
-    'Tools.DoCmd wcmd, ""
+    'DoCmd wcmd, ""
     WSH.Run wcmd, 7, True '
     
 If False Then
@@ -977,7 +992,7 @@ Private Sub DownloadFile(ByVal url, ByVal SaveFilePath)
       'strPath = "C:\Users\users\Desktop\File\画像.png"
       'strURL = "https://www.google.co.jp/images/branding/googlelogo/1x/googlelogo_color_272x92dp.png";
       
-  ' Tools.log "ダウンロード中... " & strURL, 0
+  ' log "ダウンロード中... " & strURL, 0
   
   '    URLDownload = URLDownloadToFile(0, strURL, strPath, 0, 0)
       ' URLDownload = 0 : 正常
