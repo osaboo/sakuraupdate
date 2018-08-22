@@ -18,8 +18,8 @@ call "%~dp0fileupdate.bat"
 
 :L2
 if not "%targetfile%"=="sakura.exe" goto :end
-@timeout /t 2
 echo サクラエディタを再起動します。
+@timeout /t 2
 start "" "%targetfolder%\sakura.exe"
 
 :end

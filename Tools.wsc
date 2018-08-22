@@ -534,31 +534,34 @@ Function CreateHttpRequest() ' As Object
 End Function
 
 Function GetOSInfo(ByRef aos, ByRef aver, ByRef abit)
-'  Dim objWMIService
-'  Dim colItems
-'  Dim item
+   Dim objLoc
+   Dim objWMIService
+   Dim colItems
+   Dim item
 
-'  Set objWMIService = GetObject("winmgmts:{impersonationLevel=impersonate}!\\.\root\cimv2")
-'  Set colItems = objWMIService.ExecQuery("Select * from Win32_OperatingSystem")
-'  
-'  For Each item In colItems
-'      aos = item.Caption
-'      aver = item.Version
-'      abit = item.OSArchitecture
-'  Next
+   set objLoc = CreateObject("WbemScripting.SWbemLocator")
+   set objWMIService = objLoc.ConnectServer
+'   Set objWMIService = GetObject("winmgmts:{impersonationLevel=impersonate}!\\.\root\cimv2")
+   Set colItems = objWMIService.ExecQuery("Select * from Win32_OperatingSystem")
+  
+   For Each item In colItems
+       aos = item.Caption
+       aver = item.Version
+'       abit = item.OSArchitecture
+   Next
 
-   Dim wtext
-   Dim i
-   
-   wtext = DoCmd("cmd /c ver")
-   i = instr(wtext, "Version ")
-   if i > 0 then
-       wtext = mid(wtext, i+len("Version "))
-       i = instr(wtext, "]")
-       if i > 0 then
-           aver = trim(left(wtext, i-1))
-       end if
-   End If
+'   Dim wtext
+'   Dim i
+'   
+'   wtext = DoCmd("cmd /c ver")
+'   i = instr(wtext, "Version ")
+'   if i > 0 then
+'       wtext = mid(wtext, i+len("Version "))
+'       i = instr(wtext, "]")
+'       if i > 0 then
+'           aver = trim(left(wtext, i-1))
+'       end if
+'   End If
    
 End Function
 

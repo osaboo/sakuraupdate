@@ -1,4 +1,4 @@
-' サクラエディタ 正規表現DLLの更新処理
+' サクラエディタ 正規表現ライブラリの更新処理
 '
 Option Explicit
 
@@ -22,7 +22,7 @@ Sub Main()
 
 	Editor.ActivateWinOutput
 
-    Tools.log "正規表現モジュールを最新バージョンに更新します。", 0
+    Tools.log "正規表現ライブラリを最新バージョンに更新します。", 0
 
     Dim wos, wosver, wosbit
     Tools.GetOSInfo wos, wosver, wosbit
@@ -76,8 +76,8 @@ Sub Main()
         Exit Sub
     End If
     
-    TraceOut "現在の正規表現DLLのバージョン:" & wcurver
-    TraceOut "最新の正規表現DLLのバージョン:" & wnewver
+    TraceOut "現在の正規表現ライブラリのバージョン:" & wcurver
+    TraceOut "最新の正規表現ライブラリのバージョン:" & wnewver
 
     if wnewver <= wcurver Then
         If Tools.WSH.Popup("すでに最新版ですが、更新しますか?", 0, "ソフトウェアの更新", 4) = 7 Then
@@ -86,7 +86,7 @@ Sub Main()
     End If
 
     
-    ' 正規表現モジュールのzipダウンロード
+    ' 正規表現ライブラリのzipダウンロード
     Dim wcmd
     Dim wzipfile
     
@@ -104,7 +104,7 @@ Sub Main()
         wlink = wurl
     End If
     
-    Tools.log "正規表現モジュールをダウンロードします.. " & wlink, 0
+    Tools.log "正規表現ライブラリをダウンロードします.. " & wlink, 0
 
     'wcmd = "bitsadmin.exe /TRANSFER sakura2 " & wurl & " " & wzipfile
     wcmd = Tools.CurlExe & " -L """ & wlink & """ -o " & wzipfile

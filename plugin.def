@@ -4,7 +4,7 @@ Id=SoftwareUpdate
 Name=ソフトウェアの更新(&W)
 Description=SakuraEditorを自動更新します
 Type=wsh
-Version=0.5
+Version=0.9
 Url=https://github.com/osaboo/sakuraupdate/
 Author=osaboo
 
@@ -18,7 +18,7 @@ C[2].Label=サクラエディタ更新(&S)
 C[3]=HelpUpdate.vbs
 C[3].Label=ヘルプファイル更新(&H)
 C[4]=RegexpUpdate.vbs
-C[4].Label=正規表現モジュール更新(&R)
+C[4].Label=正規表現ライブラリ更新(&R)
 ;C[6]=PluginUpdate.vbs
 ;C[6].Label=このプラグインの更新(&U)
 
@@ -26,9 +26,9 @@ C[4].Label=正規表現モジュール更新(&R)
 O[1].Section=サクラエディタ
 
 O[1].Key=SITEPRIORITY
-O[1].Label=ダウンロード順位
+O[1].Label=ダウンロードサイト
 O[1].Type=Sel
-O[1].Select=GitHub優先:0|SourceForge優先:1|Custom優先:2
+O[1].Select=GitHub:0|SourceForge:1|Custom:2
 O[1].Default=0
 
 O[2].Key=SFRSSURL
@@ -51,7 +51,7 @@ O[4].Type=Str
 O[4].Default=https://sourceforge.net/projects/sakura-editor/rss?path=/help2
 
 O[5].Key=REGEXPURL
-O[5].Label=正規表現ツールのリリースURL(未指定時はSFから自動取得)
+O[5].Label=正規表現ライブラリのリリースURL(未指定時はSFから自動取得)
 O[5].Type=Str
 ;O[5].Default=https://sourceforge.net/projects/sakura-editor/rss?path=/wiki
 ;O[3].Default=https://github.com/k-takata/bregonig/releases
