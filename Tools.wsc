@@ -1137,8 +1137,14 @@ Sub UpdateCheck(amode)
         Exit Sub
     End If
 
-    If amode = 2 Then log "サクラエディタの新バージョンがリリースされています。更新はツール→ソフトウェアの更新から実行してください。", 0
+    log "サクラエディタの新バージョンがリリースされています。", 0
+
+    If WSH.Popup("サクラエディタの新バージョンがリリースされています。更新しますか?", 0, "ソフトウェアの更新", 4) = 7 Then
+        Exit Sub
+    End if
     
+    Call SakuraUpdate()
+
 End Sub
 
 Sub SakuraUpdate()
@@ -1456,7 +1462,7 @@ Sub RegExpUpdate()
     'DoCmd wcmd, ""
     WSH.Run wcmd, 7, False
 
-    'Editor.ExitAll
+    log "正規表現ライブラリの更新処理を終了しました。", 0
 
 End Sub
 
@@ -1503,7 +1509,7 @@ Sub HelpUpdate()
     
     log "現在のサクラエディタのバージョン:" & wsakuraver, 0
     log "現在のヘルプファイル更新日付:" & wcurdate, 0
-    log "最新のヘルプファイルバージョン:" & wnewver, 0
+    'log "最新のヘルプファイルバージョン:" & wnewver, 0
     log "最新のヘルプファイル発行日付:" & wnewdate, 0
 
     if wnewdate <= wcurdate Then
@@ -1582,7 +1588,7 @@ Sub HelpUpdate()
     'DoCmd wcmd, ""
     WSH.Run wcmd, 1, False
 
-    'Editor.ExitAll
+    log "ヘルプファイルの更新処理を終了しました。", 0
 
 End Sub
 
