@@ -12,6 +12,12 @@
         <property name="PluginDir"/>
         <property name="SakuraDir"/>
         <method name="Init" />
+        <method name="SakuraUpdate" />
+        <method name="UpdateCheck">
+                <PARAMETER name="amode"/>
+        </method>
+        <method name="HelpUpdate" />
+        <method name="RegExpUpdate" />
         <method name="log">
                 <PARAMETER name="amsg"/>
                 <PARAMETER name="alvl"/>
@@ -575,13 +581,14 @@ Function GetSFRSS(ByRef aurl, apath)
     Dim wcmd
     Dim wtmpfile
 
-    If apath <> "" Then
-        wlink = aurl & "?path=/" & apath
-    Else
-        wlink = aurl
+    wlink = aurl
+    if instr(wlink, "?path=") = 0 Then
+        If apath = "sakura2" then wlink = aurl & "?path=/sakura2"
+        If apath = "help2"   then wlink = aurl & "?path=/wiki"
+        If apath = "regexp"  then wlink = aurl & "?path=/wiki"
     End If
     
-    log "SourceForge確認中... " & wlink, 0
+    log "SourceForge確認中... " & wlink, 1
 
     wtmpfile = WorkDir & "\_temp.htm"
     wcmd = CurlExe & " -L """ & wlink & """ -o " & wtmpfile
@@ -607,36 +614,119 @@ Function GetSFRSS(ByRef aurl, apath)
         End If
     'End If
 
-    'ブログ記事のタイトルを取得
-    Set Itemtitle = XmlDoc.SelectNodes("//item/link")
+    Select Case apath
+    Case "sakura2"
+        
+        Set Itemtitle = XmlDoc.SelectNodes("//item/link")
 
-    wlink = ""
-    'ブログ記事4つ出力
-    For i = 0 To Itemtitle.Length - 1
-        wlink = Itemtitle(i).Text
-        If InStr(wlink, "sakura2-") > 0 And InStr(wlink, ".zip") > 0 Then
-            'log wlink, 1
-            aurl = wlink
-            Exit For
+        wlink = ""
+        '
+        For i = 0 To Itemtitle.Length - 1
+            wlink = Itemtitle(i).Text
+            If InStr(wlink, "sakura2-") > 0 And InStr(wlink, ".zip") > 0 Then
+                'log wlink, 1
+                aurl = wlink
+                Exit For
+            End If
+        Next
+        
+        If wlink <> "" Then
+            Dim re, match, matchs
+            Set re = CreateObject("VBScript.RegExp")
+            With re
+                .Pattern = "[0-9]\.[0-9]\.[0-9]\.[0-9]"
+                .Global = True
+                Set matchs = .Execute(wlink)
+                'Debug.Print matchs.Count
+                For Each match In matchs
+                    'Debug.Print match.Value
+                    wver = match.Value
+                    log "見つかったファイル:" & wlink, 2
+                Next
+        End With
+
         End If
-    Next
-    
-    If wlink <> "" Then
-        Dim re, match, matchs
-        Set re = CreateObject("VBScript.RegExp")
-        With re
-            .Pattern = "[0-9]\.[0-9]\.[0-9]\.[0-9]"
-            .Global = True
-            Set matchs = .Execute(wlink)
-            'Debug.Print matchs.Count
-            For Each match In matchs
-                'Debug.Print match.Value
-                wver = match.Value
-                log "見つかったファイル:" & wlink, 2
-            Next
-    End With
 
-    End If
+    Case "regexp"
+        
+        Set Itemtitle = XmlDoc.SelectNodes("//item/link")
+
+        'Dim re, match, matchs
+        Set re = CreateObject("VBScript.RegExp")
+        re.pattern = "bron(\d+)\.zip"
+        
+        wlink = ""
+        '
+        For i = 0 To Itemtitle.Length - 1
+            wlink = Itemtitle(i).Text
+            If re.Test(wlink) Then
+                log "見つかったファイル:" & wlink ,2
+                aurl = wlink
+                Exit For
+            End If
+        Next
+        
+        if wlink <> "" Then
+            With re
+                '.pattern = "[0-9]\.[0-9]\.[0-9]\.[0-9]"
+                .Global = True
+                Set matchs = .Execute(wlink)
+                If matchs.Count > 0 Then
+                    If matchs(0).SubMatches.Count > 0 Then
+                        wver = matchs(0).SubMatches(0)
+                        Dim sb
+    	                Set sb=CreateObject("System.Text.StringBuilder")
+    	                sb.AppendFormat "{0,0:00}", left(wver,1)
+    	                sb.Append_3 "."
+    	                sb.AppendFormat "{0,0:00}", mid(wver,2)
+    	                wver = sb.ToString()
+                    End If
+                End If
+            End With
+        End If
+    
+    Case "help2"
+        Dim items, ItemLink, ItemDate
+        Dim j
+
+        'item取得
+        Set items = XmlDoc.SelectNodes("//item")
+
+        'Dim re, match, matchs
+        Set re = CreateObject("VBScript.RegExp")
+        re.pattern = "([0-9]\.[0-9]\.[0-9]\.[0-9])/sakura_help[0-9\-]+\.zip"
+
+        wlink = ""
+        '
+        For i = 0 To items.Length - 1
+            set ItemLink = items(i).SelectNodes("./link")
+            set ItemDate = items(i).SelectNodes("./pubDate")
+            wlink = ItemLink(0).Text
+            'If re.Test(wlink) Then
+            Set matchs = re.Execute(wlink)
+            If matchs.Count > 0 Then
+                Editor.TraceOut "見つかったファイル:" & wlink 
+                aurl = wlink
+                
+                log "pubDate: " & ItemDate(0).Text , 2
+                wver = ItemDate(0).Text
+                wver = replace(wver, " UT","")
+                j = instr(wver, ",")
+                if j > 0 then wver =mid(wver, j+1)
+                If IsDate(wver) then wver = DateValue(wver)
+                log "wver: " & wver , 2
+                
+                'If matchs(0).SubMatches.Count > 0 Then
+                '    wver = matchs(0).SubMatches(0)
+                '    'if wver = atargetver then
+                '    'End If
+                'End If
+                Exit For
+            End If
+            wlink = ""
+        Next
+
+    End Select
 
     GetSFRSS = wver
 
@@ -655,7 +745,7 @@ Function GetGitHub(ByRef aurl)
     Dim wtmpfile
 
     wlink = aurl
-      log "GitHub確認中.. " & wlink, 0
+    log "GitHub確認中.. " & wlink, 1
 
     wtmpfile = WorkDir & "\_temp.htm"
     wcmd = CurlExe & " -L """ & wlink & """ -o " & wtmpfile
@@ -663,57 +753,6 @@ Function GetGitHub(ByRef aurl)
     'DoCmd wcmd, ""
     WSH.Run wcmd, 7, True '
 
-If False Then
-    Set req = Nothing '初期化
-    Set req = CreateHttpRequest()
-    If req Is Nothing Then Exit Function
-    req.Open "GET", aurl, False
-  
-    'XMLHTTPRequestを考慮してキャッシュ対策
-    'http://vird2002.s8.xrea.com/javascript/XMLHttpRequest.html#XMLHttpRequest_Cache-Control
-    'http://www.atmarkit.co.jp/ait/articles/0305/10/news002.html 参考
-    req.setRequestHeader "Pragma", "no-cache"
-    req.setRequestHeader "Cache-Control", "no-cache"
-    req.setRequestHeader "If-Modified-Since", "Thu, 01 Jun 1970 00:00:00 GMT"
-
-'https://support.microsoft.com/en-us/help/3140245/update-to-enable-tls-1-1-and-tls-1-2-as-a-default-secure-protocols-in
-'    If (A_OSVersion = "WIN_7") {
-'        Win7FixPatch_URL = http://download.microsoft.com/download/0/6/5/0658B1A7-6D2E-474F-BC2C-D69E5B9E9A68/MicrosoftEasyFix51044.msi
-'        Log("MicrosoftEasyFix51044をダウンロード"
-'        Download(Win7FixPatch_URL, "actor_download\" . "MicrosoftEasyFix51044.msi")
-'        Log("MicrosoftEasyFix51044をインストール")
-'        RunWait, actor_download\MicrosoftEasyFix51044.exe /passive /promptrestart
-'    }
-'
-If False Then
-'================== http://madia.world.coocan.jp/cgi-bin/VBBBS/wwwlng.cgi?print+200801/08010037.txt
-Const WinHttpRequestOption_SslErrorIgnoreFlags = &H4&
-Const SslErrorFlag_UnknownCA = &H100&
-
-'SSLエラーを無視するかどうかを決めるフラグ。
-'初期値は0(エラーを無視しない)。
-Dim flag 'As Long
-flag = req.Option(WinHttpRequestOption_SslErrorIgnoreFlags)
-
-'「信頼されていないCA(認証局)」のSSLエラーを無視する。
-req.Option(WinHttpRequestOption_SslErrorIgnoreFlags) = flag Or SslErrorFlag_UnknownCA
-End If
-
-    req.Send
-    If req.Status <> 200 Then
-        log "Status Error: " & req.Status, 1
-        Exit Function
-    End If
-      
-    'set wjson = ParseJson(req.responseText)
-    'wlink = wjson.assets(0).browser_download_url
-    wpage = req.responseText
-    log "Status : " & req.Status, 2
-End If
-
-    'Dim fs, ts
-    'Set fs = CreateObject("Scripting.FileSystemObject")
-    'Set ts = fs.OpenTextFile(wtmpfile)
     wpage = LoadText(wtmpfile, "utf-8")
 
     mesg = "browser_download_url"":"
@@ -769,7 +808,7 @@ function GetBitBucket(byref aurl)
     Dim wtmpfile
 
     wlink = aurl
-	log "BitBucket確認中.. " & wlink, 0
+	log "BitBucket確認中.. " & wlink, 1
 
     wtmpfile = WorkDir & "\_temp.htm"
     wcmd = CurlExe & " -L """ & wlink & """ -o " & wtmpfile
@@ -782,7 +821,7 @@ function GetBitBucket(byref aurl)
     'set wjson = ParseJson(req.responseText)
     'wlink = wjson.assets(0).browser_download_url
     'wpage = req.responseText
-    'If DebugLvl > 1 Then TraceOut "Status : " & req.Status
+    'log "Status : " & req.Status, 1
     
     Dim re, match, matchs
     Set re = CreateObject("VBScript.RegExp")
@@ -794,7 +833,7 @@ function GetBitBucket(byref aurl)
         Set matchs = .Execute(wpage)
         If matchs.Count > 0 Then
             wlink = matchs(0)
-            Editor.TraceOut "見つかったファイル:" & wlink
+            log "見つかったファイル:" & wlink, 1
             aurl = wlink
             If matchs(0).SubMatches.Count > 0 Then
                 wver = matchs(0).SubMatches(0)
@@ -932,10 +971,8 @@ End If
     
 End Function
 
-
-
 ' @see https://www.ka-net.org/blog/?p=4855#HttpRequest
-Private Sub DownloadFile(ByVal url, ByVal SaveFilePath)
+Sub DownloadFile(ByVal url, ByVal SaveFilePath)
   'WinHttpRequest/XMLHTTPRequest + ADODB.Streamでファイルをダウンロード
     Dim req 'As Object
     Const adTypeBinary = 1
@@ -978,16 +1015,16 @@ Private Sub DownloadFile(ByVal url, ByVal SaveFilePath)
                vbCritical + vbSystemModal
         Exit Sub
     End Select
-  End Sub
+End Sub
   
   
-  'Declare PtrSafe Function URLDownloadToFile Lib "urlmon" Alias "URLDownloadToFileA" ( ByVal pCaller As Long, _
+'Declare PtrSafe Function URLDownloadToFile Lib "urlmon" Alias "URLDownloadToFileA" ( ByVal pCaller As Long, _
   '    ByVal szURL As String, _
   '    ByVal szFileName As String, _
   '    ByVal dwReserved As Long, _
   '    ByVal lpfnCB As Long ) As Long
   
-  'Function URLDownload(strURL, strPath)
+'Function URLDownload(strURL, strPath)
   'Dim lngRes 'As Long
   'Dim strURL As String
   'Dim strPath As String
@@ -999,9 +1036,9 @@ Private Sub DownloadFile(ByVal url, ByVal SaveFilePath)
   
   '    URLDownload = URLDownloadToFile(0, strURL, strPath, 0, 0)
       ' URLDownload = 0 : 正常
-  'End Sub
+'End Sub
   
-  Public Function GetRedirectUrl(ByVal url)
+Function GetRedirectUrl(ByVal url)
     Dim req
     Dim ret
     Const WinHttpRequestOption_EnableRedirects = 6 'WinHttp.WinHttpRequestOption
@@ -1036,8 +1073,518 @@ Private Sub DownloadFile(ByVal url, ByVal SaveFilePath)
   
     On Error GoTo 0
     GetRedirectUrl = ret
-  End Function
+End Function
 
+'   更新チェック
+'   amode = 1:自動モード,  2:手動モード
+Sub UpdateCheck(amode)
+
+	If amode = 2 Then Editor.ActivateWinOutput
+
+	Dim lastcheck
+	Dim checkfreq
+	lastcheck = Plugin.GetOption("サクラエディタ", "LASTCHECK")
+	checkfreq = Plugin.GetOption("サクラエディタ", "CHECKFREQ")
+	
+    If amode = 1 Then
+		if not isnumeric(checkfreq) Then
+			Exit Sub
+		End If
+		
+		if isdate(lastcheck) Then
+			If DateAdd("d", checkfreq, lastcheck) > Date Then
+				exit Sub
+			End If
+		end if
+    End If
+
+	lastcheck = Date
+	Plugin.SetOption "サクラエディタ", "LASTCHECK", lastcheck
+	
+    If amode = 2 Then log "サクラエディタ本体の最新バージョンを確認します。", 0
+
+    Dim wurl
+    Dim wlink
+    Dim wcurver
+    Dim wnewver
+    wcurver = Editor.ExpandParameter("$V")
+    
+    Select Case Plugin.GetOption("サクラエディタ", "SITEPRIORITY")
+    Case "0"
+        wurl = Plugin.GetOption("サクラエディタ", "GITHUBURL")
+    Case "1"
+        wurl = Plugin.GetOption("サクラエディタ", "SFRSSURL")
+    Case "2"
+        wurl = Plugin.GetOption("サクラエディタ", "CUSTOMURL")
+    End Select
+
+	If Instr(wurl,"sourceforge.net")>0 then
+        wnewver = GetSFRSS(wurl, "sakura2")
+	ElseIf Instr(wurl,"github.com")>0 then
+        wnewver = GetGitHub(wurl)
+    End If
+
+    If wnewver = "" then
+        If amode = 2 Then log "最新版を確認できませんでした。", 0
+        Exit Sub
+    End If
+    
+    If amode = 2 Then log "現在のサクラエディタのバージョン:" & wcurver, 0
+    If amode = 2 Then log "最新のサクラエディタのバージョン:" & wnewver, 0
+
+    if wnewver <= wcurver Then
+		If amode = 2 Then log "このサクラエディタは最新バージョンです。", 0
+        Exit Sub
+    End If
+
+    If amode = 2 Then log "サクラエディタの新バージョンがリリースされています。更新はツール→ソフトウェアの更新から実行してください。", 0
+    
+End Sub
+
+Sub SakuraUpdate()
+
+    Editor.ActivateWinOutput
+
+    log "サクラエディタ本体を最新バージョンに更新します。", 0
+
+    Dim wos, wosver, wosbit
+    GetOSInfo wos, wosver, wosbit
+    'log "wos=" & wos, 2
+    log "wosver=" & wosver, 2
+    'log "wosbit=" & wosbit, 2
+
+    Dim wurl
+    Dim wlink
+    Dim wcurver
+    Dim wnewver
+    wcurver = Editor.ExpandParameter("$V")
+    
+    Select Case Plugin.GetOption("サクラエディタ", "SITEPRIORITY")
+    Case "0"
+        wurl = Plugin.GetOption("サクラエディタ", "GITHUBURL")
+    Case "1"
+        wurl = Plugin.GetOption("サクラエディタ", "SFRSSURL")
+    Case "2"
+        wurl = Plugin.GetOption("サクラエディタ", "CUSTOMURL")
+    End Select
+
+	If Instr(wurl,"sourceforge.net")>0 then
+        wnewver = GetSFRSS(wurl, "sakura2")
+	ElseIf Instr(wurl,"github.com")>0 then
+        wnewver = GetGitHub(wurl)
+    End If
+	'wnewver = "2.3.2.0"
+    If wnewver = "" then
+        log "最新版を確認できませんでした。", 0
+        Exit Sub
+    End If
+    
+    log "現在のサクラエディタのバージョン:" & wcurver, 0
+    log "最新のサクラエディタのバージョン:" & wnewver, 0
+
+    if wnewver <= wcurver Then
+        If WSH.Popup("すでに最新版ですが、更新しますか?", 0, "ソフトウェアの更新", 4) = 7 Then
+        'If  MessageBox("すでに最新版ですが、更新しますか?",4) = 7 then 
+	        Exit Sub
+	    End if
+    End If
+
+    ' サクラエディタのzipダウンロード
+
+    Dim wcmd
+    Dim wzipfile
+    
+    wzipfile = WorkDir & "\sakura.zip"
+    
+	If Instr(wurl,"sourceforge.net")>0 then
+	    wlink = wurl
+        'log "ダウンロードリンクを確認します。", 1
+        'wlink = GetSFLink(wurl)
+        'if wlink = "" then
+        '    log "ダウンロードリンクを取得できませんでした。", 1
+        '    exit sub
+        'End If
+	ElseIf Instr(wurl,"github.com")>0 then
+        wlink = wurl
+    End If
+    
+    log "サクラエディタをダウンロードします.. " & wlink, 0
+    
+    'wcmd = "bitsadmin.exe /TRANSFER sakura2 " & wurl & " " & wzipfile
+    wcmd = CurlExe & " -L """ & wlink & """ -o " & wzipfile
+    log ">" & wcmd, 1
+    'DoCmd wcmd, ""
+    WSH.Run wcmd, 7, True '
+
+	If Not FS.FileExists(wzipfile) then
+	    log "ダウンロードできませんでした。", 0
+		Exit Sub
+	End If
+	
+	log "ダウンロードファイルを展開します。", 0
+    
+    'zip展開
+    'wcmd = UnzipExe & " -o -j " & wzipfile & " */sakura.exe -d " & WorkDir
+    wcmd = UnzipExe & " e -aoa " & wzipfile & " */sakura.exe -o" & WorkDir
+    log ">" & wcmd, 1
+    'DoCmd wcmd, ""
+    WSH.Run wcmd, 7, False
+    
+    Editor.Sleep 500
+    If Not FS.FileExists(WorkDir & "\sakura.exe") then
+	    log WorkDir & "\sakura.exeがダウンロードファイルにありませんでした。", 0
+		Exit Sub
+	End If
+
+	If WSH.Popup("sakura.exeを更新します。" & vbCrLf & "すべてのsakura.exeを強制終了後、上書きします。",0,"ソフトウェアの更新",1) = 2 Then
+        Exit sub
+    End If
+
+    ' exe上書き処理
+    '    更新スクリプトを作成し、他プロセスで実行
+    '    実行後サクラエディタを終了する。
+    '    スクリプトは、サクラエディタ上書きが出来るまで待機する。
+    '    C:\program files\sakuraの場合はセキュリティ警告がでる。
+    Dim wcmdfile
+    Dim wcmdparam
+    Dim programfiles
+    programfiles = "C:\Program Files"
+    
+    wcmd     = "set srcfolder=" & WorkDir & vbCrLf & _
+	           "set targetfolder=" & SakuraDir & vbCrLf & _
+	           "set targetfile=sakura.exe" & vbCrLf
+
+	If (left(wosver,2) = "6." or left(wosver,3) = "10.") and left(SakuraDir, Len(programfiles)) = programfiles Then
+        wcmd = wcmd & "set _runas=-Verb runas"
+    End If
+    
+    wcmdfile = WorkDir & "\_setenv.bat"
+	SaveText wcmd, wcmdfile, "Shift_JIS"
+	
+    wcmd = """" & PluginDir & "\mainupdate.bat"""
+'	wcmdparam = "Start-Process -File " & wcmdfile
+'	If (left(wosver,2) = "6." or left(wosver,3) = "10.") and left(SakuraDir, Len(programfiles)) = programfiles Then
+'	    '管理者モードでコピー
+'	    wcmdparam = wcmdparam + " -Verb runas" ' -Wait
+'       'wcmd = "powershell -NoProfile -ExecutionPolicy unrestricted -Command ""Start-Process PowerShell -ArgumentList " & wcmdparam & """"
+'        wcmd = "powershell -NoProfile -ExecutionPolicy unrestricted -Command """ & wcmdparam & """"
+'        '-NoNewWindow -PassThru
+'    Else
+'        wcmd = wcmdfile
+'	End If
+
+    If false Then
+	'   workdir + "/_temp.ps1" に、
+	'   plugindir + "/fileupdate.ps1" + パラメータ1, 2, 3
+	'   を呼ぶ処理を保存して、_temp.ps1を、start-process -Verb runasで呼ぶ
+	    wcmdfile = """" & PluginDir & "\fileupdate.ps1"""
+	    wcmd     = "& " & wcmdfile & " " & _
+	                WorkDir  & " " & _
+	                """" & SakuraDir & """ " & _
+	                "sakura.exe" + vbCrLf
+
+	    wcmdfile = WorkDir & "\_fileupdate.ps1"
+	    SaveText wcmd, wcmdfile, "Shift_JIS"
+	    
+	    wcmdparam = "Start-Process PowerShell -ArgumentList " & wcmdfile & " "
+	    If left(SakuraDir, Len(programfiles)) = programfiles Then
+	        '管理者モードでコピー
+	        wcmdparam = wcmdparam + " -Verb runas" ' -Wait
+	    End If
+
+	    'wcmd = "powershell -NoProfile -ExecutionPolicy unrestricted -Command ""Start-Process PowerShell -ArgumentList " & wcmdparam & """"
+	    wcmd = "powershell -NoProfile -ExecutionPolicy unrestricted -Command """ & wcmdparam & """"
+	    '-NoNewWindow -PassThru
+    End If
+    
+    'If DebugLvl >= 1 Then
+	'	If WSH.Popup("サクラエディタを終了しますか。",0,"ソフトウェアの更新",1) = 1 Then
+	'	
+	'    End If
+	'End If
+
+    log ">" & wcmd, 1
+    'DoCmd wcmd, ""
+    WSH.Run wcmd, 1, false
+
+    Editor.ExitAll
+    
+End Sub
+
+
+Sub RegExpUpdate()
+
+	Editor.ActivateWinOutput
+
+    log "正規表現ライブラリを最新バージョンに更新します。", 0
+
+    Dim wos, wosver, wosbit
+    GetOSInfo wos, wosver, wosbit
+'    log "wos=" & wos, 2
+    log "wosver=" & wosver, 2
+'    log "wosbit=" & wosbit, 2
+
+    Dim wurl
+    Dim wlink
+    Dim wsakurapath
+    Dim wregexppath
+    Dim wcurver
+    Dim wnewver
+    
+    wsakurapath = Editor.ExpandParameter("$S")
+    wregexppath = FS.GetParentFolderName(wsakurapath) & "\bregonig.dll"
+    wcurver = FS.GetFileVersion(wregexppath)
+
+    Dim re, match, matchs
+    Set re = CreateObject("VBScript.RegExp")
+    
+    With re
+        .pattern = "(\d+)\.(\d+)\.\d+\.\d+"
+        .Global = True
+        Set matchs = .Execute(wcurver)
+        If matchs.Count > 0 Then
+            If matchs(0).SubMatches.Count > 1 Then
+                Dim sb
+                Set sb=CreateObject("System.Text.StringBuilder")
+                sb.AppendFormat "{0,0:00}", matchs(0).SubMatches(0)
+                sb.Append_3 "."
+                sb.AppendFormat "{0,0:00}", matchs(0).SubMatches(1)
+                wcurver = sb.ToString()
+            End If
+        End If
+    End With
+    
+	wurl = Plugin.GetOption("サクラエディタ", "REGEXPURL")
+
+	If Instr(wurl,"sourceforge.net")>0 then
+        wnewver = GetSFRSS(wurl, "regexp")
+	ElseIf Instr(wurl,"api.bitbucket.org")>0 then
+        wnewver = GetBitBucket(wurl)
+    ElseIf wurl = "" Then '指定なしの場合は、SourceForgeから検索
+    	wurl = Plugin.GetOption("サクラエディタ", "SFRSSURL")
+        wnewver = GetSFRSS(wurl, "regexp")
+    End If
+	'wnewver = "2.3.2.0"
+    If wnewver = "" then
+        log "最新版を確認できませんでした。", 0
+        Exit Sub
+    End If
+    
+    log "現在の正規表現ライブラリのバージョン:" & wcurver, 0
+    log "最新の正規表現ライブラリのバージョン:" & wnewver, 0
+
+    if wnewver <= wcurver Then
+        If WSH.Popup("すでに最新版ですが、更新しますか?", 0, "ソフトウェアの更新", 4) = 7 Then
+	        Exit Sub
+	    End if
+    End If
+
+    
+    ' 正規表現ライブラリのzipダウンロード
+    Dim wcmd
+    Dim wzipfile
+    
+    wzipfile = WorkDir & "\regexp.zip"
+    
+	If Instr(wurl,"sourceforge.net")>0 then
+	    wlink = wurl
+        'If DebugLvl > 0 Then log "ダウンロードリンクを確認します。"
+        'wlink = GetSFLink(wurl)
+        'if wlink = "" then
+        '    If DebugLvl > 0 Then log "ダウンロードリンクを取得できませんでした。"
+        '    exit sub
+        'End If
+	ElseIf Instr(wurl,"bitbucket.org")>0 then
+        wlink = wurl
+    End If
+    
+    log "正規表現ライブラリをダウンロードします.. " & wlink, 0
+
+    'wcmd = "bitsadmin.exe /TRANSFER sakura2 " & wurl & " " & wzipfile
+    wcmd = CurlExe & " -L """ & wlink & """ -o " & wzipfile
+    log ">" & wcmd, 1
+    'DoCmd wcmd, ""
+    WSH.Run wcmd, 7, True '
+
+	If Not IsExistFile(wzipfile) then
+	    log "ダウンロードできませんでした。", 0
+		Exit Sub
+	End If
+	
+	log "ダウンロードファイルを展開します。", 1
+
+    'zip展開
+    wcmd = UnzipExe & " e -aoa " & wzipfile & " bregonig.dll -o" & WorkDir
+    log ">" & wcmd, 1
+    WSH.Run wcmd, 7, False
+
+	Editor.Sleep 500
+	If Not IsExistFile(WorkDir & "\bregonig.dll") then
+	    log "bregonig.dllがダウンロードファイルにありませんでした。", 0
+		Exit Sub
+	End If
+
+	log "bregonig.dllを更新します。", 1
+	If WSH.Popup("bregonig.dllを更新します。",0,"ソフトウェアの更新",1) = 2 Then
+        Exit sub
+    End If
+	
+    ' exe上書き処理
+    '    更新スクリプトを作成し、他プロセスで実行
+    '    実行後サクラエディタを終了する。
+    '    スクリプトは、サクラエディタ上書きが出来るまで待機する。
+    '    program files\sakuraの場合はセキュリティ警告がでる。
+    Dim wcmdfile
+    Dim wcmdparam
+    Dim programfiles
+    programfiles = "C:\Program Files"
+
+    wcmd     = "set srcfolder=" & WorkDir & vbCrLf & _
+	           "set targetfolder=" & SakuraDir & vbCrLf & _
+	           "set targetfile=bregonig.dll" & vbCrLf
+
+	If (left(wosver,2) = "6." or left(wosver,3) = "10.") and left(SakuraDir, Len(programfiles)) = programfiles Then
+        wcmd = wcmd & "set _runas=-Verb runas"
+    End If
+    
+    wcmdfile = WorkDir & "\_setenv.bat"
+	SaveText wcmd, wcmdfile, "Shift_JIS"
+
+    wcmd = """" & PluginDir & "\mainupdate.bat"""
+
+    log ">" & wcmd, 1
+    'DoCmd wcmd, ""
+    WSH.Run wcmd, 7, False
+
+    'Editor.ExitAll
+
+End Sub
+
+Sub HelpUpdate()
+
+	Editor.ActivateWinOutput
+
+	log "ヘルプファイルを最新バージョンに更新します。", 0
+
+    Dim wos, wosver, wosbit
+    GetOSInfo wos, wosver, wosbit
+    log "wos=" & wos, 2
+    log "wosver=" & wosver, 2
+    log "wosbit=" & wosbit, 2
+
+    Dim wurl
+    Dim wlink
+    Dim wsakurapath
+    Dim whelppath
+    Dim wcurdate
+    Dim wsakuraver
+    Dim wnewver
+    Dim wnewdate
+    
+    wsakurapath = Editor.ExpandParameter("$S")
+    whelppath = FS.GetParentFolderName(wsakurapath) & "\sakura.chm"
+    wcurdate = DateValue(FS.GetFile(whelppath).DateLastModified)
+
+    wsakuraver = Editor.ExpandParameter("$V")
+	wurl = Plugin.GetOption("サクラエディタ", "HELPURL")
+    wnewdate = ""
+
+	If Instr(wurl,"sourceforge.net")>0 then
+        wnewdate = GetSFRSS(wurl, "help2")
+    ElseIf wurl = "" Then '指定なしの場合は、SourceForgeから検索
+    	wurl = Plugin.GetOption("サクラエディタ", "SFRSSURL")
+        wnewdate = GetSFRSS(wurl, "help2")
+    End If
+	
+    If wnewdate = "" then
+        log "リリースされたヘルプファイルを確認できませんでした。", 0
+        Exit Sub
+    End If
+    
+    log "現在のサクラエディタのバージョン:" & wsakuraver, 0
+    log "現在のヘルプファイル更新日付:" & wcurdate, 0
+    log "最新のヘルプファイルバージョン:" & wnewver, 0
+    log "最新のヘルプファイル発行日付:" & wnewdate, 0
+
+    if wnewdate <= wcurdate Then
+        If WSH.Popup("すでに最新版ですが、更新しますか?", 0, "ソフトウェアの更新", 4) = 7 Then
+	        Exit Sub
+	    End if
+    End If
+
+    
+    ' ヘルプファイルのzipダウンロード
+    Dim wcmd
+    Dim wzipfile
+    
+    wzipfile = WorkDir & "help.zip"
+    
+	If Instr(wurl,"sourceforge.net")>0 then
+	    wlink = wurl
+    End If
+    
+    log "ヘルプファイルをダウンロードします.. " & wlink, 0
+
+    'wcmd = "bitsadmin.exe /TRANSFER sakura2 " & wurl & " " & wzipfile
+    wcmd = CurlExe & " -L """ & wlink & """ -o " & wzipfile
+    log ">" & wcmd, 1
+    'DoCmd wcmd, ""
+    WSH.Run wcmd, 7, True '
+
+	If Not IsExistFile(wzipfile) then
+	    log "ダウンロードできませんでした。", 0
+		Exit Sub
+	End If
+	
+	log "ダウンロードファイルを展開します。", 0
+
+    'zip展開
+    wcmd = UnzipExe & " e -aoa " & wzipfile & " sakura.chm -o" & WorkDir
+    log ">" & wcmd, 1
+    WSH.Run wcmd, 7, False
+
+	Editor.Sleep 500
+
+	If Not IsExistFile(WorkDir & "\sakura.chm") then
+	    log "sakura.chmがダウンロードファイルにありませんでした。", 0
+		Exit Sub
+	End If
+
+	log "sakura.chmを更新します。", 1
+	If WSH.Popup("sakura.chmを更新します。",0,"ソフトウェアの更新",1) = 2 Then
+        Exit sub
+    End If
+	
+    ' exe上書き処理
+    '    更新スクリプトを作成し、他プロセスで実行
+    '    実行後サクラエディタを終了する。
+    '    スクリプトは、サクラエディタ上書きが出来るまで待機する。
+    '    program files\sakuraの場合はセキュリティ警告がでる。
+    Dim wcmdfile
+    Dim wcmdparam
+    Dim programfiles
+    programfiles = "C:\Program Files"
+    
+    wcmd     = "set srcfolder=" & WorkDir & vbCrLf & _
+	           "set targetfolder=" & SakuraDir & vbCrLf & _
+	           "set targetfile=sakura.chm" & vbCrLf
+
+	If (left(wosver,2) = "6." or left(wosver,3) = "10.") and left(SakuraDir, Len(programfiles)) = programfiles Then
+        wcmd = wcmd & "set _runas=-Verb runas"
+    End If
+    
+    wcmdfile = WorkDir & "\_setenv.bat"
+	SaveText wcmd, wcmdfile, "Shift_JIS"
+
+    wcmd = """" & PluginDir & "\mainupdate.bat"""
+
+    log ">" & wcmd, 1
+    'DoCmd wcmd, ""
+    WSH.Run wcmd, 1, False
+
+    'Editor.ExitAll
+
+End Sub
 
 ]]>
 </script>
