@@ -50,24 +50,55 @@ sakuraupdate ver 0.5
 
 ★★オプション設定★★
 
-リリースが更新されている場合にメッセージ表示し、
-更新を選択した時は、ダウンロード、サクラエディタの終了、exe差し替え、サクラエディタの再起動を実行する。
-ダウンロード先はSorceForgeの場合
-https://sourceforge.net/projects/sakura-editor/rss?path=/sakura2
-内の最新verを取得
-GitHubの場合
-https://api.github.com/repos/sakura-editor/sakura/releases/latest
-の最新verを取得
-管理者モード対応は、PowerShellのrunasを使用
+1. ダウンロードサイト
+	GitHub:0 SourceForge:1 Custom:2
+	から選びます。
+	※Customは未実装のため現時点では無効
 
-ToDo
-イントラ向けにURLをカスタマイズ可能とする
-サクラエディタ起動時にチェック可能か。EditorStartイベント時にチェック
+2. sourceforgeのsakura-edtiorプロジェクトRSS
+	ダウンロード対象をこのRSSから検索します。
+	初期値:https://sourceforge.net/projects/sakura-editor/rss
+
+3. GitHub sakura-editor Release URL(API)
+	ダウンロード対象を、このURLから検索します。
+	初期値:https://api.github.com/repos/sakura-editor/sakura/releases/latest
+
+4. ヘルプファイルのリリースURL(未指定時はSFから自動取得)
+	ヘルプファイルダウンロード対象を、このURLから検索します。
+	初期値:https://sourceforge.net/projects/sakura-editor/rss?path=/help2
+
+
+5. 正規表現ライブラリのリリースURL(未指定時はSFから自動取得)
+	正規表現ライブラリのダウンロード対象を、このURLから検索します。
+	初期値:https://api.bitbucket.org/2.0/repositories/k_takata/bregonig/downloads
+
+
+6. 独自リリース用URL(file:// or http://)
+	社内ネット等インターネット以外からダウンロードする際のURL
+	※未実装のため現時点では無効
+	初期値はダミー
+
+7. プラグインのリリースURL
+	このプラグインを更新するためのURL
+	初期値:https://github.com/osaboo/sakuraupdate/releases
+
+8. 最近の更新チェック日
+	更新チェックした最終日。この日から頻度で設定した日数を経過するとチェックします。
+
+9. 更新チェックの頻度(単位=日、空白=自動チェックしない)
+	日単位でチェック頻度を指定します。
+
+10. Debug Level (0=NODEBUG)
+	1あるいは2でアウトプットウィンドウに詳細なログを出力します。
+
 
 ★★著作権表示★★
 
 サクラエディタは、Norio Nakatani & Collaboratorsが開発・配布しているフリー・ソフトウェアです。
 https://sakura-editor.github.io/
+
+正規表現ライブラリ bregonig.dllは、 K.Takata (高田 謙)氏が開発・配布しているフリー・ソフトウェアです。
+http://k-takata.o.oo7.jp/mysoft/bregonig.html
 
 同封のcurl.exeはDirk Paehl氏がコンパイル・配布しているものです。
 http://www.paehl.com/open_source/?CURL_7.61.0
