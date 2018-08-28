@@ -4,6 +4,7 @@
         <property name="Editor"/>
         <property name="Plugin"/>
         <property name="DebugLvl"/>
+        <property name="Version"/>
         <property name="FS"/>
         <property name="WSH"/>
         <property name="CurlExe"/>
@@ -18,6 +19,7 @@
         </method>
         <method name="HelpUpdate" />
         <method name="RegExpUpdate" />
+        <method name="DiffUpdate" />
         <method name="log">
                 <PARAMETER name="amsg"/>
                 <PARAMETER name="alvl"/>
@@ -54,7 +56,6 @@
                 <PARAMETER name="adir"/>
         </method>
         <method name="DeleteDir">
-                <PARAMETER name="fs"/>
                 <PARAMETER name="adir"/>
         </method>
         <method name="DoCmd">
@@ -90,6 +91,7 @@ Option Explicit
 Dim Editor
 Dim Plugin
 Dim DebugLvl
+Dim Version
 
 Dim WorkDir
 Dim PluginDir
@@ -107,6 +109,8 @@ Dim OSVer
 
 ' 初期化
 Sub Init()
+  Version = "v20180828"
+
   Set FS = CreateObject("Scripting.FileSystemObject")
 
   DebugLvl = Plugin.GetOption("サクラエディタ", "DEBUGLVL")
@@ -163,13 +167,23 @@ Function CreateDir(FS, adir)
   End If
 End Function
 
-Function DeleteDir(FS, adir)
+Function DeleteDir(adir)
   On Error Resume Next
   
   Err.Clear
   FS.DeleteFolder adir
   If Err.Number <> 0 Then
      Editor.ErrorMsg (adir & "フォルダを削除できませんでした。")
+  End If
+End Function
+
+Function DeleteFile(afile)
+  On Error Resume Next
+  
+  Err.Clear
+  FS.DeleteFile afile
+  If Err.Number <> 0 Then
+     log afile & "を削除できませんでした。", 2
   End If
 End Function
 
@@ -607,7 +621,7 @@ Function GetSFRSS(ByRef aurl, apath)
     If (XmlDoc.parseError.ErrorCode <> 0) Then 'ロード失敗
         log "読み込めませんでした。", 0
         log XmlDoc.parseError.reason, 0   'エラー内容を出力
-        GetSFRSS = -1
+        GetSFRSS = ""
         Exit Function
     End If
 
@@ -1101,9 +1115,10 @@ Sub UpdateCheck(amode)
     Dim wchk1
     Dim wchk2
     Dim wchk3
+    Dim wchk4
 
     Editor.ActivateWinOutput
-    log "★★sakuraupdate ver 0.9★★", 0
+    log "★★sakuraupdate " & Version & "★★", 0
 
     log "サクラエディタ本体の最新バージョンを確認します。", 0
     wchk1 = SakuraCheck(amode, wnewver, wurl)
@@ -1111,6 +1126,8 @@ Sub UpdateCheck(amode)
     wchk2 = HelpCheck(amode, wnewver, wurl)
     log "正規表現ライブラリの最新バージョンを確認します。", 0
     wchk3 = RegExpCheck(amode, wnewver, wurl)
+    log "Diff(差分)ツールの最新バージョンを確認します。", 0
+    wchk4 = DiffCheck(amode, wnewver, wurl)
 
 End Sub
 
@@ -1120,7 +1137,7 @@ Sub SakuraUpdate()
 
     Editor.ActivateWinOutput
     
-    log "★★sakuraupdate ver 0.9★★", 0
+    log "★★sakuraupdate " & Version & "★★", 0
     log "サクラエディタ本体を最新バージョンに更新します。", 0
 
     If SakuraCheck(2, wnewver, wurl) = false Then
@@ -1319,7 +1336,7 @@ Sub RegExpUpdate()
 
     Editor.ActivateWinOutput
 
-    log "★★sakuraupdate ver 0.9★★", 0
+    log "★★sakuraupdate " & Version & "★★", 0
     log "正規表現ライブラリを最新バージョンに更新します。", 0
     
     If RegExpCheck(2, wnewver, wurl) = false Then
@@ -1353,10 +1370,12 @@ Function RegExpCheck(amode, ByRef aver, ByRef aurl)
     Dim wregexppath
     Dim wcurver
     
+    wcurver = ""
     wsakurapath = Editor.ExpandParameter("$S")
+on error resume next
     wregexppath = FS.GetParentFolderName(wsakurapath) & "\bregonig.dll"
     wcurver = FS.GetFileVersion(wregexppath)
-
+on error goto 0
     Dim re, match, matchs
     Set re = CreateObject("VBScript.RegExp")
     
@@ -1498,7 +1517,7 @@ Sub HelpUpdate()
 
     Editor.ActivateWinOutput
     
-    log "★★sakuraupdate ver 0.9★★", 0
+    log "★★sakuraupdate " & Version & "★★", 0
     log "ヘルプファイルを最新バージョンに更新します。", 0
 
     If HelpCheck(2, wnewver, wurl) = false Then
@@ -1642,6 +1661,165 @@ Sub HelpDownload(wurl)
     WSH.Run wcmd, 1, False
 
     log "ヘルプファイルの更新処理を終了しました。", 0
+
+End Sub
+
+Sub DiffUpdate()
+    Dim wurl
+    Dim wnewver
+
+    Editor.ActivateWinOutput
+
+    log "★★sakuraupdate " & Version & "★★", 0
+    log "Diff(差分)ツールを最新バージョンに更新します。", 0
+    
+    If DiffCheck(2, wnewver, wurl) = false Then
+        If WSH.Popup("すでに最新版ですが、更新しますか?", 0, "ソフトウェアの更新", 4) = 7 Then
+            Exit Sub
+        End If
+    End If
+
+    Call DiffDownload(wurl)
+
+End Sub
+
+
+'   Diff(差分)ツールの更新チェック
+'   amode = 1:自動モード,  2:手動モード
+'   戻り値: true=更新あり false=更新なし
+'
+Function DiffCheck(amode, ByRef aver, ByRef aurl)
+
+    'Editor.ActivateWinOutput
+
+    Dim wos, wosver, wosbit
+    GetOSInfo wos, wosver, wosbit
+'    log "wos=" & wos, 2
+    log "osver=" & OSVer, 2
+'    log "wosbit=" & wosbit, 2
+
+    Dim wurl
+    Dim wlink
+    Dim wsakurapath
+    Dim wdiffpath
+    Dim wcurdate
+    
+    wsakurapath = Editor.ExpandParameter("$S")
+    wcurdate = ""
+on error resume next
+    wdiffpath = FS.GetParentFolderName(wsakurapath) & "\diff.exe"
+    wcurdate = DateValue(FS.GetFile(wdiffpath).DateLastModified)
+on error goto 0
+
+    aurl = Plugin.GetOption("サクラエディタ", "DIFFURL")
+    aver = ""
+
+    Dim wtmpfile
+    Dim wcmd
+    Dim whead
+    
+    wtmpfile = WorkDir & "\_temp.htm"
+    DeleteFile(wtmpfile)
+    'curl --head  -s -w "HTTPCODE=%{http_code}"
+    wcmd = CurlExe & " --head -s -L """ & aurl & """ -o " & wtmpfile
+    log ">" & wcmd, 1
+    WSH.Run wcmd, 7, True '
+    whead = LoadText(wtmpfile, "utf-8")
+    
+    If instr(whead, "200 OK") > 0 Then
+        aver = "any date"
+    Else
+        log "最新版を確認できませんでした。", 0
+        DiffCheck = False
+        Exit Function
+    End If
+    
+    log "現在のDiff(差分)ツールの更新日付:" & wcurdate, 0
+
+    If wcurdate <> "" Then
+        log "●Diff(差分)ツールは配置済みです。", 0
+        DiffCheck = False
+        Exit Function
+    End If
+
+    log "★Diff(差分)ツールがダウンロード可能です。", 0
+    
+    DiffCheck = True
+
+End Function
+
+' Diff(差分)ツールのzipダウンロード
+
+Sub DiffDownload(wurl)
+    
+    Dim wlink
+    Dim wcmd
+    Dim wzipfile
+    
+    wzipfile = WorkDir & "\Diff.zip"
+    DeleteFile(wzipfile)
+    
+    wlink = wurl
+    
+    log "Diff(差分)ツールをダウンロードします.. " & wlink, 0
+
+    'wcmd = "bitsadmin.exe /TRANSFER sakura2 " & wurl & " " & wzipfile
+    wcmd = CurlExe & " -L """ & wlink & """ -o " & wzipfile
+    log ">" & wcmd, 1
+    'DoCmd wcmd, ""
+    WSH.Run wcmd, 7, True '
+
+    If Not IsExistFile(wzipfile) Then
+        log "ダウンロードできませんでした。", 0
+        Exit Sub
+    End If
+    
+    log "ダウンロードファイルを展開します。", 1
+
+    'zip展開
+    wcmd = UnzipExe & " e -aoa " & wzipfile & " diff.exe -o" & WorkDir
+    log ">" & wcmd, 1
+    WSH.Run wcmd, 7, False
+
+    Editor.Sleep 500
+    If Not IsExistFile(WorkDir & "\diff.exe") Then
+        log "diff.exeがダウンロードファイルにありませんでした。", 0
+        Exit Sub
+    End If
+
+    log "diff.exeを更新します。", 1
+    If WSH.Popup("diff.exeを更新します。", 0, "ソフトウェアの更新", 1) = 2 Then
+        Exit Sub
+    End If
+    
+    ' exe上書き処理
+    '    更新スクリプトを作成し、他プロセスで実行
+    '    実行後サクラエディタを終了する。
+    '    スクリプトは、サクラエディタ上書きが出来るまで待機する。
+    '    program files\sakuraの場合はセキュリティ警告がでる。
+    Dim wcmdfile
+    Dim wcmdparam
+    Dim programfiles
+    programfiles = "C:\Program Files"
+
+    wcmd = "set srcfolder=" & WorkDir & vbCrLf & _
+               "set targetfolder=" & SakuraDir & vbCrLf & _
+               "set targetfile=diff.exe" & vbCrLf
+
+    If (Left(OSVer, 2) = "6." Or Left(OSVer, 3) = "10.") And Left(SakuraDir, Len(programfiles)) = programfiles Then
+        wcmd = wcmd & "set _runas=-Verb runas"
+    End If
+    
+    wcmdfile = WorkDir & "\_setenv.bat"
+    SaveText wcmd, wcmdfile, "Shift_JIS"
+
+    wcmd = """" & PluginDir & "\mainupdate.bat"""
+
+    log ">" & wcmd, 1
+    'DoCmd wcmd, ""
+    WSH.Run wcmd, 7, False
+
+    log "Diff(差分)ツールの更新処理を終了しました。", 0
 
 End Sub
 

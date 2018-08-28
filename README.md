@@ -1,5 +1,5 @@
 # sakuraupdate
-Sakura-Editor Update Plugin (ver 0.9 (beta))
+Sakura-Editor Update Plugin (v20180828 (beta))
 
 プラグインでサクラエディタのバージョンアップ機能を実装してみる
 
