@@ -13,13 +13,14 @@
         <property name="PluginDir"/>
         <property name="SakuraDir"/>
         <method name="Init" />
-        <method name="SakuraUpdate" />
         <method name="UpdateCheck">
                 <PARAMETER name="amode"/>
         </method>
+        <method name="SakuraUpdate" />
         <method name="HelpUpdate" />
         <method name="RegExpUpdate" />
         <method name="DiffUpdate" />
+        <method name="PluginUpdate" />
         <method name="log">
                 <PARAMETER name="amsg"/>
                 <PARAMETER name="alvl"/>
@@ -64,9 +65,6 @@
         <method name="GetFileEncode">
                 <PARAMETER name="afile"/>
         </method>
-        <method name="ParseJson">
-                <PARAMETER name="strJson"/>
-        </method>
         <method name="LoadText">
                 <PARAMETER name="afile"/>
                 <PARAMETER name="aenc"/>
@@ -78,11 +76,7 @@
         </method>
         <method name="CreateHttpRequest">
         </method>
-        <method name="GetOSInfo">
-                <PARAMETER name="aos"/>
-                <PARAMETER name="aver"/>
-                <PARAMETER name="abit"/>
-        </method>
+        <method name="GetOSInfo"/>
     </public>
 <script language="VBScript">
 <![CDATA[
@@ -109,11 +103,14 @@ Dim OSVer
 
 ' 初期化
 Sub Init()
-  Version = "v20180828"
-
-  Set FS = CreateObject("Scripting.FileSystemObject")
+  Version = "v20180830"
 
   DebugLvl = Plugin.GetOption("サクラエディタ", "DEBUGLVL")
+
+  OSVer = GetOSInfo()
+  log "osver=" & OSVer, 2
+
+  Set FS = CreateObject("Scripting.FileSystemObject")
 
   PluginDir = Plugin.GetPluginDir()
   SakuraDir = FS.GetParentFolderName(Editor.ExpandParameter("$S"))
@@ -244,7 +241,9 @@ Function DoCmd(acmd)
   Set oEX = WSH.Exec(acmd)
 
   Do While oEX.Status = 0
+on error resume next
     Editor.Sleep 100
+on error goto 0
   Loop
 
   DoCmd = oEX.StdOut.ReadAll()
@@ -448,33 +447,6 @@ Function AppendText(atext, apath, aenc)
   AppendText = atext
 End Function
 
-' Encode special characters of a string
-' this is useful when you want to put a string in the URL
-' inspired by http://stackoverflow.com/questions/218181/how-can-i-url-encode-a-string-in-excel-vba
-Function URLEncode(StringVal)
-    Dim sc
-    Set sc = CreateObject("ScriptControl")
-    sc.Language = "JScript"
-    Dim js
-    Set js = sc.CodeObject
-    Dim strEncodeURL
-    URLEncode = js.encodeURI(StringVal)
-    URLEncode = Replace(URLEncode, "(", "%28")
-    URLEncode = Replace(URLEncode, ")", "%29")
-End Function
-
-' JSONの読み込み
-' @see https://o10e.org/blog/how-to-parse-json-for-vbscript/
-Function ParseJson(ByVal strJson)
-  Dim objJs
-
-  Set objJs = CreateObject("ScriptControl")
-  objJs.Language = "JScript"
-  objJs.AddCode "function jsonParse(str) { return eval('(' + str + ')'); };"
-
-  Set ParseJson = objJs.CodeObject.jsonParse(strJson)
-End Function
-
 Function FindApp(app)
     Dim oXL
     On Error Resume Next
@@ -554,7 +526,7 @@ Function CreateHttpRequest() ' As Object
   Set CreateHttpRequest = ret
 End Function
 
-Function GetOSInfo(ByRef aos, ByRef aver, ByRef abit)
+Function GetOSInfo()
    Dim objLoc
    Dim objWMIService
    Dim colItems
@@ -565,11 +537,13 @@ Function GetOSInfo(ByRef aos, ByRef aver, ByRef abit)
 '   Set objWMIService = GetObject("winmgmts:{impersonationLevel=impersonate}!\\.\root\cimv2")
    Set colItems = objWMIService.ExecQuery("Select * from Win32_OperatingSystem")
   
+   GetOSInfo = ""
+   
    For Each item In colItems
-       aos = item.Caption
-       aver = item.Version
-       OSVer = aver
-'       abit = item.OSArchitecture
+       'aos = item.Caption
+       OSVer = item.Version
+       GetOSInfo = OSVer
+       'abit = item.OSArchitecture
    Next
 
 '   Dim wtext
@@ -600,7 +574,7 @@ Function GetSFRSS(ByRef aurl, apath)
     wlink = aurl
     If InStr(wlink, "?path=") = 0 Then
         If apath = "sakura2" Then wlink = aurl & "?path=/sakura2"
-        If apath = "help2" Then wlink = aurl & "?path=/wiki"
+        If apath = "help2" Then wlink = aurl & "?path=/help2"
         If apath = "regexp" Then wlink = aurl & "?path=/wiki"
     End If
     
@@ -784,20 +758,20 @@ Function GetGitHub(ByRef aurl)
         Else
             wlink = ""
         End If
+        log "見つかったファイル:" & wlink, 2
     End If
      
     If wlink <> "" Then
         Dim re, match, matchs
         Set re = CreateObject("VBScript.RegExp")
         With re
-            .Pattern = "[0-9]\.[0-9]\.[0-9]\.[0-9]"
+            .Pattern = "([0-9]\.[0-9]\.[0-9]\.[0-9]|v[0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9])"
             .Global = True
             Set matchs = .Execute(wlink)
             'Debug.Print matchs.Count
             For Each match In matchs
                 'Debug.Print match.Value
                 wver = match.Value
-                log "見つかったファイル:" & wlink, 2
             Next
         End With
     End If
@@ -1112,23 +1086,30 @@ Sub UpdateCheck(amode)
     
     Dim wurl
     Dim wnewver
+    Dim wchk0
     Dim wchk1
     Dim wchk2
     Dim wchk3
     Dim wchk4
 
     Editor.ActivateWinOutput
-    log "★★sakuraupdate " & Version & "★★", 0
+    log vbCrLf & "★★sakuraupdate " & Version & "★★", 0
 
-    log "サクラエディタ本体の最新バージョンを確認します。", 0
+    log vbCrLf & "プラグインの最新バージョンを確認します。", 0
+    wchk0 = PluginCheck(amode, wnewver, wurl)
+
+    log vbCrLf & "サクラエディタ本体の最新バージョンを確認します。", 0
     wchk1 = SakuraCheck(amode, wnewver, wurl)
-    log "ヘルプファイルの最新バージョンを確認します。", 0
+    log vbCrLf & "ヘルプファイルの最新バージョンを確認します。", 0
     wchk2 = HelpCheck(amode, wnewver, wurl)
-    log "正規表現ライブラリの最新バージョンを確認します。", 0
+    log vbCrLf & "正規表現ライブラリの最新バージョンを確認します。", 0
     wchk3 = RegExpCheck(amode, wnewver, wurl)
-    log "Diff(差分)ツールの最新バージョンを確認します。", 0
-    wchk4 = DiffCheck(amode, wnewver, wurl)
 
+    If Plugin.GetOption("サクラエディタ", "DIFFURL") <> "" Then
+        log vbCrLf & "Diff(差分)ツールの最新バージョンを確認します。", 0
+        wchk4 = DiffCheck(amode, wnewver, wurl)
+    End If
+    
 End Sub
 
 Sub SakuraUpdate()
@@ -1137,7 +1118,7 @@ Sub SakuraUpdate()
 
     Editor.ActivateWinOutput
     
-    log "★★sakuraupdate " & Version & "★★", 0
+    log vbCrLf & "★★sakuraupdate " & Version & "★★", 0
     log "サクラエディタ本体を最新バージョンに更新します。", 0
 
     If SakuraCheck(2, wnewver, wurl) = false Then
@@ -1157,12 +1138,6 @@ End Sub
 Function SakuraCheck(amode, ByRef aver, ByRef aurl)
 
     'Editor.ActivateWinOutput
-
-    Dim wos, wosver, wosbit
-    GetOSInfo wos, wosver, wosbit
-    'log "wos=" & wos, 2
-    log "osver=" & OSVer, 2
-    'log "wosbit=" & wosbit, 2
 
     'Dim wurl
     Dim wlink
@@ -1249,7 +1224,10 @@ Sub SakuraDownload(wurl)
     'DoCmd wcmd, ""
     WSH.Run wcmd, 7, False
     
+on error resume next
     Editor.Sleep 500
+on error goto 0
+
     If Not FS.FileExists(WorkDir & "\sakura.exe") Then
         log WorkDir & "\sakura.exeがダウンロードファイルにありませんでした。", 0
         Exit Sub
@@ -1336,7 +1314,7 @@ Sub RegExpUpdate()
 
     Editor.ActivateWinOutput
 
-    log "★★sakuraupdate " & Version & "★★", 0
+    log vbCrLf & "★★sakuraupdate " & Version & "★★", 0
     log "正規表現ライブラリを最新バージョンに更新します。", 0
     
     If RegExpCheck(2, wnewver, wurl) = false Then
@@ -1357,12 +1335,6 @@ End Sub
 Function RegExpCheck(amode, ByRef aver, ByRef aurl)
 
     'Editor.ActivateWinOutput
-
-    Dim wos, wosver, wosbit
-    GetOSInfo wos, wosver, wosbit
-'    log "wos=" & wos, 2
-    log "osver=" & OSVer, 2
-'    log "wosbit=" & wosbit, 2
 
     Dim wurl
     Dim wlink
@@ -1411,6 +1383,8 @@ on error goto 0
         RegExpCheck = False
         Exit Function
     End If
+    
+    aurl = wurl
     
     log "現在の正規表現ライブラリのバージョン:" & wcurver, 0
     log "最新の正規表現ライブラリのバージョン:" & aver, 0
@@ -1469,7 +1443,10 @@ Sub RegExpDownload(wurl)
     log ">" & wcmd, 1
     WSH.Run wcmd, 7, False
 
+on error resume next
     Editor.Sleep 500
+on error goto 0
+
     If Not IsExistFile(WorkDir & "\bregonig.dll") Then
         log "bregonig.dllがダウンロードファイルにありませんでした。", 0
         Exit Sub
@@ -1517,7 +1494,7 @@ Sub HelpUpdate()
 
     Editor.ActivateWinOutput
     
-    log "★★sakuraupdate " & Version & "★★", 0
+    log vbCrLf & "★★sakuraupdate " & Version & "★★", 0
     log "ヘルプファイルを最新バージョンに更新します。", 0
 
     If HelpCheck(2, wnewver, wurl) = false Then
@@ -1537,12 +1514,6 @@ End Sub
 Function HelpCheck(amode, ByRef aver, ByRef aurl)
 
     'Editor.ActivateWinOutput
-
-    Dim wos, wosver, wosbit
-    GetOSInfo wos, wosver, wosbit
-    'log "wos=" & wos, 2
-    log "osver=" & OSVer, 2
-    'log "wosbit=" & wosbit, 2
 
     Dim wurl
     Dim wlink
@@ -1571,6 +1542,8 @@ Function HelpCheck(amode, ByRef aver, ByRef aurl)
         HelpCheck = False
         Exit Function
     End If
+    
+    aurl = wurl
     
     'log "現在のサクラエディタのバージョン:" & wsakuraver, 0
     log "現在のヘルプファイル更新日付:" & wcurdate, 0
@@ -1621,7 +1594,9 @@ Sub HelpDownload(wurl)
     log ">" & wcmd, 1
     WSH.Run wcmd, 7, False
 
+on error resume next
     Editor.Sleep 500
+on error goto 0
 
     If Not IsExistFile(WorkDir & "\sakura.chm") Then
         log "sakura.chmがダウンロードファイルにありませんでした。", 0
@@ -1670,11 +1645,11 @@ Sub DiffUpdate()
 
     Editor.ActivateWinOutput
 
-    log "★★sakuraupdate " & Version & "★★", 0
-    log "Diff(差分)ツールを最新バージョンに更新します。", 0
+    log vbCrLf & "★★sakuraupdate " & Version & "★★", 0
+    log "Diff(差分)ツールを配置します。", 0
     
     If DiffCheck(2, wnewver, wurl) = false Then
-        If WSH.Popup("すでに最新版ですが、更新しますか?", 0, "ソフトウェアの更新", 4) = 7 Then
+        If WSH.Popup("すでに配置済みですが、更新しますか?", 0, "ソフトウェアの更新", 4) = 7 Then
             Exit Sub
         End If
     End If
@@ -1692,12 +1667,6 @@ Function DiffCheck(amode, ByRef aver, ByRef aurl)
 
     'Editor.ActivateWinOutput
 
-    Dim wos, wosver, wosbit
-    GetOSInfo wos, wosver, wosbit
-'    log "wos=" & wos, 2
-    log "osver=" & OSVer, 2
-'    log "wosbit=" & wosbit, 2
-
     Dim wurl
     Dim wlink
     Dim wsakurapath
@@ -1714,6 +1683,10 @@ on error goto 0
     aurl = Plugin.GetOption("サクラエディタ", "DIFFURL")
     aver = ""
 
+    if aurl = "" Then
+        Exit Function
+    End If
+    
     Dim wtmpfile
     Dim wcmd
     Dim whead
@@ -1781,7 +1754,10 @@ Sub DiffDownload(wurl)
     log ">" & wcmd, 1
     WSH.Run wcmd, 7, False
 
+on error resume next
     Editor.Sleep 500
+on error goto 0
+
     If Not IsExistFile(WorkDir & "\diff.exe") Then
         log "diff.exeがダウンロードファイルにありませんでした。", 0
         Exit Sub
@@ -1820,6 +1796,170 @@ Sub DiffDownload(wurl)
     WSH.Run wcmd, 7, False
 
     log "Diff(差分)ツールの更新処理を終了しました。", 0
+
+End Sub
+
+'	プラグインの更新処理
+
+Sub PluginUpdate()
+    Dim wurl
+    Dim wnewver
+
+    Editor.ActivateWinOutput
+    
+    log vbCrLf & "★★sakuraupdate " & Version & "★★", 0
+    log "sakuraupdateプラグインを最新バージョンに更新します。", 0
+
+    If PluginCheck(2, wnewver, wurl) = false Then
+        If WSH.Popup("すでに最新版ですが、更新しますか?", 0, "ソフトウェアの更新", 4) = 7 Then
+            Exit Sub
+        End If
+    End If
+
+    Call PluginDownload(wurl)
+    Call PluginSetup(wtarget)
+
+End Sub
+
+'   プラグインファイルの更新チェック
+'   amode = 1:自動モード,  2:手動モード
+'   戻り値: true=更新あり false=更新なし
+'
+Function PluginCheck(amode, ByRef aver, ByRef aurl)
+
+    'Editor.ActivateWinOutput
+
+    Dim wpluginpath
+    Dim wdefpath
+    Dim wdeftext
+    Dim wcurver
+    Dim wsakuraver
+    
+    wpluginpath = PluginDir
+    wdefpath = wpluginpath & "\plugin.def"
+    
+    wdeftext = LoadText(wdefpath, "")
+
+    Dim re, match, matchs
+    Set re = CreateObject("VBScript.RegExp")
+
+    With re
+
+        re.Pattern = "Version=(v\d+)"
+        '.Global = True
+        Set matchs = .Execute(wdeftext)
+        If matchs.Count > 0 Then
+            If matchs(0).SubMatches.Count > 0 Then
+                wcurver = matchs(0).SubMatches(0)
+            End If
+        End If
+
+    End With
+
+    aurl = Plugin.GetOption("サクラエディタ", "PLUGINURL")
+    aver = GetGitHub(aurl)
+
+    If aver = "" Then
+        log "最新版を確認できませんでした。", 0
+        PluginCheck = False
+        Exit Function
+    End If
+    
+    log "現在のプラグインのバージョン:" & wcurver, 0
+    log "最新のプラグインのバージョン:" & aver, 0
+
+    If aver <= wcurver Then
+        log "●プラグインは最新バージョンです。", 0
+        PluginCheck = False
+        Exit Function
+    End If
+
+    log "★プラグインの新バージョンがリリースされています。", 0
+    
+    PluginCheck = True
+End Function
+
+' プラグインのzipダウンロード
+Sub PluginDownload(wurl)
+    
+    Dim wlink
+    Dim wcmd
+    Dim wzipfile
+    
+    wzipfile = WorkDir & "Plugin.zip"
+    
+    wlink = wurl
+    
+    log "プラグインをダウンロードします.. " & wlink, 0
+
+    'wcmd = "bitsadmin.exe /TRANSFER sakura2 " & wurl & " " & wzipfile
+    wcmd = CurlExe & " -L """ & wlink & """ -o " & wzipfile
+    log ">" & wcmd, 1
+    'DoCmd wcmd, ""
+    WSH.Run wcmd, 7, True '
+
+    If Not IsExistFile(wzipfile) Then
+        log "ダウンロードできませんでした。", 0
+        Exit Sub
+    End If
+    
+    log "ダウンロードファイルを展開します。", 0
+
+    'zip展開
+    'CreateDir(WorkDir & "\plugin")
+    wcmd = UnzipExe & " e -aoa " & wzipfile & " -o" & WorkDir
+    log ">" & wcmd, 1
+    WSH.Run wcmd, 7, False
+
+on error resume next
+    Editor.Sleep 500
+on error goto 0
+
+    If Not IsExistFile(WorkDir & "\sakuraupdate\plugin.def") Then
+        log "プラグインzipではありませんでした。", 0
+        Exit Sub
+    End If
+
+End Sub
+
+'   ターゲットファイル・フォルダをインストールフォルダへコピーする。
+'	
+Sub PluginSetup(atarget)
+
+    log "プラグインを更新します。", 1
+    If WSH.Popup("プラグインを更新します。", 0, "ソフトウェアの更新", 1) = 2 Then
+        Exit Sub
+    End If
+    
+    ' exe上書き処理
+    '    更新スクリプトを作成し、他プロセスで実行
+    '    実行後サクラエディタを終了する。
+    '    スクリプトは、サクラエディタ上書きが出来るまで待機する。
+    '    program files\sakuraの場合はセキュリティ警告がでる。
+    Dim wcmdfile
+    Dim wcmdparam
+    Dim programfiles
+    programfiles = "C:\Program Files"
+    
+    wcmd = "set srcfolder=" & WorkDir & vbCrLf & _
+               "set targetfolder=" & SakuraDir & vbCrLf & _
+               "set targetfile=sakura.chm" & vbCrLf
+
+    If (Left(OSVer, 2) = "6." Or Left(OSVer, 3) = "10.") And Left(SakuraDir, Len(programfiles)) = programfiles Then
+        wcmd = wcmd & "set _runas=-Verb runas"
+    End If
+    
+    wcmdfile = WorkDir & "\_setenv.bat"
+    SaveText wcmd, wcmdfile, "Shift_JIS"
+
+    wcmd = """" & PluginDir & "\mainupdate.bat"""
+
+    log ">" & wcmd, 1
+    'DoCmd wcmd, ""
+    WSH.Run wcmd, 1, False
+
+
+    log "プラグインの更新処理を終了しました。", 0
 
 End Sub
 

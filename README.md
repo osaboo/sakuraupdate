@@ -118,6 +118,19 @@ Sakura-Editor Update Plugin (v20180828 (beta))
 * zip展開は、7zのコマンドライン版を使用。(これも環境依存の回避)
 * vbsをjsに移行したい
 
+## ToDo
+
+* まとめて更新する。
+	ダウンロード部分も切り分け
+		XXXXXCheck
+		XXXXXDownload
+		FileUpdateでまとめる
+	
+* ゴミ掃除
+	処理後に%temp%\sakuraupdateを削除する
+		Cleanup
+	
+
 ## 著作権表示
 
 1. サクラエディタは、Norio Nakatani & Collaboratorsが開発・配布しているフリー・ソフトウェアです。

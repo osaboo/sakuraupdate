@@ -4,7 +4,7 @@ Id=SoftwareUpdate
 Name=ソフトウェアの更新(&W)
 Description=SakuraEditorを自動更新します
 Type=wsh
-Version=v20180828
+Version=v20180830
 Url=https://github.com/osaboo/sakuraupdate/
 Author=osaboo
 
@@ -71,10 +71,10 @@ O[7].Label=独自リリース用URL(file:// or http://)
 O[7].Type=Str
 O[7].Default=file://hogehoge/share/sakura
 
-O[8].Key=UPDATEURL
+O[8].Key=PLUGINURL
 O[8].Label=プラグインのリリースURL
 O[8].Type=Str
-O[8].Default=https://github.com/osaboo/sakuraupdate/releases
+O[8].Default=https://api.github.com/repos/osaboo/sakuraupdate/releases
 
 O[9].Key=LASTCHECK
 O[9].Label=最近の更新チェック日
