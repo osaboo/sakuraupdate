@@ -12,6 +12,8 @@ set oldfile=%targetfolder%\%targetfile%.old
 if "%targetfolder%"=="" goto :err
 
 rem @timeout /t 3
+if "%targetfile%"=="plugin" goto :plugin
+
 if "%targetfile%"=="sakura.exe" taskkill /im %targetfile%
 @if "%targetfile%"=="sakura.exe" @timeout /t 3
 
@@ -22,7 +24,15 @@ copy /y "%srcfile%" "%newfile%"
 @echo %newfile%の差し替えに成功しました。
 rem @timeout /t 3
 goto :end
+
+:plugin
+taskkill /im sakura.exe
+xcopy /i /y "%srcfolder%" "%targetfolder%"
+@echo プラグインの差し替えに成功しました。
+goto :end
+
 :err
 @echo %newfile%の差し替えに失敗しました。
+
 rem @timeout /t 5
 :end
