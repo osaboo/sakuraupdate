@@ -18,6 +18,9 @@ Sakura-Editor Update Plugin (v20180830 (beta))
 
 ## インストール手順
 
+以下はzipプラグイン機能が使える、v2.0.6.0以降での導入手順です。zipプラグインが使えない場合は、
+zipを展開して、pluginsフォルダにsakuraupdateフォルダを作って保存してください。
+
 1. サクラエディタを起動し、メニューから設定⇒共通設定を起動し、プラグインのタブを表示します。
 
 2. 「プラグインを有効にする」のチェックボックスのチェックを入れます。  
@@ -63,26 +66,26 @@ Sakura-Editor Update Plugin (v20180830 (beta))
 
 ## オプション設定
 
-1. ダウンロードサイト
-	GitHub:0 SourceForge:1 Custom:2
-	から選びます。
+1. ダウンロードサイト  
+	GitHub:0 SourceForge:1 Custom:2  
+	から選びます。  
 	※Customは未実装のため現時点では無効
 
 2. sourceforgeのsakura-edtiorプロジェクトRSS
-	ダウンロード対象をこのRSSから検索します。
+	ダウンロード対象をこのRSSから検索します。  
 	初期値:https://sourceforge.net/projects/sakura-editor/rss
 
 3. GitHub sakura-editor Release URL(API)
-	ダウンロード対象を、このURLから検索します。
+	ダウンロード対象を、このURLから検索します。  
 	初期値:https://api.github.com/repos/sakura-editor/sakura/releases/latest
 
 4. ヘルプファイルのリリースURL(未指定時はSFから自動取得)
-	ヘルプファイルダウンロード対象を、このURLから検索します。
+	ヘルプファイルダウンロード対象を、このURLから検索します。  
 	初期値:https://sourceforge.net/projects/sakura-editor/rss?path=/help2
 
 
 5. 正規表現ライブラリのリリースURL(未指定時はSFから自動取得)
-	正規表現ライブラリのダウンロード対象を、このURLから検索します。
+	正規表現ライブラリのダウンロード対象を、このURLから検索します。  
 	初期値:https://api.bitbucket.org/2.0/repositories/k_takata/bregonig/downloads
 
 
@@ -92,7 +95,7 @@ Sakura-Editor Update Plugin (v20180830 (beta))
 	初期値はダミー
 
 7. プラグインのリリースURL
-	このプラグインを更新するためのURL
+	このプラグインを更新するためのURL  
 	初期値:https://github.com/osaboo/sakuraupdate/releases
 
 8. 最近の更新チェック日
@@ -133,20 +136,18 @@ Sakura-Editor Update Plugin (v20180830 (beta))
 
 ## 著作権表示
 
-1. サクラエディタは、Norio Nakatani & Collaboratorsが開発・配布しているフリー・ソフトウェアです。
+1. サクラエディタは、Norio Nakatani & Collaboratorsが開発・配布しているフリー・ソフトウェアです。  
 https://sakura-editor.github.io/
 
-2. 正規表現ライブラリ bregonig.dllは、 K.Takata (高田 謙)氏が開発・配布しているフリー・ソフトウェアです。
+2. 正規表現ライブラリ bregonig.dllは、 K.Takata (高田 謙)氏が開発・配布しているフリー・ソフトウェアです。  
 http://k-takata.o.oo7.jp/mysoft/bregonig.html
 
-3. 同封のcurl.exeはDirk Paehl氏がコンパイル・配布しているものです。
+3. 同封のcurl.exeはDirk Paehl氏がコンパイル・配布しているものです。  
 http://www.paehl.com/open_source/?CURL_7.61.0
 
-4. 同封の7za.exeは、GNU LGPLでライセンスされている、Igor Pavlovの著作物です。
-	```
-	7-Zip Extra is package of extra modules of 7-Zip. 
-	7-Zip Copyright (C) 1999-2018 Igor Pavlov.
-	7-Zip is free software. Read License.txt for more information about license.
-	Source code of binaries can be found at:
+4. 同封の7za.exeは、GNU LGPLでライセンスされている、Igor Pavlovの著作物です。  
+	7-Zip Extra is package of extra modules of 7-Zip.   
+	7-Zip Copyright (C) 1999-2018 Igor Pavlov.  
+	7-Zip is free software. Read License.txt for more information about license.  
+	Source code of binaries can be found at:  
 	  http://www.7-zip.org/
-	```
