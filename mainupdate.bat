@@ -34,7 +34,8 @@ goto :end
 :L3
 echo サクラエディタを再起動します。
 rem @timeout /t 2
-start "" "%targetfolder%\sakura.exe"
+if not exist "%sakurafolder%\sakura.exe" goto :end
+start "" "%sakurafolder%\sakura.exe"
 
 :end
 rem timeout /t 10

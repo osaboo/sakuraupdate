@@ -1254,6 +1254,7 @@ on error goto 0
     programfiles = "C:\Program Files"
     
     wcmd = "set srcfolder=" & WorkDir & vbCrLf & _
+               "set sakurafolder=" & SakuraDir & vbCrLf & _
                "set targetfolder=" & SakuraDir & vbCrLf & _
                "set targetfile=sakura.exe" & vbCrLf
 
@@ -1474,6 +1475,7 @@ on error goto 0
     programfiles = "C:\Program Files"
 
     wcmd = "set srcfolder=" & WorkDir & vbCrLf & _
+               "set sakurafolder=" & SakuraDir & vbCrLf & _
                "set targetfolder=" & SakuraDir & vbCrLf & _
                "set targetfile=bregonig.dll" & vbCrLf
 
@@ -1625,6 +1627,7 @@ on error goto 0
     programfiles = "C:\Program Files"
     
     wcmd = "set srcfolder=" & WorkDir & vbCrLf & _
+               "set sakurafolder=" & SakuraDir & vbCrLf & _
                "set targetfolder=" & SakuraDir & vbCrLf & _
                "set targetfile=sakura.chm" & vbCrLf
 
@@ -1785,6 +1788,7 @@ on error goto 0
     programfiles = "C:\Program Files"
 
     wcmd = "set srcfolder=" & WorkDir & vbCrLf & _
+               "set sakurafolder=" & SakuraDir & vbCrLf & _
                "set targetfolder=" & SakuraDir & vbCrLf & _
                "set targetfile=diff.exe" & vbCrLf
 
@@ -1950,6 +1954,7 @@ Sub PluginSetup(atarget)
     programfiles = "C:\Program Files"
     
     wcmd = "set srcfolder=" & WorkDir & "\sakuraupdate" & vbCrLf & _
+               "set sakurafolder=" & SakuraDir & vbCrLf & _
                "set targetfolder=" & PluginDir & vbCrLf & _
                "set targetfile=" & atarget & vbCrLf
 
