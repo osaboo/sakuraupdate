@@ -21,8 +21,8 @@ C[4]=RegexpUpdate.vbs
 C[4].Label=正規表現ライブラリ更新(&R)
 C[5]=DiffUpdate.vbs
 C[5].Label=DIFF更新(&D)
-;C[6]=PluginUpdate.vbs
-;C[6].Label=このプラグインの更新(&U)
+C[6]=PluginUpdate.vbs
+C[6].Label=このプラグインの更新(&U)
 
 [Option]
 O[1].Section=サクラエディタ

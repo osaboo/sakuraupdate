@@ -1,4 +1,4 @@
-sakuraupdate v20180828
+sakuraupdate v20180830
 
 サクラエディタを更新するプラグイン
 

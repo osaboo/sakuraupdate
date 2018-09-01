@@ -1092,21 +1092,27 @@ Sub UpdateCheck(amode)
     Dim wchk3
     Dim wchk4
 
-    Editor.ActivateWinOutput
-    log vbCrLf & "★★sakuraupdate " & Version & "★★", 0
+    If amode = 2 Then Editor.ActivateWinOutput
+    If amode = 2 Then log vbCrLf & "★★sakuraupdate " & Version & "★★", 0
 
-    log vbCrLf & "プラグインの最新バージョンを確認します。", 0
+    If amode = 2 Then log vbCrLf & "プラグインの最新バージョンを確認します。", 0
     wchk0 = PluginCheck(amode, wnewver, wurl)
 
-    log vbCrLf & "サクラエディタ本体の最新バージョンを確認します。", 0
+    If amode = 2 Then log vbCrLf & "サクラエディタ本体の最新バージョンを確認します。", 0
     wchk1 = SakuraCheck(amode, wnewver, wurl)
-    log vbCrLf & "ヘルプファイルの最新バージョンを確認します。", 0
-    wchk2 = HelpCheck(amode, wnewver, wurl)
-    log vbCrLf & "正規表現ライブラリの最新バージョンを確認します。", 0
-    wchk3 = RegExpCheck(amode, wnewver, wurl)
 
+    If Plugin.GetOption("サクラエディタ", "HELPURL") <> "" Then
+        If amode = 2 Then log vbCrLf & "ヘルプファイルの最新バージョンを確認します。", 0
+        wchk2 = HelpCheck(amode, wnewver, wurl)
+    End If
+    
+    If Plugin.GetOption("サクラエディタ", "REGEXPURL") <> "" Then
+        If amode = 2 Then log vbCrLf & "正規表現ライブラリの最新バージョンを確認します。", 0
+        wchk3 = RegExpCheck(amode, wnewver, wurl)
+    End If
+    
     If Plugin.GetOption("サクラエディタ", "DIFFURL") <> "" Then
-        log vbCrLf & "Diff(差分)ツールの最新バージョンを確認します。", 0
+        If amode = 2 Then log vbCrLf & "Diff(差分)ツールの最新バージョンを確認します。", 0
         wchk4 = DiffCheck(amode, wnewver, wurl)
     End If
     
@@ -1160,16 +1166,16 @@ Function SakuraCheck(amode, ByRef aver, ByRef aurl)
     End If
 
     If aver = "" Then
-        log "最新版を確認できませんでした。", 0
+        If amode = 2 Then log "最新版を確認できませんでした。", 0
         SakuraCheck = False
         Exit Function
     End If
     
-    log "現在のサクラエディタのバージョン:" & wcurver, 0
-    log "最新のサクラエディタのバージョン:" & aver, 0
+    If amode = 2 Then log "現在のサクラエディタのバージョン:" & wcurver, 0
+    If amode = 2 Then log "最新のサクラエディタのバージョン:" & aver, 0
 
     If aver <= wcurver Then
-        log "●サクラエディタは最新バージョンです。", 0
+        If amode = 2 Then log "●サクラエディタは最新バージョンです。", 0
         SakuraCheck = False
         Exit Function
     End If
@@ -1379,18 +1385,18 @@ on error goto 0
     End If
     
     If aver = "" Then
-        log "最新版を確認できませんでした。", 0
+        If amode = 2 Then log "最新版を確認できませんでした。", 0
         RegExpCheck = False
         Exit Function
     End If
     
     aurl = wurl
     
-    log "現在の正規表現ライブラリのバージョン:" & wcurver, 0
-    log "最新の正規表現ライブラリのバージョン:" & aver, 0
+    If amode = 2 Then log "現在の正規表現ライブラリのバージョン:" & wcurver, 0
+    If amode = 2 Then log "最新の正規表現ライブラリのバージョン:" & aver, 0
 
     If aver <= wcurver Then
-        log "●正規表現ライブラリは最新バージョンです。", 0
+        If amode = 2 Then log "●正規表現ライブラリは最新バージョンです。", 0
         RegExpCheck = False
         Exit Function
     End If
@@ -1538,20 +1544,20 @@ Function HelpCheck(amode, ByRef aver, ByRef aurl)
     End If
     
     If aver = "" Then
-        log "最新版を確認できませんでした。", 0
+        If amode = 2 Then log "最新版を確認できませんでした。", 0
         HelpCheck = False
         Exit Function
     End If
     
     aurl = wurl
     
-    'log "現在のサクラエディタのバージョン:" & wsakuraver, 0
-    log "現在のヘルプファイル更新日付:" & wcurdate, 0
-    'log "最新のヘルプファイルバージョン:" & wnewver, 0
-    log "最新のヘルプファイル発行日付:" & aver, 0
+    'If amode = 2 Then log "現在のサクラエディタのバージョン:" & wsakuraver, 0
+    If amode = 2 Then log "現在のヘルプファイル更新日付:" & wcurdate, 0
+    'If amode = 2 Then log "最新のヘルプファイルバージョン:" & wnewver, 0
+    If amode = 2 Then log "最新のヘルプファイル発行日付:" & aver, 0
 
     If aver <= wcurdate Then
-        log "●ヘルプファイルは最新バージョンです。", 0
+        If amode = 2 Then log "●ヘルプファイルは最新バージョンです。", 0
         HelpCheck = False
         Exit Function
     End If
@@ -1695,27 +1701,27 @@ on error goto 0
     DeleteFile(wtmpfile)
     'curl --head  -s -w "HTTPCODE=%{http_code}"
     wcmd = CurlExe & " --head -s -L """ & aurl & """ -o " & wtmpfile
-    log ">" & wcmd, 1
+    If amode = 2 Then log ">" & wcmd, 1
     WSH.Run wcmd, 7, True '
     whead = LoadText(wtmpfile, "utf-8")
     
     If instr(whead, "200 OK") > 0 Then
         aver = "any date"
     Else
-        log "最新版を確認できませんでした。", 0
+        If amode = 2 Then log "最新版を確認できませんでした。", 0
         DiffCheck = False
         Exit Function
     End If
     
-    log "現在のDiff(差分)ツールの更新日付:" & wcurdate, 0
+    If amode = 2 Then log "現在のDiff(差分)ツールの更新日付:" & wcurdate, 0
 
     If wcurdate <> "" Then
-        log "●Diff(差分)ツールは配置済みです。", 0
+        If amode = 2 Then log "●Diff(差分)ツールは配置済みです。", 0
         DiffCheck = False
         Exit Function
     End If
 
-    log "★Diff(差分)ツールがダウンロード可能です。", 0
+    If amode = 2 Then log "★Diff(差分)ツールがダウンロード可能です。", 0
     
     DiffCheck = True
 
@@ -1817,7 +1823,8 @@ Sub PluginUpdate()
     End If
 
     Call PluginDownload(wurl)
-    Call PluginSetup(wtarget)
+    
+    Call PluginSetup("plugin")
 
 End Sub
 
@@ -1860,16 +1867,16 @@ Function PluginCheck(amode, ByRef aver, ByRef aurl)
     aver = GetGitHub(aurl)
 
     If aver = "" Then
-        log "最新版を確認できませんでした。", 0
+        If amode = 2 Then log "最新版を確認できませんでした。", 0
         PluginCheck = False
         Exit Function
     End If
     
-    log "現在のプラグインのバージョン:" & wcurver, 0
-    log "最新のプラグインのバージョン:" & aver, 0
+    If amode = 2 Then log "現在のプラグインのバージョン:" & wcurver, 0
+    If amode = 2 Then log "最新のプラグインのバージョン:" & aver, 0
 
     If aver <= wcurver Then
-        log "●プラグインは最新バージョンです。", 0
+        If amode = 2 Then log "●プラグインは最新バージョンです。", 0
         PluginCheck = False
         Exit Function
     End If
@@ -1907,7 +1914,7 @@ Sub PluginDownload(wurl)
 
     'zip展開
     'CreateDir(WorkDir & "\plugin")
-    wcmd = UnzipExe & " e -aoa " & wzipfile & " -o" & WorkDir
+    wcmd = UnzipExe & " x -aoa " & wzipfile & " -o" & WorkDir
     log ">" & wcmd, 1
     WSH.Run wcmd, 7, False
 
@@ -1922,7 +1929,7 @@ on error goto 0
 
 End Sub
 
-'   ターゲットファイル・フォルダをインストールフォルダへコピーする。
+'   pluginのファイルをインストールフォルダへコピーする。
 '	
 Sub PluginSetup(atarget)
 
@@ -1936,16 +1943,17 @@ Sub PluginSetup(atarget)
     '    実行後サクラエディタを終了する。
     '    スクリプトは、サクラエディタ上書きが出来るまで待機する。
     '    program files\sakuraの場合はセキュリティ警告がでる。
+    Dim wcmd
     Dim wcmdfile
     Dim wcmdparam
     Dim programfiles
     programfiles = "C:\Program Files"
     
-    wcmd = "set srcfolder=" & WorkDir & vbCrLf & _
-               "set targetfolder=" & SakuraDir & vbCrLf & _
-               "set targetfile=sakura.chm" & vbCrLf
+    wcmd = "set srcfolder=" & WorkDir & "\sakuraupdate" & vbCrLf & _
+               "set targetfolder=" & PluginDir & vbCrLf & _
+               "set targetfile=" & atarget & vbCrLf
 
-    If (Left(OSVer, 2) = "6." Or Left(OSVer, 3) = "10.") And Left(SakuraDir, Len(programfiles)) = programfiles Then
+    If (Left(OSVer, 2) = "6." Or Left(OSVer, 3) = "10.") And Left(PluginDir, Len(programfiles)) = programfiles Then
         wcmd = wcmd & "set _runas=-Verb runas"
     End If
     
@@ -1957,7 +1965,6 @@ Sub PluginSetup(atarget)
     log ">" & wcmd, 1
     'DoCmd wcmd, ""
     WSH.Run wcmd, 1, False
-
 
     log "プラグインの更新処理を終了しました。", 0
 

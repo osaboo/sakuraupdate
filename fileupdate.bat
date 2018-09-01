@@ -1,3 +1,4 @@
+@echo off
 call "%TEMP%\sakuraupdate\_setenv.bat"
 
 set srcfile=%srcfolder%\%targetfile%
