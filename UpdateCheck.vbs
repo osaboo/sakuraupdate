@@ -8,12 +8,6 @@ Option Explicit
 '	更新されていない場合は、終了
 '	チェックはエディタ起動3分後に実施
 
-Dim vbCrLf '= Chr(13) & Chr(10)
-Dim vbLf '= Chr(10)
-
-vbCrLf = Chr(13) & Chr(10)
-vbLf = Chr(10)
-
 Dim Tools
 
 Set Tools = GetObject("script:" & Plugin.GetPluginDir() & "\Tools.wsc")

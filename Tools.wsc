@@ -45,15 +45,12 @@
                 <PARAMETER name="aDT"/>
         </method>
         <method name="IsExistFile">
-                <PARAMETER name="fs"/>
                 <PARAMETER name="afile"/>
         </method>
         <method name="IsExistDir">
-                <PARAMETER name="fs"/>
                 <PARAMETER name="adir"/>
         </method>
         <method name="CreateDir">
-                <PARAMETER name="fs"/>
                 <PARAMETER name="adir"/>
         </method>
         <method name="DeleteDir">
@@ -103,12 +100,12 @@ Dim OSVer
 
 ' 初期化
 Sub Init()
-  Version = "v20180830"
+  Version = "v20180902"
 
   DebugLvl = Plugin.GetOption("サクラエディタ", "DEBUGLVL")
 
   OSVer = GetOSInfo()
-  log "osver=" & OSVer, 2
+  'log "osver=" & OSVer, 2
 
   Set FS = CreateObject("Scripting.FileSystemObject")
 
@@ -123,9 +120,9 @@ Sub Init()
   Set WSH = CreateObject("Wscript.Shell")
   WorkDir = WSH.ExpandEnvironmentStrings("%TEMP%") & "\sakuraupdate"
     'log "更新作業用フォルダ " & WorkDir, 1
-  If Not IsExistDir(FS, WorkDir) Then
-    log "更新作業用フォルダを作成します", 1
-    CreateDir FS, WorkDir
+  If Not IsExistDir(WorkDir) Then
+    'log "更新作業用フォルダを作成します", 1
+    CreateDir WorkDir
   End If
 
 End Sub
@@ -142,45 +139,48 @@ End Sub
 
 Function IsExistFile(afile)
 '  Dim fs
-'  Set fs = CreateObject("Scripting.FileSystemObject")
+  If FS is Nothing Then Set FS = CreateObject("Scripting.FileSystemObject")
   IsExistFile = FS.FileExists(afile)
 '  Set fs = Nothing
 End Function
 
-Function IsExistDir(FS, adir)
+Function IsExistDir(adir)
 '  Dim fs
-'  Set fs = CreateObject("Scripting.FileSystemObject")
+  If FS is Nothing Then Set FS = CreateObject("Scripting.FileSystemObject")
   IsExistDir = FS.FolderExists(adir)
 '  set fs = Nothing
 End Function
 
-Function CreateDir(FS, adir)
+Function CreateDir(adir)
   On Error Resume Next
-
   Err.Clear
+
+  If FS is Nothing Then Set FS = CreateObject("Scripting.FileSystemObject")
   FS.CreateFolder adir
   If Err.Number <> 0 Then
-    Editor.ErrorMsg (adir & "フォルダを作成できませんでした。")
+    log adir & "フォルダを作成できませんでした。", 1
   End If
 End Function
 
 Function DeleteDir(adir)
   On Error Resume Next
-  
   Err.Clear
+
+  If FS is Nothing Then Set FS = CreateObject("Scripting.FileSystemObject")
   FS.DeleteFolder adir
   If Err.Number <> 0 Then
-     Editor.ErrorMsg (adir & "フォルダを削除できませんでした。")
+    log adir & "フォルダを削除できませんでした。", 1
   End If
 End Function
 
 Function DeleteFile(afile)
   On Error Resume Next
-  
   Err.Clear
+
+  If FS is Nothing Then Set FS = CreateObject("Scripting.FileSystemObject")
   FS.DeleteFile afile
   If Err.Number <> 0 Then
-     log afile & "を削除できませんでした。", 2
+     log afile & "を削除できませんでした。", 1
   End If
 End Function
 
@@ -1091,31 +1091,65 @@ Sub UpdateCheck(amode)
     Dim wchk2
     Dim wchk3
     Dim wchk4
-
+    Dim wtargets
+    
+    wtargets = Array("")
+    
     If amode = 2 Then Editor.ActivateWinOutput
     If amode = 2 Then log vbCrLf & "★★sakuraupdate " & Version & "★★", 0
 
     If amode = 2 Then log vbCrLf & "プラグインの最新バージョンを確認します。", 0
     wchk0 = PluginCheck(amode, wnewver, wurl)
+    If wchk0 = true Then
+        If amode = 2 Then
+            Call PluginDownload(wurl)
+            Call PluginSetup("plugin")
+        End If
+        Exit Sub
+    End If
 
     If amode = 2 Then log vbCrLf & "サクラエディタ本体の最新バージョンを確認します。", 0
     wchk1 = SakuraCheck(amode, wnewver, wurl)
+    If wchk1 = true Then
+        Call SakuraDownload(wurl)
+        redim preserve wtargets(ubound(wtargets)+1)
+        wtargets(ubound(wtargets)) = "sakura.exe"
+    End If
 
     If Plugin.GetOption("サクラエディタ", "HELPURL") <> "" Then
         If amode = 2 Then log vbCrLf & "ヘルプファイルの最新バージョンを確認します。", 0
         wchk2 = HelpCheck(amode, wnewver, wurl)
+        If wchk2 = true Then
+            Call HelpDownload(wurl)
+            redim preserve wtargets(ubound(wtargets)+1)
+            wtargets(ubound(wtargets)) = "sakura.chm"
+        End If
     End If
     
     If Plugin.GetOption("サクラエディタ", "REGEXPURL") <> "" Then
         If amode = 2 Then log vbCrLf & "正規表現ライブラリの最新バージョンを確認します。", 0
         wchk3 = RegExpCheck(amode, wnewver, wurl)
+        If wchk3 = true Then
+            Call RegExpDownload(wurl)
+            redim preserve wtargets(ubound(wtargets)+1)
+            wtargets(ubound(wtargets)) = "bregonig.dll"
+        End If
     End If
     
     If Plugin.GetOption("サクラエディタ", "DIFFURL") <> "" Then
         If amode = 2 Then log vbCrLf & "Diff(差分)ツールの最新バージョンを確認します。", 0
         wchk4 = DiffCheck(amode, wnewver, wurl)
+        If wchk4 = true Then
+            Call DiffDownload(wurl)
+            redim preserve wtargets(ubound(wtargets)+1)
+            wtargets(ubound(wtargets)) = "diff.exe"
+        End If
     End If
     
+    if ubound(wtargets) > 0 Then
+        Call FileUpdate(wtargets)
+    End If
+
 End Sub
 
 Sub SakuraUpdate()
@@ -1134,6 +1168,8 @@ Sub SakuraUpdate()
     End If
 
     Call SakuraDownload(wurl)
+
+    Call FileUpdate(Array("","sakura.exe"))
 
 End Sub
 
@@ -1239,79 +1275,7 @@ on error goto 0
         Exit Sub
     End If
 
-    If WSH.Popup("sakura.exeを更新します。" & vbCrLf & "すべてのsakura.exeを強制終了後、上書きします。", 0, "ソフトウェアの更新", 1) = 2 Then
-        Exit Sub
-    End If
-
-    ' exe上書き処理
-    '    更新スクリプトを作成し、他プロセスで実行
-    '    実行後サクラエディタを終了する。
-    '    スクリプトは、サクラエディタ上書きが出来るまで待機する。
-    '    C:\program files\sakuraの場合はセキュリティ警告がでる。
-    Dim wcmdfile
-    Dim wcmdparam
-    Dim programfiles
-    programfiles = "C:\Program Files"
-    
-    wcmd = "set srcfolder=" & WorkDir & vbCrLf & _
-               "set sakurafolder=" & SakuraDir & vbCrLf & _
-               "set targetfolder=" & SakuraDir & vbCrLf & _
-               "set targetfile=sakura.exe" & vbCrLf
-
-    If (Left(OSVer, 2) = "6." Or Left(OSVer, 3) = "10.") And Left(SakuraDir, Len(programfiles)) = programfiles Then
-        wcmd = wcmd & "set _runas=-Verb runas"
-    End If
-    
-    wcmdfile = WorkDir & "\_setenv.bat"
-    SaveText wcmd, wcmdfile, "Shift_JIS"
-    
-    wcmd = """" & PluginDir & "\mainupdate.bat"""
-'   wcmdparam = "Start-Process -File " & wcmdfile
-'   If (left(OSVer,2) = "6." or left(OSVer,3) = "10.") and left(SakuraDir, Len(programfiles)) = programfiles Then
-'       '管理者モードでコピー
-'       wcmdparam = wcmdparam + " -Verb runas" ' -Wait
-'       'wcmd = "powershell -NoProfile -ExecutionPolicy unrestricted -Command ""Start-Process PowerShell -ArgumentList " & wcmdparam & """"
-'        wcmd = "powershell -NoProfile -ExecutionPolicy unrestricted -Command """ & wcmdparam & """"
-'        '-NoNewWindow -PassThru
-'    Else
-'        wcmd = wcmdfile
-'   End If
-
-    If False Then
-    '   workdir + "/_temp.ps1" に、
-    '   plugindir + "/fileupdate.ps1" + パラメータ1, 2, 3
-    '   を呼ぶ処理を保存して、_temp.ps1を、start-process -Verb runasで呼ぶ
-        wcmdfile = """" & PluginDir & "\fileupdate.ps1"""
-        wcmd = "& " & wcmdfile & " " & _
-                    WorkDir & " " & _
-                    """" & SakuraDir & """ " & _
-                    "sakura.exe" + vbCrLf
-
-        wcmdfile = WorkDir & "\_fileupdate.ps1"
-        SaveText wcmd, wcmdfile, "Shift_JIS"
-        
-        wcmdparam = "Start-Process PowerShell -ArgumentList " & wcmdfile & " "
-        If Left(SakuraDir, Len(programfiles)) = programfiles Then
-            '管理者モードでコピー
-            wcmdparam = wcmdparam + " -Verb runas" ' -Wait
-        End If
-
-        'wcmd = "powershell -NoProfile -ExecutionPolicy unrestricted -Command ""Start-Process PowerShell -ArgumentList " & wcmdparam & """"
-        wcmd = "powershell -NoProfile -ExecutionPolicy unrestricted -Command """ & wcmdparam & """"
-        '-NoNewWindow -PassThru
-    End If
-    
-    'If DebugLvl >= 1 Then
-    '   If WSH.Popup("サクラエディタを終了しますか。",0,"ソフトウェアの更新",1) = 1 Then
-    '
-    '    End If
-    'End If
-
-    log ">" & wcmd, 1
-    'DoCmd wcmd, ""
-    WSH.Run wcmd, 1, False
-
-    Editor.ExitAll
+    'Editor.ExitAll
     
 End Sub
 
@@ -1331,6 +1295,8 @@ Sub RegExpUpdate()
     End If
 
     Call RegExpDownload(wurl)
+
+    Call FileUpdate(Array("","bregonig.dll"))
 
 End Sub
 
@@ -1459,41 +1425,6 @@ on error goto 0
         Exit Sub
     End If
 
-    log "bregonig.dllを更新します。", 1
-    If WSH.Popup("bregonig.dllを更新します。", 0, "ソフトウェアの更新", 1) = 2 Then
-        Exit Sub
-    End If
-    
-    ' exe上書き処理
-    '    更新スクリプトを作成し、他プロセスで実行
-    '    実行後サクラエディタを終了する。
-    '    スクリプトは、サクラエディタ上書きが出来るまで待機する。
-    '    program files\sakuraの場合はセキュリティ警告がでる。
-    Dim wcmdfile
-    Dim wcmdparam
-    Dim programfiles
-    programfiles = "C:\Program Files"
-
-    wcmd = "set srcfolder=" & WorkDir & vbCrLf & _
-               "set sakurafolder=" & SakuraDir & vbCrLf & _
-               "set targetfolder=" & SakuraDir & vbCrLf & _
-               "set targetfile=bregonig.dll" & vbCrLf
-
-    If (Left(OSVer, 2) = "6." Or Left(OSVer, 3) = "10.") And Left(SakuraDir, Len(programfiles)) = programfiles Then
-        wcmd = wcmd & "set _runas=-Verb runas"
-    End If
-    
-    wcmdfile = WorkDir & "\_setenv.bat"
-    SaveText wcmd, wcmdfile, "Shift_JIS"
-
-    wcmd = """" & PluginDir & "\mainupdate.bat"""
-
-    log ">" & wcmd, 1
-    'DoCmd wcmd, ""
-    WSH.Run wcmd, 7, False
-
-    log "正規表現ライブラリの更新処理を終了しました。", 0
-
 End Sub
 
 Sub HelpUpdate()
@@ -1513,6 +1444,8 @@ Sub HelpUpdate()
 
     Call HelpDownload(wurl)
 
+    Call FileUpdate(Array("","sakura.chm"))
+
 End Sub
 
 '   ヘルプファイルの更新チェック
@@ -1530,9 +1463,12 @@ Function HelpCheck(amode, ByRef aver, ByRef aurl)
     Dim wcurdate
     Dim wsakuraver
     
+    wcurdate = ""
     wsakurapath = Editor.ExpandParameter("$S")
+    on error resume next
     whelppath = FS.GetParentFolderName(wsakurapath) & "\sakura.chm"
     wcurdate = DateValue(FS.GetFile(whelppath).DateLastModified)
+    on error goto 0
 
     wsakuraver = Editor.ExpandParameter("$V")
     wurl = Plugin.GetOption("サクラエディタ", "HELPURL")
@@ -1558,7 +1494,7 @@ Function HelpCheck(amode, ByRef aver, ByRef aurl)
     'If amode = 2 Then log "最新のヘルプファイルバージョン:" & wnewver, 0
     If amode = 2 Then log "最新のヘルプファイル発行日付:" & aver, 0
 
-    If aver <= wcurdate Then
+    If aver <= wcurdate and wcurdate <> "" Then
         If amode = 2 Then log "●ヘルプファイルは最新バージョンです。", 0
         HelpCheck = False
         Exit Function
@@ -1611,41 +1547,6 @@ on error goto 0
         Exit Sub
     End If
 
-    log "sakura.chmを更新します。", 1
-    If WSH.Popup("sakura.chmを更新します。", 0, "ソフトウェアの更新", 1) = 2 Then
-        Exit Sub
-    End If
-    
-    ' exe上書き処理
-    '    更新スクリプトを作成し、他プロセスで実行
-    '    実行後サクラエディタを終了する。
-    '    スクリプトは、サクラエディタ上書きが出来るまで待機する。
-    '    program files\sakuraの場合はセキュリティ警告がでる。
-    Dim wcmdfile
-    Dim wcmdparam
-    Dim programfiles
-    programfiles = "C:\Program Files"
-    
-    wcmd = "set srcfolder=" & WorkDir & vbCrLf & _
-               "set sakurafolder=" & SakuraDir & vbCrLf & _
-               "set targetfolder=" & SakuraDir & vbCrLf & _
-               "set targetfile=sakura.chm" & vbCrLf
-
-    If (Left(OSVer, 2) = "6." Or Left(OSVer, 3) = "10.") And Left(SakuraDir, Len(programfiles)) = programfiles Then
-        wcmd = wcmd & "set _runas=-Verb runas"
-    End If
-    
-    wcmdfile = WorkDir & "\_setenv.bat"
-    SaveText wcmd, wcmdfile, "Shift_JIS"
-
-    wcmd = """" & PluginDir & "\mainupdate.bat"""
-
-    log ">" & wcmd, 1
-    'DoCmd wcmd, ""
-    WSH.Run wcmd, 1, False
-
-    log "ヘルプファイルの更新処理を終了しました。", 0
-
 End Sub
 
 Sub DiffUpdate()
@@ -1664,6 +1565,8 @@ Sub DiffUpdate()
     End If
 
     Call DiffDownload(wurl)
+
+    Call FileUpdate(Array("","diff.exe"))
 
 End Sub
 
@@ -1771,41 +1674,6 @@ on error goto 0
         log "diff.exeがダウンロードファイルにありませんでした。", 0
         Exit Sub
     End If
-
-    log "diff.exeを更新します。", 1
-    If WSH.Popup("diff.exeを更新します。", 0, "ソフトウェアの更新", 1) = 2 Then
-        Exit Sub
-    End If
-    
-    ' exe上書き処理
-    '    更新スクリプトを作成し、他プロセスで実行
-    '    実行後サクラエディタを終了する。
-    '    スクリプトは、サクラエディタ上書きが出来るまで待機する。
-    '    program files\sakuraの場合はセキュリティ警告がでる。
-    Dim wcmdfile
-    Dim wcmdparam
-    Dim programfiles
-    programfiles = "C:\Program Files"
-
-    wcmd = "set srcfolder=" & WorkDir & vbCrLf & _
-               "set sakurafolder=" & SakuraDir & vbCrLf & _
-               "set targetfolder=" & SakuraDir & vbCrLf & _
-               "set targetfile=diff.exe" & vbCrLf
-
-    If (Left(OSVer, 2) = "6." Or Left(OSVer, 3) = "10.") And Left(SakuraDir, Len(programfiles)) = programfiles Then
-        wcmd = wcmd & "set _runas=-Verb runas"
-    End If
-    
-    wcmdfile = WorkDir & "\_setenv.bat"
-    SaveText wcmd, wcmdfile, "Shift_JIS"
-
-    wcmd = """" & PluginDir & "\mainupdate.bat"""
-
-    log ">" & wcmd, 1
-    'DoCmd wcmd, ""
-    WSH.Run wcmd, 7, False
-
-    log "Diff(差分)ツールの更新処理を終了しました。", 0
 
 End Sub
 
@@ -1953,10 +1821,10 @@ Sub PluginSetup(atarget)
     Dim programfiles
     programfiles = "C:\Program Files"
     
-    wcmd = "set srcfolder=" & WorkDir & "\sakuraupdate" & vbCrLf & _
-               "set sakurafolder=" & SakuraDir & vbCrLf & _
-               "set targetfolder=" & PluginDir & vbCrLf & _
-               "set targetfile=" & atarget & vbCrLf
+    wcmd = "set srcfolder=" & WorkDir & "\sakuraupdate" & vbLf & _
+               "set sakurafolder=" & SakuraDir & vbLf & _
+               "set targetfolder=" & PluginDir & vbLf & _
+               "set targetfile1=" & atarget & vbLf
 
     If (Left(OSVer, 2) = "6." Or Left(OSVer, 3) = "10.") And Left(PluginDir, Len(programfiles)) = programfiles Then
         wcmd = wcmd & "set _runas=-Verb runas"
@@ -1965,13 +1833,68 @@ Sub PluginSetup(atarget)
     wcmdfile = WorkDir & "\_setenv.bat"
     SaveText wcmd, wcmdfile, "Shift_JIS"
 
-    wcmd = """" & PluginDir & "\mainupdate.bat"""
+    'mainupdate.batとfileupdate.batの退避
+    FS.CopyFile PluginDir & "\mainupdate.bat", WorkDir & "\", true
+    FS.CopyFile PluginDir & "\fileupdate.bat", WorkDir & "\", true
+
+    wcmd = """" & WorkDir & "\mainupdate.bat"""
 
     log ">" & wcmd, 1
     'DoCmd wcmd, ""
     WSH.Run wcmd, 1, False
 
     log "プラグインの更新処理を終了しました。", 0
+
+End Sub
+
+'   %temp%\sakuraupdate内の指定ファイルをインストールフォルダへコピーする。
+'	atargets = 指定ファイルの配列(1～)
+
+Sub FileUpdate(atargets)
+
+    log ubound(atargets) &"個のファイルを更新します。", 1
+    If WSH.Popup(ubound(atargets) &"個のファイルを更新します。", 0, "ソフトウェアの更新", 1) = 2 Then
+        Exit Sub
+    End If
+    
+    ' exe上書き処理
+    '    更新スクリプトを作成し、他プロセスで実行
+    '    実行後サクラエディタを終了する。
+    '    スクリプトは、サクラエディタ上書きが出来るまで待機する。
+    '    program files\sakuraの場合はセキュリティ警告がでる。
+    Dim wcmd
+    Dim wcmdfile
+    Dim wcmdparam
+    Dim programfiles
+    programfiles = "C:\Program Files"
+    
+    wcmd = "set srcfolder=" & WorkDir & vbLf & _
+               "set sakurafolder=" & SakuraDir & vbLf & _
+               "set targetfolder=" & SakuraDir & vbLf
+    
+    Dim i
+    for i = 1 to ubound(atargets)
+        wcmd = wcmd & "set targetfile" & i & "=" & atargets(i) & vbLf
+    next
+
+    If (Left(OSVer, 2) = "6." Or Left(OSVer, 3) = "10.") And Left(SakuraDir, Len(programfiles)) = programfiles Then
+        wcmd = wcmd & "set _runas=-Verb runas"
+    End If
+    
+    wcmdfile = WorkDir & "\_setenv.bat"
+    SaveText wcmd, wcmdfile, "Shift_JIS"
+
+    'mainupdate.batとfileupdate.batの退避
+    FS.CopyFile PluginDir & "\mainupdate.bat", WorkDir & "\", true
+    FS.CopyFile PluginDir & "\fileupdate.bat", WorkDir & "\", true
+
+    wcmd = """" & WorkDir & "\mainupdate.bat"""
+
+    log ">" & wcmd, 1
+    'DoCmd wcmd, ""
+    WSH.Run wcmd, 1, False
+
+    log "更新処理を終了しました。", 0
 
 End Sub
 

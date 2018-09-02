@@ -1,5 +1,5 @@
 # sakuraupdate
-Sakura-Editor Update Plugin (v20180830 (beta))
+Sakura-Editor Update Plugin (v20180902 (beta))
 
 プラグインでサクラエディタのバージョンアップ機能を実装してみる
 
@@ -124,15 +124,17 @@ zipを展開して、pluginsフォルダにsakuraupdateフォルダを作って�
 ## ToDo
 
 * まとめて更新する。
+```
 	ダウンロード部分も切り分け
 		XXXXXCheck
 		XXXXXDownload
 		FileUpdateでまとめる
-	
+```	
 * ゴミ掃除
+```
 	処理後に%temp%\sakuraupdateを削除する
 		Cleanup
-	
+```	
 
 ## 著作権表示
 
