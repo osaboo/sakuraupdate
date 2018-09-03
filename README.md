@@ -71,40 +71,38 @@ zipを展開して、pluginsフォルダにsakuraupdateフォルダを作って�
 	から選びます。  
 	※Customは未実装のため現時点では無効
 
-2. sourceforgeのsakura-edtiorプロジェクトRSS
+2. sourceforgeのsakura-edtiorプロジェクトRSS  
 	ダウンロード対象をこのRSSから検索します。  
 	初期値:https://sourceforge.net/projects/sakura-editor/rss
 
-3. GitHub sakura-editor Release URL(API)
+3. GitHub sakura-editor Release URL(API)  
 	ダウンロード対象を、このURLから検索します。  
 	初期値:https://api.github.com/repos/sakura-editor/sakura/releases/latest
 
-4. ヘルプファイルのリリースURL(未指定時はSFから自動取得)
+4. ヘルプファイルのリリースURL(未指定時はは自動チェック対象外。手動時はSFから自動取得)  
 	ヘルプファイルダウンロード対象を、このURLから検索します。  
 	初期値:https://sourceforge.net/projects/sakura-editor/rss?path=/help2
 
-
-5. 正規表現ライブラリのリリースURL(未指定時はSFから自動取得)
+5. 正規表現ライブラリのリリースURL(未指定時は自動チェック対象外。手動時はSFから自動取得)  
 	正規表現ライブラリのダウンロード対象を、このURLから検索します。  
 	初期値:https://api.bitbucket.org/2.0/repositories/k_takata/bregonig/downloads
 
-
-6. 独自リリース用URL(file:// or http://)
-	社内ネット等インターネット以外からダウンロードする際のURL
-	※未実装のため現時点では無効
+6. 独自リリース用URL(file:// or http://)  
+	社内ネット等インターネット以外からダウンロードする際のURL  
+	※未実装のため現時点では無効  
 	初期値はダミー
 
-7. プラグインのリリースURL
+7. プラグインのリリースURL  
 	このプラグインを更新するためのURL  
 	初期値:https://github.com/osaboo/sakuraupdate/releases
 
-8. 最近の更新チェック日
+8. 最近の更新チェック日  
 	更新チェックした最終日。この日から頻度で設定した日数を経過するとチェックします。
 
-9. 更新チェックの頻度(単位=日、空白=自動チェックしない)
+9. 更新チェックの頻度(単位=日、空白=自動チェックしない)  
 	日単位でチェック頻度を指定します。
 
-10. Debug Level (0=NODEBUG)
+10. Debug Level (0=NODEBUG)  
 	1あるいは2でアウトプットウィンドウに詳細なログを出力します。
 
 ## 仕様メモ
@@ -152,5 +150,3 @@ http://www.paehl.com/open_source/?CURL_7.61.0
 	Source code of binaries can be found at:  
 	  http://www.7-zip.org/
 
-5. 同封のsleep.exeは、Microsoft の著作物である、Windows Server 2003 Resource Kit Toolsの一部です。
-https://www.microsoft.com/en-us/download/details.aspx?id=17657
