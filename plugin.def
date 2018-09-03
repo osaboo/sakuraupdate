@@ -4,7 +4,7 @@ Id=SoftwareUpdate
 Name=ソフトウェアの更新(&W)
 Description=SakuraEditorを自動更新します
 Type=wsh
-Version=v20180902
+Version=v20180903
 Url=https://github.com/osaboo/sakuraupdate/
 Author=osaboo
 
@@ -30,67 +30,71 @@ O[1].Section=サクラエディタ
 O[1].Key=SITEPRIORITY
 O[1].Label=ダウンロードサイト
 O[1].Type=Sel
-O[1].Select=GitHub:0|SourceForge:1|Custom:2
+O[1].Select=GitHub:0|SourceForge:1|OSDN:2|Custom:3
 O[1].Default=0
 
 O[2].Key=SFRSSURL
 O[2].Label=sourceforgeのsakura-edtiorプロジェクトRSS
 O[2].Type=Str
 O[2].Default=https://sourceforge.net/projects/sakura-editor/rss
-;O[1].Default=https://api.github.com/repos/sakura-editor/sakura/releases/latest
 ;?path=/sakura2
 ;?path=/help2
 ;?path=/wiki
 
-O[3].Key=GITHUBURL
-O[3].Label=GitHub sakura-editor Release URL(API)
+O[3].Key=OSDNURL
+O[3].Label=OSDNのSakura Editor Downloads RSS
 O[3].Type=Str
-O[3].Default=https://api.github.com/repos/sakura-editor/sakura/releases/latest
+O[3].Default=https://osdn.net/projects/sakura-editor/releases/rss
 
-O[4].Key=HELPURL
-O[4].Label=ヘルプファイルのリリースURL(未指定時はSFから自動取得)
+O[4].Key=GITHUBURL
+O[4].Label=GitHub sakura-editor Release URL(API)
 O[4].Type=Str
-O[4].Default=https://sourceforge.net/projects/sakura-editor/rss?path=/help2
+O[4].Default=https://api.github.com/repos/sakura-editor/sakura/releases/latest
 
-O[5].Key=REGEXPURL
-O[5].Label=正規表現ライブラリのリリースURL(未指定時はSFから自動取得)
+O[5].Key=HELPURL
+O[5].Label=ヘルプファイルのリリースURL(未指定時はSFから自動取得)
 O[5].Type=Str
-O[5].Default=https://api.bitbucket.org/2.0/repositories/k_takata/bregonig/downloads
-;O[5].Default=https://sourceforge.net/projects/sakura-editor/rss?path=/wiki
-;O[5].Default=https://github.com/k-takata/bregonig/releases
-;O[5].Default=http://k-takata.o.oo7.jp/mysoft/bregonig.html
-;O[5].Default=https://bitbucket.org/k_takata/bregonig/downloads/
+O[5].Default=https://sourceforge.net/projects/sakura-editor/rss?path=/help2
 
-O[6].Key=DIFFURL
-O[6].Label=DIFFのリリースURL(未指定時は取得しない)
+O[6].Key=REGEXPURL
+O[6].Label=正規表現ライブラリのリリースURL(未指定時はSFから自動取得)
 O[6].Type=Str
-O[6].Default=http://www.ring.gr.jp/archives/text/TeX/ptex-win32/w32/patch-diff-w32.zip
+O[6].Default=https://api.bitbucket.org/2.0/repositories/k_takata/bregonig/downloads
+;O[6].Default=https://sourceforge.net/projects/sakura-editor/rss?path=/wiki
+;O[6].Default=https://github.com/k-takata/bregonig/releases
+;O[6].Default=http://k-takata.o.oo7.jp/mysoft/bregonig.html
+;O[6].Default=https://bitbucket.org/k_takata/bregonig/downloads/
 
-O[7].Key=CUSTOMURL
-O[7].Label=独自リリース用URL(file:// or http://)
+O[7].Key=DIFFURL
+O[7].Label=DIFFのリリースURL(未指定時は取得しない)
 O[7].Type=Str
-O[7].Default=file://hogehoge/share/sakura
+O[7].Default=http://www.ring.gr.jp/archives/text/TeX/ptex-win32/w32/patch-diff-w32.zip
 
-O[8].Key=PLUGINURL
-O[8].Label=プラグインのリリースURL
+O[8].Key=CUSTOMURL
+O[8].Label=独自リリース用URL(file:// or http://)
 O[8].Type=Str
-O[8].Default=https://api.github.com/repos/osaboo/sakuraupdate/releases
+O[8].Default=file://hogehoge/share/sakura
 
-O[9].Key=LASTCHECK
-O[9].Label=最近の更新チェック日
-;Date of last update check
+O[9].Key=PLUGINURL
+O[9].Label=プラグインのリリースURL
 O[9].Type=Str
+O[9].Default=https://api.github.com/repos/osaboo/sakuraupdate/releases
 
-O[10].Key=CHECKFREQ
-O[10].Label=更新チェックの頻度(単位=日、空白=自動チェックしない)
-;Frequency of update check (unit=day. null=stop auto check)
+O[10].Key=LASTCHECK
+O[10].Label=最近の更新チェック日
+;Date of last update check
 O[10].Type=Str
-O[10].Default=7
 
-O[11].Key=DEBUGLVL
-O[11].Label=Debug Level (0=NODEBUG)
+O[11].Key=CHECKFREQ
+O[11].Label=更新チェックの頻度(単位=日、空白=自動チェックしない)
+;Frequency of update check (unit=day. null=stop auto check)
 O[11].Type=Str
-O[11].Default=0
+O[11].Default=7
+
+O[12].Key=DEBUGLVL
+O[12].Label=Debug Level (0=NODEBUG)
+O[12].Type=Str
+O[12].Default=0
 
 [Plug]
 EditorStart=UpdateCheck.vbs

@@ -100,7 +100,7 @@ Dim OSVer
 
 ' 初期化
 Sub Init()
-  Version = "v20180902"
+  Version = "v20180903"
 
   DebugLvl = Plugin.GetOption("サクラエディタ", "DEBUGLVL")
 
@@ -119,7 +119,12 @@ Sub Init()
 
   Set WSH = CreateObject("Wscript.Shell")
   WorkDir = WSH.ExpandEnvironmentStrings("%TEMP%") & "\sakuraupdate"
-    'log "更新作業用フォルダ " & WorkDir, 1
+
+  If IsExistDir(WorkDir) Then
+    DeleteDir WorkDir
+  End If
+
+  'log "更新作業用フォルダ " & WorkDir, 1
   If Not IsExistDir(WorkDir) Then
     'log "更新作業用フォルダを作成します", 1
     CreateDir WorkDir
@@ -167,7 +172,7 @@ Function DeleteDir(adir)
   Err.Clear
 
   If FS is Nothing Then Set FS = CreateObject("Scripting.FileSystemObject")
-  FS.DeleteFolder adir
+  FS.DeleteFolder adir, true
   If Err.Number <> 0 Then
     log adir & "フォルダを削除できませんでした。", 1
   End If
@@ -178,7 +183,7 @@ Function DeleteFile(afile)
   Err.Clear
 
   If FS is Nothing Then Set FS = CreateObject("Scripting.FileSystemObject")
-  FS.DeleteFile afile
+  FS.DeleteFile afile, true
   If Err.Number <> 0 Then
      log afile & "を削除できませんでした。", 1
   End If
@@ -619,7 +624,7 @@ Function GetSFRSS(ByRef aurl, apath)
             Dim re, match, matchs
             Set re = CreateObject("VBScript.RegExp")
             With re
-                .Pattern = "[0-9]\.[0-9]\.[0-9]\.[0-9]"
+                .Pattern = "[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+"
                 .Global = True
                 Set matchs = .Execute(wlink)
                 'Debug.Print matchs.Count
@@ -653,7 +658,6 @@ Function GetSFRSS(ByRef aurl, apath)
         
         If wlink <> "" Then
             With re
-                '.pattern = "[0-9]\.[0-9]\.[0-9]\.[0-9]"
                 .Global = True
                 Set matchs = .Execute(wlink)
                 If matchs.Count > 0 Then
@@ -679,7 +683,7 @@ Function GetSFRSS(ByRef aurl, apath)
 
         'Dim re, match, matchs
         Set re = CreateObject("VBScript.RegExp")
-        re.Pattern = "([0-9]\.[0-9]\.[0-9]\.[0-9])/sakura_help[0-9\-]+\.zip"
+        re.Pattern = "([0-9]+\.[0-9]+\.[0-9]+\.[0-9]+)/sakura_help[0-9\-]+\.zip"
 
         wlink = ""
         '
@@ -716,6 +720,87 @@ Function GetSFRSS(ByRef aurl, apath)
     GetSFRSS = wver
 
 End Function
+
+' Get GetOSDNRSS RSS
+Function GetOSDNRSS(ByRef aurl, apath)
+    Dim rCode
+    Dim ItemFile
+    Dim i
+    Dim wlink
+    Dim wurl
+    Dim wver
+    Dim wcmd
+    Dim wtmpfile
+
+    wlink = aurl
+'        If apath = "sakura2" Then wlink = aurl & "?path=/sakura2"
+'        If apath = "help2" Then wlink = aurl & "?path=/help2"
+'        If apath = "regexp" Then wlink = aurl & "?path=/wiki"
+    
+    log "OSDN 確認中... " & wlink, 1
+
+    wtmpfile = WorkDir & "\_temp.htm"
+    wcmd = CurlExe & " -L """ & wlink & """ -o " & wtmpfile
+    log ">" & wcmd, 1
+    'DoCmd wcmd, ""
+    WSH.Run wcmd, 7, True '
+
+    Dim XmlDoc 'As Object
+    Set XmlDoc = CreateObject("Microsoft.XMLDOM")
+    XmlDoc.async = False
+    rCode = XmlDoc.Load(wtmpfile)
+
+    '取得確認
+    If (XmlDoc.parseError.ErrorCode <> 0) Then 'ロード失敗
+        log "読み込めませんでした。", 0
+        log XmlDoc.parseError.reason, 0   'エラー内容を出力
+        GetOSDNRSS = ""
+        Exit Function
+    End If
+
+    Select Case apath
+    Case "sakura2"
+        
+        Set ItemFile = XmlDoc.SelectNodes("//osdn:file")
+
+        wlink = ""
+        
+        For i = 0 To ItemFile.Length - 1
+            wurl = ItemFile(i).getAttribute("url")
+            log wurl, 2
+            If InStr(wurl, "sakura2-") > 0 And InStr(wurl, ".zip") > 0 Then
+                wlink = wurl
+                Exit For
+            End If
+        Next
+        
+        If wlink <> "" Then
+            Dim re, match, matchs
+            Set re = CreateObject("VBScript.RegExp")
+            With re
+                .Pattern = "[0-9]+-[0-9]+-[0-9]+-[0-9]+"
+                .Global = True
+                Set matchs = .Execute(wlink)
+                'Debug.Print matchs.Count
+                For Each match In matchs
+                    'Debug.Print match.Value
+                    wver = replace(match.Value,"-",".")
+                Next
+            End With
+
+            log "見つかったファイル:" & wlink, 2
+            aurl = wlink
+
+        End If
+
+    Case "help2"
+
+    End Select
+
+    GetOSDNRSS = wver
+
+End Function
+
 
 ' Get GitHub Release API
 Function GetGitHub(ByRef aurl)
@@ -765,7 +850,7 @@ Function GetGitHub(ByRef aurl)
         Dim re, match, matchs
         Set re = CreateObject("VBScript.RegExp")
         With re
-            .Pattern = "([0-9]\.[0-9]\.[0-9]\.[0-9]|v[0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9])"
+            .Pattern = "([0-9]+\.[0-9]+\.[0-9]+\.[0-9]+|v[0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9])"
             .Global = True
             Set matchs = .Execute(wlink)
             'Debug.Print matchs.Count
@@ -813,7 +898,6 @@ Function GetBitBucket(ByRef aurl)
     re.Pattern = "https://[^""]+/bron(\d+)\.zip"
 
     With re
-        '.pattern = "[0-9]\.[0-9]\.[0-9]\.[0-9]"
         .Global = True
         Set matchs = .Execute(wpage)
         If matchs.Count > 0 Then
@@ -1192,6 +1276,8 @@ Function SakuraCheck(amode, ByRef aver, ByRef aurl)
     Case "1"
         aurl = Plugin.GetOption("サクラエディタ", "SFRSSURL")
     Case "2"
+        aurl = Plugin.GetOption("サクラエディタ", "OSDNURL")
+    Case "3"
         aurl = Plugin.GetOption("サクラエディタ", "CUSTOMURL")
     End Select
 
@@ -1199,6 +1285,8 @@ Function SakuraCheck(amode, ByRef aver, ByRef aurl)
         aver = GetSFRSS(aurl, "sakura2")
     ElseIf InStr(aurl, "github.com") > 0 Then
         aver = GetGitHub(aurl)
+    ElseIf InStr(aurl, "osdn.net") > 0 Then
+        aver = GetOSDNRSS(aurl, "sakura2")
     End If
 
     If aver = "" Then
@@ -1232,17 +1320,18 @@ Sub SakuraDownload(wurl)
     
     wzipfile = WorkDir & "\sakura.zip"
     
-    If InStr(wurl, "sourceforge.net") > 0 Then
-        wlink = wurl
+    wlink = wurl
+    'If InStr(wurl, "sourceforge.net") > 0 Then
+    '    wlink = wurl
         'log "ダウンロードリンクを確認します。", 1
         'wlink = GetSFLink(wurl)
         'if wlink = "" then
         '    log "ダウンロードリンクを取得できませんでした。", 1
         '    exit sub
         'End If
-    ElseIf InStr(wurl, "github.com") > 0 Then
-        wlink = wurl
-    End If
+    'ElseIf InStr(wurl, "github.com") > 0 Then
+    '    wlink = wurl
+    'End If
     
     log "サクラエディタをダウンロードします.. " & wlink, 0
     

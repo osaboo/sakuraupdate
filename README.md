@@ -1,5 +1,5 @@
 # sakuraupdate
-Sakura-Editor Update Plugin (v20180902 (beta))
+Sakura-Editor Update Plugin (v20180903 (beta))
 
 プラグインでサクラエディタのバージョンアップ機能を実装してみる
 
@@ -107,12 +107,12 @@ zipを展開して、pluginsフォルダにsakuraupdateフォルダを作って�
 
 ## 仕様メモ
 
-* 更新対象は、サクラエディタ本体、ヘルプファイル、正規表現ライブラリの3つのみ
+* 更新対象は、サクラエディタ本体、ヘルプファイル、正規表現ライブラリ、diffの4つのみ
 * 対象のサクラエディタはVer2以降の32bit版
 * 動作OSは、XP以降
 * C:\Program Files配下へのコピー時は管理者モードでコピー
-* SourceForgeとGithubのどちらでもダウンロード可能とする
-* サクラエディタのダウンロードは、SFとGitHubの2種類から選べる
+* SourceForgeとGithub、OSDNのどれでもダウンロード可能とする
+* サクラエディタのダウンロードは、SFとGitHub,OSDNの3種類から選べる
 * ヘルプファイルは現状SFのみだが、将来GitHubにリリースされれば取得可能とする
 * ヘルプファイル自身にバージョン情報が無いためタイムスタンプで判定
 * ネットからのダウンロードは、MSXMLを使わずcURLで取得。（環境依存の回避)
