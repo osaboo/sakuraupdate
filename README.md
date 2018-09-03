@@ -151,3 +151,6 @@ http://www.paehl.com/open_source/?CURL_7.61.0
 	7-Zip is free software. Read License.txt for more information about license.  
 	Source code of binaries can be found at:  
 	  http://www.7-zip.org/
+
+5. 同封のsleep.exeは、Microsoft の著作物である、Windows Server 2003 Resource Kit Toolsの一部です。
+https://www.microsoft.com/en-us/download/details.aspx?id=17657

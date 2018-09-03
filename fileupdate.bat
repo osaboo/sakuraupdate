@@ -17,17 +17,19 @@ if "%_num%"=="1" set targetfile=%targetfile1%
 if "%_num%"=="2" set targetfile=%targetfile2%
 if "%_num%"=="3" set targetfile=%targetfile3%
 if "%_num%"=="4" set targetfile=%targetfile4%
+if "%_num%"=="5" goto :LEXIT
 if "%targetfile%"=="" goto :LEXIT
 
 set srcfile=%srcfolder%\%targetfile%
 set newfile=%targetfolder%\%targetfile%
 set oldfile=%targetfolder%\%targetfile%.old
-pause
+
 rem @timeout /t 3
 if "%targetfile%"=="plugin" goto :plugin
 
 if "%targetfile%"=="sakura.exe" taskkill /im %targetfile%
-@if "%targetfile%"=="sakura.exe" @timeout /t 3
+@if "%targetfile%"=="sakura.exe" cscript //nologo %~dp0sleep.vbs 3000
+rem @timeout /t 3
 
 del "%oldfile%" 2>nul
 ren "%newfile%" %targetfile%.old 2>nul
@@ -48,6 +50,7 @@ goto :LOOP
 goto :LOOP
 
 :LEXIT
+cscript //nologo %~dp0sleep.vbs 2000
 rem @timeout /t 5
 :end
-pause
+

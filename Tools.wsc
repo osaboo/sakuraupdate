@@ -1110,7 +1110,7 @@ Sub UpdateCheck(amode)
 
     If amode = 2 Then log vbCrLf & "サクラエディタ本体の最新バージョンを確認します。", 0
     wchk1 = SakuraCheck(amode, wnewver, wurl)
-    If wchk1 = true Then
+    If wchk1 = true and amode = 2 Then
         Call SakuraDownload(wurl)
         redim preserve wtargets(ubound(wtargets)+1)
         wtargets(ubound(wtargets)) = "sakura.exe"
@@ -1119,7 +1119,7 @@ Sub UpdateCheck(amode)
     If Plugin.GetOption("サクラエディタ", "HELPURL") <> "" Then
         If amode = 2 Then log vbCrLf & "ヘルプファイルの最新バージョンを確認します。", 0
         wchk2 = HelpCheck(amode, wnewver, wurl)
-        If wchk2 = true Then
+        If wchk2 = true and amode = 2 Then
             Call HelpDownload(wurl)
             redim preserve wtargets(ubound(wtargets)+1)
             wtargets(ubound(wtargets)) = "sakura.chm"
@@ -1129,7 +1129,7 @@ Sub UpdateCheck(amode)
     If Plugin.GetOption("サクラエディタ", "REGEXPURL") <> "" Then
         If amode = 2 Then log vbCrLf & "正規表現ライブラリの最新バージョンを確認します。", 0
         wchk3 = RegExpCheck(amode, wnewver, wurl)
-        If wchk3 = true Then
+        If wchk3 = true and amode = 2 Then
             Call RegExpDownload(wurl)
             redim preserve wtargets(ubound(wtargets)+1)
             wtargets(ubound(wtargets)) = "bregonig.dll"
@@ -1139,7 +1139,7 @@ Sub UpdateCheck(amode)
     If Plugin.GetOption("サクラエディタ", "DIFFURL") <> "" Then
         If amode = 2 Then log vbCrLf & "Diff(差分)ツールの最新バージョンを確認します。", 0
         wchk4 = DiffCheck(amode, wnewver, wurl)
-        If wchk4 = true Then
+        If wchk4 = true and amode = 2 Then
             Call DiffDownload(wurl)
             redim preserve wtargets(ubound(wtargets)+1)
             wtargets(ubound(wtargets)) = "diff.exe"
@@ -1627,7 +1627,7 @@ on error goto 0
         Exit Function
     End If
 
-    If amode = 2 Then log "★Diff(差分)ツールがダウンロード可能です。", 0
+    log "★Diff(差分)ツールがダウンロード可能です。", 0
     
     DiffCheck = True
 
@@ -1834,6 +1834,7 @@ Sub PluginSetup(atarget)
     SaveText wcmd, wcmdfile, "Shift_JIS"
 
     'mainupdate.batとfileupdate.batの退避
+    FS.CopyFile PluginDir & "\sleep.vbs",      WorkDir & "\", true
     FS.CopyFile PluginDir & "\mainupdate.bat", WorkDir & "\", true
     FS.CopyFile PluginDir & "\fileupdate.bat", WorkDir & "\", true
 
@@ -1885,6 +1886,7 @@ Sub FileUpdate(atargets)
     SaveText wcmd, wcmdfile, "Shift_JIS"
 
     'mainupdate.batとfileupdate.batの退避
+    FS.CopyFile PluginDir & "\sleep.vbs",      WorkDir & "\", true
     FS.CopyFile PluginDir & "\mainupdate.bat", WorkDir & "\", true
     FS.CopyFile PluginDir & "\fileupdate.bat", WorkDir & "\", true
 
