@@ -28,11 +28,13 @@ rem @timeout /t 3
 if "%targetfile%"=="plugin" goto :plugin
 
 if "%targetfile%"=="sakura.exe" taskkill /im %targetfile%
-@if "%targetfile%"=="sakura.exe" cscript //nologo %~dp0sleep.vbs 3000
+@if "%targetfile%"=="sakura.exe" @cscript //nologo %~dp0sleep.vbs 1000
+if "%targetfile%"=="sakura.exe" taskkill /im %targetfile%
+@if "%targetfile%"=="sakura.exe" @cscript //nologo %~dp0sleep.vbs 1000
 rem @timeout /t 3
 
-del "%oldfile%" 2>nul
-ren "%newfile%" %targetfile%.old 2>nul
+if exist "%oldfile%" del "%oldfile%"
+ren "%newfile%" %targetfile%.old
 @if exist "%newfile%" goto :err
 copy /y "%srcfile%" "%newfile%"
 @echo %newfile%ÇÃç∑Çµë÷Ç¶Ç…ê¨å˜ÇµÇ‹ÇµÇΩÅB
@@ -47,6 +49,7 @@ goto :LOOP
 
 :err
 @echo %newfile%ÇÃç∑Çµë÷Ç¶Ç…é∏îsÇµÇ‹ÇµÇΩÅB
+pause
 goto :LOOP
 
 :LEXIT

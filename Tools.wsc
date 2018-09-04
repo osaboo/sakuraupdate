@@ -585,16 +585,16 @@ Function GetSFRSS(ByRef aurl, apath)
     
     log "SourceForge確認中... " & wlink, 1
 
-    wtmpfile = WorkDir & "\_temp.htm"
-    wcmd = CurlExe & " -L """ & wlink & """ -o " & wtmpfile
-    log ">" & wcmd, 1
-    'DoCmd wcmd, ""
-    WSH.Run wcmd, 7, True '
-
+    'wtmpfile = WorkDir & "\_temp.htm"
+    'wcmd = CurlExe & " -L """ & wlink & """ -o " & wtmpfile
+    'log ">" & wcmd, 1
+    ''DoCmd wcmd, ""
+    'WSH.Run wcmd, 7, True '
+    
     Dim XmlDoc 'As Object
     Set XmlDoc = CreateObject("Microsoft.XMLDOM")
     XmlDoc.async = False
-    rCode = XmlDoc.Load(wtmpfile)
+    rCode = XmlDoc.LoadXML(DownloadFile(wlink,""))
 
     '取得確認
     If (XmlDoc.parseError.ErrorCode <> 0) Then 'ロード失敗
@@ -739,16 +739,16 @@ Function GetOSDNRSS(ByRef aurl, apath)
     
     log "OSDN 確認中... " & wlink, 1
 
-    wtmpfile = WorkDir & "\_temp.htm"
-    wcmd = CurlExe & " -L """ & wlink & """ -o " & wtmpfile
-    log ">" & wcmd, 1
-    'DoCmd wcmd, ""
-    WSH.Run wcmd, 7, True '
+    'wtmpfile = WorkDir & "\_temp.htm"
+    'wcmd = CurlExe & " -L """ & wlink & """ -o " & wtmpfile
+    'log ">" & wcmd, 1
+    ''DoCmd wcmd, ""
+    'WSH.Run wcmd, 7, True '
 
     Dim XmlDoc 'As Object
     Set XmlDoc = CreateObject("Microsoft.XMLDOM")
     XmlDoc.async = False
-    rCode = XmlDoc.Load(wtmpfile)
+    rCode = XmlDoc.LoadXML(DownloadFile(wlink, ""))
 
     '取得確認
     If (XmlDoc.parseError.ErrorCode <> 0) Then 'ロード失敗
@@ -817,13 +817,14 @@ Function GetGitHub(ByRef aurl)
     wlink = aurl
     log "GitHub確認中.. " & wlink, 1
 
-    wtmpfile = WorkDir & "\_temp.htm"
-    wcmd = CurlExe & " -L """ & wlink & """ -o " & wtmpfile
-    log ">" & wcmd, 1
-    'DoCmd wcmd, ""
-    WSH.Run wcmd, 7, True '
+    'wtmpfile = WorkDir & "\_temp.htm"
+    'wcmd = CurlExe & " -L """ & wlink & """ -o " & wtmpfile
+    'log ">" & wcmd, 1
+    ''DoCmd wcmd, ""
+    'WSH.Run wcmd, 7, True '
 
-    wpage = LoadText(wtmpfile, "utf-8")
+    'wpage = LoadText(wtmpfile, "utf-8")
+    wpage = DownloadFile(wlink, "")
 
     mesg = "browser_download_url"":"
     i = InStr(wpage, mesg)
@@ -880,13 +881,14 @@ Function GetBitBucket(ByRef aurl)
     wlink = aurl
     log "BitBucket確認中.. " & wlink, 1
 
-    wtmpfile = WorkDir & "\_temp.htm"
-    wcmd = CurlExe & " -L """ & wlink & """ -o " & wtmpfile
-    log ">" & wcmd, 1
-    'DoCmd wcmd, ""
-    WSH.Run wcmd, 7, True '
+    'wtmpfile = WorkDir & "\_temp.htm"
+    'wcmd = CurlExe & " -L """ & wlink & """ -o " & wtmpfile
+    'log ">" & wcmd, 1
+    ''DoCmd wcmd, ""
+    'WSH.Run wcmd, 7, True '
 
-    wpage = LoadText(wtmpfile, "utf-8")
+    'wpage = LoadText(wtmpfile, "utf-8")
+    wpage = DownloadFile(wlink, "")
 
     'set wjson = ParseJson(req.responseText)
     'wlink = wjson.assets(0).browser_download_url
@@ -925,40 +927,15 @@ End Function
 '</noscript>
 
 Function GetSFLink(aurl)
-    Dim wtmpfile
-    Dim wcmd
+    'Dim wtmpfile
+    'Dim wcmd
     
-    wtmpfile = WorkDir & "\_temp2.htm"
-    wcmd = CurlExe & " -L """ & aurl & """ -o " & wtmpfile
-    log ">" & wcmd, 1
-    'DoCmd wcmd, ""
-    WSH.Run wcmd, 7, True '
-    
-If False Then
-    'WinHttpRequest/XMLHTTPRequest + ADODB.Streamでファイルをダウンロード
-    Dim req 'As Object
-    Const adTypeBinary = 1
-    Const adSaveCreateOverWrite = 2
-    
-    GetSFLink = ""
-    
-    Set req = Nothing '初期化
-    Set req = CreateHttpRequest()
-    If req Is Nothing Then Exit Function
-    'req.Option(17) = False 'WinHttpRequestOption_EnableHttp1_1
-    req.Open "GET", aurl, False
-     
-    '.Option(WinHttpRequestOption_EnableRedirects)
-    'XMLHTTPRequestを考慮してキャッシュ対策
-    'http://vird2002.s8.xrea.com/javascript/XMLHttpRequest.html#XMLHttpRequest_Cache-Control
-    'http://www.atmarkit.co.jp/ait/articles/0305/10/news002.html 参考
-    req.setRequestHeader "Pragma", "no-cache"
-    req.setRequestHeader "Cache-Control", "no-cache"
-    req.setRequestHeader "If-Modified-Since", "Thu, 01 Jun 1970 00:00:00 GMT"
-    
-    req.Send
-End If
-    
+    'wtmpfile = WorkDir & "\_temp2.htm"
+    'wcmd = CurlExe & " -L """ & aurl & """ -o " & wtmpfile
+    'log ">" & wcmd, 1
+    ''DoCmd wcmd, ""
+    'WSH.Run wcmd, 7, True '
+   
     Dim i
     Dim j
     Dim wpage
@@ -977,11 +954,13 @@ End If
 '    End If
     
     'wpage = req.responseText
-    Dim FS, ts
-    Set FS = CreateObject("Scripting.FileSystemObject")
-    Set ts = FS.OpenTextFile(wtmpfile)
-    wpage = ts.ReadAll
+    'Dim FS, ts
+    'Set FS = CreateObject("Scripting.FileSystemObject")
+    'Set ts = FS.OpenTextFile(wtmpfile)
+    'wpage = ts.ReadAll
     
+    wpage = DownloadFile(aurl, "")
+
     mesg = "<meta http-equiv=""refresh"" content="""
     i = InStr(wpage, mesg)
     If i > 0 Then
@@ -1040,21 +1019,45 @@ End If
     
 End Function
 
+Function DownloadCURL(aurl, SaveFilePath)
+    Dim wtmpfile
+    Dim wcmd
+
+    wtmpfile = WorkDir & "\_download.htm"
+    If SaveFilePath <> "" Then
+        wtmpfile = SaveFilePath
+    End If
+
+    If IsExistFile(wtmpfile) Then DeleteFile wtmpfile
+
+    wcmd = CurlExe & " -L """ & aurl & """ -o " & wtmpfile
+    log ">" & wcmd, 1
+    'DoCmd wcmd, ""
+    WSH.Run wcmd, 7, True
+
+    DownloadCURL = LoadText(wtmpfile, "utf-8")
+End Function
+
 ' @see https://www.ka-net.org/blog/?p=4855#HttpRequest
-Sub DownloadFile(ByVal url, ByVal SaveFilePath)
-  'WinHttpRequest/XMLHTTPRequest + ADODB.Streamでファイルをダウンロード
+Function DownloadFile(ByVal aurl, ByVal SaveFilePath)
+    On Error Resume Next
+
     Dim req 'As Object
     Const adTypeBinary = 1
     Const adSaveCreateOverWrite = 2
     
+    DownloadFile = ""
     Set req = Nothing '初期化
     Set req = CreateHttpRequest() 'CreateObject("WinHttp.WinHttpRequest.5.1") '
     'Set req = CreateObject("MSXML2.XMLHTTP")
-    If req Is Nothing Then Exit Sub
-  
-    log "ダウンロード中... " & url, 0
+    If req Is Nothing Then
+        DownloadFile = DownloadCURL(aurl, SaveFilePath)
+        Exit Function
+    End If
+
+    log "ダウンロード中... " & aurl, 1
     
-    req.Open "GET", url, False
+    req.Open "GET", aurl, False
      
     '2：SXH_OPTION_IGNORE_SERVER_SSL_CERT_ERROR_FLAGS
     '3：SXH_OPTION_SELECT_CLIENT_SSL_CERT
@@ -1069,44 +1072,65 @@ Sub DownloadFile(ByVal url, ByVal SaveFilePath)
     req.setRequestHeader "If-Modified-Since", "Thu, 01 Jun 1970 00:00:00 GMT"
      
     req.Send
+    
+    If err.number <> 0 Then
+        log "エラー: " & Err.Description , 1
+        DownloadFile = DownloadCURL(aurl, SaveFilePath)
+        Exit Function
+    End If
+
+    log "ステータスコード：" & req.Status, 2
+
     Select Case req.Status
       Case 200
-        With CreateObject("ADODB.Stream")
-          .Type = adTypeBinary
-          .Open
-          .Write req.responseBody
-          .SaveToFile SaveFilePath, adSaveCreateOverWrite
-          .Close
-        End With
+        If SaveFilePath <> "" Then
+            With CreateObject("ADODB.Stream")
+            .Type = adTypeBinary
+            .Open
+            .Write req.responseBody
+            .SaveToFile SaveFilePath, adSaveCreateOverWrite
+            .Close
+            End With
+        End If
+        DownloadFile = req.responseText
       Case Else
-        MsgBox "エラーが発生しました。" & vbCrLf & _
-               "ステータスコード：" & req.Status, _
-               vbCritical + vbSystemModal
-        Exit Sub
+        log "ステータスエラー：" & req.Status, 1
+        DownloadFile = "#ERROR# " & req.Status
     End Select
-End Sub
-  
-  
-'Declare PtrSafe Function URLDownloadToFile Lib "urlmon" Alias "URLDownloadToFileA" ( ByVal pCaller As Long, _
-  '    ByVal szURL As String, _
-  '    ByVal szFileName As String, _
-  '    ByVal dwReserved As Long, _
-  '    ByVal lpfnCB As Long ) As Long
-  
-'Function URLDownload(strURL, strPath)
-  'Dim lngRes 'As Long
-  'Dim strURL As String
-  'Dim strPath As String
-       
-      'strPath = "C:\Users\users\Desktop\File\画像.png"
-      'strURL = "https://www.google.co.jp/images/branding/googlelogo/1x/googlelogo_color_272x92dp.png";
-      
-  ' log "ダウンロード中... " & strURL, 0
-  
-  '    URLDownload = URLDownloadToFile(0, strURL, strPath, 0, 0)
-      ' URLDownload = 0 : 正常
-'End Sub
-  
+
+End Function
+
+'   ヘッダのみ要求してレスポンスコードを返す
+Function GetHTTPStatus(ByVal aurl)
+    On Error Resume Next
+
+    Dim req 'As Object
+    
+    GetHTTPStatus = 0
+    Set req = Nothing '初期化
+    Set req = CreateHttpRequest() 'CreateObject("WinHttp.WinHttpRequest.5.1") '
+    
+    If req Is Nothing Then
+        Exit Function
+    End If
+
+    log "HEAD要求中... " & aurl, 1
+    
+    req.Open "HEAD", aurl, False
+     
+    req.Send
+    
+    If err.number <> 0 Then
+        log "エラー: " & Err.Description , 0
+        Exit Function
+    End If
+
+    log "ステータスコード：" & req.Status, 2
+
+    GetHTTPStatus = req.Status
+
+End Function
+
 Function GetRedirectUrl(ByVal url)
     Dim req
     Dim ret
@@ -1231,7 +1255,7 @@ Sub UpdateCheck(amode)
     End If
     
     if ubound(wtargets) > 0 Then
-        Call FileUpdate(wtargets)
+        Call FileSetup(wtargets)
     End If
 
 End Sub
@@ -1253,7 +1277,7 @@ Sub SakuraUpdate()
 
     Call SakuraDownload(wurl)
 
-    Call FileUpdate(Array("","sakura.exe"))
+    Call FileSetup(Array("","sakura.exe"))
 
 End Sub
 
@@ -1385,7 +1409,7 @@ Sub RegExpUpdate()
 
     Call RegExpDownload(wurl)
 
-    Call FileUpdate(Array("","bregonig.dll"))
+    Call FileSetup(Array("","bregonig.dll"))
 
 End Sub
 
@@ -1533,7 +1557,7 @@ Sub HelpUpdate()
 
     Call HelpDownload(wurl)
 
-    Call FileUpdate(Array("","sakura.chm"))
+    Call FileSetup(Array("","sakura.chm"))
 
 End Sub
 
@@ -1601,7 +1625,7 @@ Sub HelpDownload(wurl)
     Dim wcmd
     Dim wzipfile
     
-    wzipfile = WorkDir & "help.zip"
+    wzipfile = WorkDir & "\help.zip"
     
     If InStr(wurl, "sourceforge.net") > 0 Then
         wlink = wurl
@@ -1655,7 +1679,7 @@ Sub DiffUpdate()
 
     Call DiffDownload(wurl)
 
-    Call FileUpdate(Array("","diff.exe"))
+    Call FileSetup(Array("","diff.exe"))
 
 End Sub
 
@@ -1692,15 +1716,24 @@ on error goto 0
     Dim wcmd
     Dim whead
     
-    wtmpfile = WorkDir & "\_temp.htm"
-    DeleteFile(wtmpfile)
-    'curl --head  -s -w "HTTPCODE=%{http_code}"
-    wcmd = CurlExe & " --head -s -L """ & aurl & """ -o " & wtmpfile
-    If amode = 2 Then log ">" & wcmd, 1
-    WSH.Run wcmd, 7, True '
-    whead = LoadText(wtmpfile, "utf-8")
+    whead = GetHTTPStatus(aurl)
+    if whead = 0 Then
+        wtmpfile = WorkDir & "\_temp.htm"
+        DeleteFile(wtmpfile)
+        'curl --head  -s -w "HTTPCODE=%{http_code}"
+        wcmd = CurlExe & " --head -s -L """ & aurl & """ -o " & wtmpfile
+        If amode = 2 Then log ">" & wcmd, 1
+        WSH.Run wcmd, 7, True '
+        whead = LoadText(wtmpfile, "utf-8")
+        
+        log "ステータスコード: " & left(whead,10), 2
+        
+        If instr(whead, "200 OK") > 0 Then
+            whead = 200
+        End If
+    End If
     
-    If instr(whead, "200 OK") > 0 Then
+    If whead = 200 Then
         aver = "any date"
     Else
         If amode = 2 Then log "最新版を確認できませんでした。", 0
@@ -1731,7 +1764,6 @@ Sub DiffDownload(wurl)
     Dim wzipfile
     
     wzipfile = WorkDir & "\Diff.zip"
-    DeleteFile(wzipfile)
     
     wlink = wurl
     
@@ -1854,7 +1886,7 @@ Sub PluginDownload(wurl)
     Dim wcmd
     Dim wzipfile
     
-    wzipfile = WorkDir & "Plugin.zip"
+    wzipfile = WorkDir & "\Plugin.zip"
     
     wlink = wurl
     
@@ -1895,7 +1927,7 @@ End Sub
 Sub PluginSetup(atarget)
 
     log "プラグインを更新します。", 1
-    If WSH.Popup("プラグインを更新します。", 0, "ソフトウェアの更新", 1) = 2 Then
+    If WSH.Popup("プラグインを更新します。" & vbCrLf & "注意！更新前にサクラエディタは強制終了します。編集中のファイルがある場合は破棄されます。", 0, "ソフトウェアの更新", 1) = 2 Then
         Exit Sub
     End If
     
@@ -1940,10 +1972,23 @@ End Sub
 '   %temp%\sakuraupdate内の指定ファイルをインストールフォルダへコピーする。
 '	atargets = 指定ファイルの配列(1～)
 
-Sub FileUpdate(atargets)
+Sub FileSetup(atargets)
+    Dim i
+    Dim wfilelist
+    Dim wrestart
+    
+    wfilelist = ""
+    wrestart = ""
+    for i = 1 to ubound(atargets)
+        wfilelist = wfilelist & "," & atargets(i)
+        if atargets(i) = "sakura.exe" Then
+            wrestart = vbCrLf & "注意！更新前にサクラエディタは強制終了します。編集中のファイルがある場合は破棄されます。"
+        End If
+    next
 
-    log ubound(atargets) &"個のファイルを更新します。", 1
-    If WSH.Popup(ubound(atargets) &"個のファイルを更新します。", 0, "ソフトウェアの更新", 1) = 2 Then
+    log vbCrLf & mid(wfilelist,2) & "を更新します。" & wrestart, 0
+    
+    If WSH.Popup(mid(wfilelist,2) & "を更新します。" & wrestart, 0, "ソフトウェアの更新", 1) = 2 Then
         Exit Sub
     End If
     
@@ -1962,7 +2007,6 @@ Sub FileUpdate(atargets)
                "set sakurafolder=" & SakuraDir & vbLf & _
                "set targetfolder=" & SakuraDir & vbLf
     
-    Dim i
     for i = 1 to ubound(atargets)
         wcmd = wcmd & "set targetfile" & i & "=" & atargets(i) & vbLf
     next
