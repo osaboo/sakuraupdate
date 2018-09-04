@@ -2019,11 +2019,11 @@ Sub FileSetup(atargets)
     SaveText wcmd, wcmdfile, "Shift_JIS"
 
     'mainupdate.batとfileupdate.batの退避
-    FS.CopyFile PluginDir & "\sleep.vbs",      WorkDir & "\", true
-    FS.CopyFile PluginDir & "\mainupdate.bat", WorkDir & "\", true
-    FS.CopyFile PluginDir & "\fileupdate.bat", WorkDir & "\", true
+    'FS.CopyFile PluginDir & "\sleep.vbs",      WorkDir & "\", true
+    'FS.CopyFile PluginDir & "\mainupdate.bat", WorkDir & "\", true
+    'FS.CopyFile PluginDir & "\fileupdate.bat", WorkDir & "\", true
 
-    wcmd = """" & WorkDir & "\mainupdate.bat"""
+    wcmd = """" & PluginDir & "\mainupdate.bat"""
 
     log ">" & wcmd, 1
     'DoCmd wcmd, ""
