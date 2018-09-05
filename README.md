@@ -5,13 +5,15 @@ Sakura-Editor Update Plugin (v20180903 (beta))
 
 ## 機能
 
-1.次のプログラム・ファイルをインターネットからダウンロードして更新します。
+1. 次のプログラム・ファイルをインターネットからダウンロードして更新します。
 
-* サクラエディタ本体
-* ヘルプファイル
-* 正規表現ライブラリ
+	* サクラエディタ本体
+	* ヘルプファイル
+	* 正規表現ライブラリ
+	* Diffコマンド
+	* 当プラグイン自身
 
-2.サクラエディタ起動時に自動的にチェックすることができます。
+2. サクラエディタ起動時に自動的にチェックすることができます。
 
 	自動チェックは初期設定で7日単位で、無効にすることもできます。  
 	手動によるチェックもできます。
@@ -19,7 +21,7 @@ Sakura-Editor Update Plugin (v20180903 (beta))
 ## インストール手順
 
 以下はzipプラグイン機能が使える、v2.0.6.0以降での導入手順です。zipプラグインが使えない場合は、
-zipを展開して、pluginsフォルダにsakuraupdateフォルダを作って保存してください。
+zipを展開してpluginsフォルダにsakuraupdateフォルダを作って保存してください。
 
 1. サクラエディタを起動し、メニューから設定⇒共通設定を起動し、プラグインのタブを表示します。
 
@@ -50,6 +52,8 @@ zipを展開して、pluginsフォルダにsakuraupdateフォルダを作って�
 	 └サクラエディタ更新  
 	 └ヘルプファイル更新  
 	 └正規表現ライブラリ更新  
+	 └DIFF更新  
+	 └このプラグインの更新  
 
 2. 更新チェック  
 	インターネットサイトのリリースバージョンが更新されているかを確認します。
@@ -64,73 +68,88 @@ zipを展開して、pluginsフォルダにsakuraupdateフォルダを作って�
 5. 正規表現ライブラリ更新  
 	正規表現ライブラリのみを更新します。
 
+6. DIFF更新  
+	DIFFコマンドのみを更新します。
+
+7. このプラグインの更新  
+	sakuraupdateプラグインのみを更新します。
+
 ## オプション設定
 
 1. ダウンロードサイト  
-	GitHub:0 SourceForge:1 Custom:2  
+	GitHub:0 SourceForge:1 OSDN:2 Custom:3  
 	から選びます。  
+	初期値: GitHub
 	※Customは未実装のため現時点では無効
 
 2. sourceforgeのsakura-edtiorプロジェクトRSS  
 	ダウンロード対象をこのRSSから検索します。  
 	初期値:https://sourceforge.net/projects/sakura-editor/rss
 
-3. GitHub sakura-editor Release URL(API)  
+3. OSDNのSakura Editor Downloads RSS  
+	ダウンロード対象を、このURLから検索します。  
+	初期値:https://osdn.net/projects/sakura-editor/releases/rss
+
+4. GitHub sakura-editor Release URL(API)  
 	ダウンロード対象を、このURLから検索します。  
 	初期値:https://api.github.com/repos/sakura-editor/sakura/releases/latest
 
-4. ヘルプファイルのリリースURL(未指定時はは自動チェック対象外。手動時はSFから自動取得)  
+5. ヘルプファイルのリリースURL  
 	ヘルプファイルダウンロード対象を、このURLから検索します。  
+	(未指定時は自動チェック対象外。手動時はSFから自動取得)  
 	初期値:https://sourceforge.net/projects/sakura-editor/rss?path=/help2
 
-5. 正規表現ライブラリのリリースURL(未指定時は自動チェック対象外。手動時はSFから自動取得)  
+6. 正規表現ライブラリのリリースURL  
 	正規表現ライブラリのダウンロード対象を、このURLから検索します。  
+	(未指定時は自動チェック対象外。手動時はSFから自動取得)  
 	初期値:https://api.bitbucket.org/2.0/repositories/k_takata/bregonig/downloads
 
-6. 独自リリース用URL(file:// or http://)  
+7. DIFFのリリースURL  
+	DIFFのダウンロード対象のURLを指定します。  
+	(未指定時は取得しない)  
+	初期値:http://www.ring.gr.jp/archives/text/TeX/ptex-win32/w32/patch-diff-w32.zip
+
+8. 独自リリース用URL(file:// or http://)  
 	社内ネット等インターネット以外からダウンロードする際のURL  
 	※未実装のため現時点では無効  
 	初期値はダミー
 
-7. プラグインのリリースURL  
+9. プラグインのリリースURL  
 	このプラグインを更新するためのURL  
 	初期値:https://github.com/osaboo/sakuraupdate/releases
 
-8. 最近の更新チェック日  
+10. 最近の更新チェック日  
 	更新チェックした最終日。この日から頻度で設定した日数を経過するとチェックします。
 
-9. 更新チェックの頻度(単位=日、空白=自動チェックしない)  
+11. 更新チェックの頻度(単位=日、空白=自動チェックしない)  
 	日単位でチェック頻度を指定します。
 
-10. Debug Level (0=NODEBUG)  
+12. Debug Level (0=NODEBUG)  
 	1あるいは2でアウトプットウィンドウに詳細なログを出力します。
 
 ## 仕様メモ
 
-* 更新対象は、サクラエディタ本体、ヘルプファイル、正規表現ライブラリ、diffの4つのみ
+* 更新対象は、サクラエディタ本体、ヘルプファイル、正規表現ライブラリ、diff、プラグイン自身
 * 対象のサクラエディタはVer2以降の32bit版
 * 動作OSは、XP以降
 * C:\Program Files配下へのコピー時は管理者モードでコピー
 * SourceForgeとGithub、OSDNのどれでもダウンロード可能とする
 * サクラエディタのダウンロードは、SFとGitHub,OSDNの3種類から選べる
-* ヘルプファイルは現状SFのみだが、将来GitHubにリリースされれば取得可能とする
+* ヘルプファイルは現状SFのみだが、将来GitHubやOSDNにリリースされれば取得可能とする
 * ヘルプファイル自身にバージョン情報が無いためタイムスタンプで判定
-* ネットからのダウンロードは、MSXMLを使わずcURLで取得。（環境依存の回避)
+* ネットからのダウンロードは、MSXMLでエラーになる場合にCURLで取得。（環境依存の回避)
 * zip展開は、7zのコマンドライン版を使用。(これも環境依存の回避)
-* vbsをjsに移行したい
 * 複数更新ある場合は、まとめて更新する
 * OS新しいならCURL使わないようにしてパフォーマンス上げる
 
 ## ToDo
 
+* vbsをjsに移行したい。ソースもきれいにしたい。
 * マクロヘルプ、プラグインヘルプも無ければダウンロードする
 * 新しいキーワード定義あればダウンロードする
 * VirtualStoreが有効になっているか判断して無効化する
-* ゴミ掃除
-```
-	処理後に%temp%\sakuraupdateを削除する
-		Cleanup
-```	
+* ゴミ掃除(処理後に%temp%\sakuraupdateを削除する(Cleanup))
+
 
 ## 著作権表示
 

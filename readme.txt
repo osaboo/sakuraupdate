@@ -1,113 +1,161 @@
-sakuraupdate v20180903
+# sakuraupdate
+Sakura-Editor Update Plugin (v20180903 (beta))
 
-�T�N���G�f�B�^���X�V����v���O�C��
+プラグインでサクラエディタのバージョンアップ機能を実装してみる
 
-�����@�\����
+## 機能
 
-1.���̃v���O�����E�t�@�C�����C���^�[�l�b�g����_�E�����[�h���čX�V���܂��B
-�E�T�N���G�f�B�^�{��
-�E�w���v�t�@�C��
-�E���K�\�����C�u����
+1.次のプログラム・ファイルをインターネットからダウンロードして更新します。
 
-2.�T�N���G�f�B�^�N�����Ɏ����I�Ƀ`�F�b�N���邱�Ƃ��ł��܂��B
-�����`�F�b�N�͏����ݒ��7���P�ʂŁA�����ɂ��邱�Ƃ��ł��܂��B
-�蓮�ɂ��`�F�b�N���ł��܂��B
+* サクラエディタ本体
+* ヘルプファイル
+* 正規表現ライブラリ
+* Diffコマンド
 
-�����C���X�g�[���菇����
+2.サクラエディタ起動時に自動的にチェックすることができます。
 
-1.�T�N���G�f�B�^���N�����A���j���[����ݒ�ˋ��ʐݒ���N�����A
-   �v���O�C���̃^�u��\�����܂��B
-2.�u�v���O�C����L���ɂ���v�̃`�F�b�N�{�b�N�X�̃`�F�b�N�����܂��B
-  �i�����Ă���ꍇ�͂��̂܂܂ł悢�ł�)
-3.�uZIP�v���O�C���𓱓��v�{�^�����N���b�N���܂��B
-4.���v���O�C����zip�t�@�C��(SakuraUpdate.zip)���w�肵�܂��B
-5.�v���O�C���ꗗ��sakuraupdate���ǉ�����܂��B
-6.���ʐݒ�E�B���h�E���uOK�v�{�^���ŕ��܂��B
-7.�T�N���G�f�B�^���������񂷂ׂďI�����Ă���ēx�N�����܂��B
+	自動チェックは初期設定で7日単位で、無効にすることもできます。  
+	手動によるチェックもできます。
 
-�����g��������
+## インストール手順
 
-1.���̃R�}���h���c�[�����j���[�ɒǉ�����܂��B
+以下はzipプラグイン機能が使える、v2.0.6.0以降での導入手順です。zipプラグインが使えない場合は、
+zipを展開して、pluginsフォルダにsakuraupdateフォルダを作って保存してください。
 
-�\�t�g�E�F�A�̍X�V
-���X�V�`�F�b�N
-���T�N���G�f�B�^�X�V
-���w���v�t�@�C���X�V
-�����K�\�����C�u�����X�V
+1. サクラエディタを起動し、メニューから設定⇒共通設定を起動し、プラグインのタブを表示します。
 
-2.�X�V�`�F�b�N
-�C���^�[�l�b�g�T�C�g�̃����[�X�o�[�W�������X�V����Ă��邩���m�F���܂��B
-�X�V�\�ȏꍇ�͍X�V���邱�Ƃ��ł��܂��B
+2. 「プラグインを有効にする」のチェックボックスのチェックを入れます。  
+	（入っている場合はそのままでよいです)  
 
-3.�T�N���G�f�B�^�X�V
-�T�N���G�f�B�^�{�݂̂̂��X�V���܂��B
+3. 「ZIPプラグインを導入」ボタンをクリックします。  
+	ここで「Pluginフォルダがありません」と表示されたら、一度「フォルダを開く」をクリックしてからやり直してください。
 
-4.�w���v�t�@�C���X�V
-�w���v�t�@�C���݂̂��X�V���܂��B
-
-5.���K�\�����C�u�����X�V
-���K�\�����C�u�����݂̂��X�V���܂��B
-
-�����I�v�V�����ݒ聚��
-
-1. �_�E�����[�h�T�C�g
-	GitHub:0 SourceForge:1 Custom:2
-	����I�т܂��B
-	��Custom�͖������̂��ߌ����_�ł͖���
-
-2. sourceforge��sakura-edtior�v���W�F�N�gRSS
-	�_�E�����[�h�Ώۂ�����RSS���猟�����܂��B
-	�����l:https://sourceforge.net/projects/sakura-editor/rss
-
-3. GitHub sakura-editor Release URL(API)
-	�_�E�����[�h�Ώۂ��A����URL���猟�����܂��B
-	�����l:https://api.github.com/repos/sakura-editor/sakura/releases/latest
-
-4. �w���v�t�@�C���̃����[�XURL(���w�莞��SF���玩���擾)
-	�w���v�t�@�C���_�E�����[�h�Ώۂ��A����URL���猟�����܂��B
-	�����l:https://sourceforge.net/projects/sakura-editor/rss?path=/help2
+4. 当プラグインのzipファイル(SakuraUpdate.zip)を指定します。
 
 
-5. ���K�\�����C�u�����̃����[�XURL(���w�莞��SF���玩���擾)
-	���K�\�����C�u�����̃_�E�����[�h�Ώۂ��A����URL���猟�����܂��B
-	�����l:https://api.bitbucket.org/2.0/repositories/k_takata/bregonig/downloads
+5. プラグイン一覧にsakuraupdateが追加されます。
 
 
-6. �Ǝ������[�X�pURL(file:// or http://)
-	�Г��l�b�g���C���^�[�l�b�g�ȊO����_�E�����[�h����ۂ�URL
-	���������̂��ߌ����_�ł͖���
-	�����l�̓_�~�[
-
-7. �v���O�C���̃����[�XURL
-	���̃v���O�C�����X�V���邽�߂�URL
-	�����l:https://github.com/osaboo/sakuraupdate/releases
-
-8. �ŋ߂̍X�V�`�F�b�N��
-	�X�V�`�F�b�N�����ŏI���B���̓�����p�x�Őݒ肵���������o�߂���ƃ`�F�b�N���܂��B
-
-9. �X�V�`�F�b�N�̕p�x(�P��=���A��=�����`�F�b�N���Ȃ�)
-	���P�ʂŃ`�F�b�N�p�x���w�肵�܂��B
-
-10. Debug Level (0=NODEBUG)
-	1���邢��2�ŃA�E�g�v�b�g�E�B���h�E�ɏڍׂȃ��O���o�͂��܂��B
+6. 共通設定ウィンドウを「OK」ボタンで閉じます。
 
 
-�������쌠�\������
+7. サクラエディタをいったんすべて終了してから再度起動します。
 
-�T�N���G�f�B�^�́ANorio Nakatani & Collaborators���J���E�z�z���Ă���t���[�E�\�t�g�E�F�A�ł��B
+
+## 使い方
+
+1. 次のコマンドがツールメニューに追加されます。
+
+	ソフトウェアの更新  
+	 └更新チェック  
+	 └サクラエディタ更新  
+	 └ヘルプファイル更新  
+	 └正規表現ライブラリ更新  
+	 └DIFF更新  
+	 └このプラグインの更新  
+
+2. 更新チェック  
+	インターネットサイトのリリースバージョンが更新されているかを確認します。
+	更新可能な場合は更新することができます。
+
+3. サクラエディタ更新  
+	サクラエディタ本体のみを更新します。
+
+4. ヘルプファイル更新  
+	ヘルプファイルのみを更新します。
+
+5. 正規表現ライブラリ更新  
+	正規表現ライブラリのみを更新します。
+
+6. DIFF更新  
+	DIFFコマンドのみを更新します。
+
+7. このプラグインの更新  
+	sakuraupdateプラグインのみを更新します。
+
+## オプション設定
+
+1. ダウンロードサイト  
+	GitHub:0 SourceForge:1 Custom:2  
+	から選びます。  
+	※Customは未実装のため現時点では無効
+
+2. sourceforgeのsakura-edtiorプロジェクトRSS  
+	ダウンロード対象をこのRSSから検索します。  
+	初期値:https://sourceforge.net/projects/sakura-editor/rss
+
+3. GitHub sakura-editor Release URL(API)  
+	ダウンロード対象を、このURLから検索します。  
+	初期値:https://api.github.com/repos/sakura-editor/sakura/releases/latest
+
+4. ヘルプファイルのリリースURL(未指定時はは自動チェック対象外。手動時はSFから自動取得)  
+	ヘルプファイルダウンロード対象を、このURLから検索します。  
+	初期値:https://sourceforge.net/projects/sakura-editor/rss?path=/help2
+
+5. 正規表現ライブラリのリリースURL(未指定時は自動チェック対象外。手動時はSFから自動取得)  
+	正規表現ライブラリのダウンロード対象を、このURLから検索します。  
+	初期値:https://api.bitbucket.org/2.0/repositories/k_takata/bregonig/downloads
+
+6. 独自リリース用URL(file:// or http://)  
+	社内ネット等インターネット以外からダウンロードする際のURL  
+	※未実装のため現時点では無効  
+	初期値はダミー
+
+7. プラグインのリリースURL  
+	このプラグインを更新するためのURL  
+	初期値:https://github.com/osaboo/sakuraupdate/releases
+
+8. 最近の更新チェック日  
+	更新チェックした最終日。この日から頻度で設定した日数を経過するとチェックします。
+
+9. 更新チェックの頻度(単位=日、空白=自動チェックしない)  
+	日単位でチェック頻度を指定します。
+
+10. Debug Level (0=NODEBUG)  
+	1あるいは2でアウトプットウィンドウに詳細なログを出力します。
+
+## 仕様メモ
+
+* 更新対象は、サクラエディタ本体、ヘルプファイル、正規表現ライブラリ、diffの4つのみ
+* 対象のサクラエディタはVer2以降の32bit版
+* 動作OSは、XP以降
+* C:\Program Files配下へのコピー時は管理者モードでコピー
+* SourceForgeとGithub、OSDNのどれでもダウンロード可能とする
+* サクラエディタのダウンロードは、SFとGitHub,OSDNの3種類から選べる
+* ヘルプファイルは現状SFのみだが、将来GitHubにリリースされれば取得可能とする
+* ヘルプファイル自身にバージョン情報が無いためタイムスタンプで判定
+* ネットからのダウンロードは、MSXMLを使わずcURLで取得。（環境依存の回避)
+* zip展開は、7zのコマンドライン版を使用。(これも環境依存の回避)
+* vbsをjsに移行したい
+* 複数更新ある場合は、まとめて更新する
+* OS新しいならCURL使わないようにしてパフォーマンス上げる
+
+## ToDo
+
+* マクロヘルプ、プラグインヘルプも無ければダウンロードする
+* 新しいキーワード定義あればダウンロードする
+* VirtualStoreが有効になっているか判断して無効化する
+* ゴミ掃除
+```
+	処理後に%temp%\sakuraupdateを削除する
+		Cleanup
+```	
+
+## 著作権表示
+
+1. サクラエディタは、Norio Nakatani & Collaboratorsが開発・配布しているフリー・ソフトウェアです。  
 https://sakura-editor.github.io/
 
-���K�\�����C�u���� bregonig.dll�́A K.Takata (���c ��)�����J���E�z�z���Ă���t���[�E�\�t�g�E�F�A�ł��B
+2. 正規表現ライブラリ bregonig.dllは、 K.Takata (高田 謙)氏が開発・配布しているフリー・ソフトウェアです。  
 http://k-takata.o.oo7.jp/mysoft/bregonig.html
 
-������curl.exe��Dirk Paehl�����R���p�C���E�z�z���Ă�����̂ł��B
+3. 同封のcurl.exeはDirk Paehl氏がコンパイル・配布しているものです。  
 http://www.paehl.com/open_source/?CURL_7.61.0
 
-������7za.exe�́AGNU LGPL�Ń��C�Z���X����Ă���AIgor Pavlov�̒��앨�ł��B
------------------
-7-Zip Extra is package of extra modules of 7-Zip. 
-7-Zip Copyright (C) 1999-2018 Igor Pavlov.
-7-Zip is free software. Read License.txt for more information about license.
-Source code of binaries can be found at:
-  http://www.7-zip.org/
+4. 同封の7za.exeは、GNU LGPLでライセンスされている、Igor Pavlovの著作物です。  
+	7-Zip Extra is package of extra modules of 7-Zip.   
+	7-Zip Copyright (C) 1999-2018 Igor Pavlov.  
+	7-Zip is free software. Read License.txt for more information about license.  
+	Source code of binaries can be found at:  
+	  http://www.7-zip.org/
 

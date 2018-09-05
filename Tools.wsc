@@ -104,6 +104,20 @@ Sub Init()
 
   DebugLvl = Plugin.GetOption("サクラエディタ", "DEBUGLVL")
 
+  If DebugLvl = "" Then
+      Plugin.SetOption "サクラエディタ", "SITEPRIORITY","0"
+      Plugin.SetOption "サクラエディタ", "SFRSSURL", "https://sourceforge.net/projects/sakura-editor/rss"
+      Plugin.SetOption "サクラエディタ", "OSDNURL",  "https://osdn.net/projects/sakura-editor/releases/rss"
+      Plugin.SetOption "サクラエディタ", "GITHUBURL","https://api.github.com/repos/sakura-editor/sakura/releases/latest"
+      Plugin.SetOption "サクラエディタ", "HELPURL",  "https://sourceforge.net/projects/sakura-editor/rss?path=/help2"
+      Plugin.SetOption "サクラエディタ", "REGEXPURL","https://api.bitbucket.org/2.0/repositories/k_takata/bregonig/downloads"
+      Plugin.SetOption "サクラエディタ", "DIFFURL",  "http://www.ring.gr.jp/archives/text/TeX/ptex-win32/w32/patch-diff-w32.zip"
+      Plugin.SetOption "サクラエディタ", "PLUGINURL","https://api.github.com/repos/osaboo/sakuraupdate/releases"
+      Plugin.SetOption "サクラエディタ", "CHECKFREQ","7"
+      Plugin.SetOption "サクラエディタ", "DEBUGLVL", "0"
+      DebugLvl = 0
+  End If
+  
   OSVer = GetOSInfo()
   'log "osver=" & OSVer, 2
 
@@ -1314,7 +1328,7 @@ Function SakuraCheck(amode, ByRef aver, ByRef aurl)
     End If
 
     If aver = "" Then
-        If amode = 2 Then log "最新版を確認できませんでした。", 0
+        If amode = 2 Then log "×最新版を確認できませんでした。", 0
         SakuraCheck = False
         Exit Function
     End If
@@ -1465,7 +1479,7 @@ on error goto 0
     End If
     
     If aver = "" Then
-        If amode = 2 Then log "最新版を確認できませんでした。", 0
+        If amode = 2 Then log "×最新版を確認できませんでした。", 0
         RegExpCheck = False
         Exit Function
     End If
@@ -1595,7 +1609,7 @@ Function HelpCheck(amode, ByRef aver, ByRef aurl)
     End If
     
     If aver = "" Then
-        If amode = 2 Then log "最新版を確認できませんでした。", 0
+        If amode = 2 Then log "×最新版を確認できませんでした。", 0
         HelpCheck = False
         Exit Function
     End If
@@ -1730,13 +1744,17 @@ on error goto 0
         
         If instr(whead, "200 OK") > 0 Then
             whead = 200
+        ElseIf IsNumeric(left(whead,3)) Then
+            whead = CLng(left(whead,3))
+        Else
+            whead = 0
         End If
     End If
     
     If whead = 200 Then
         aver = "any date"
     Else
-        If amode = 2 Then log "最新版を確認できませんでした。", 0
+        If amode = 2 Then log "×最新版を確認できませんでした。", 0
         DiffCheck = False
         Exit Function
     End If
@@ -1860,7 +1878,7 @@ Function PluginCheck(amode, ByRef aver, ByRef aurl)
     aver = GetGitHub(aurl)
 
     If aver = "" Then
-        If amode = 2 Then log "最新版を確認できませんでした。", 0
+        If amode = 2 Then log "×最新版を確認できませんでした。", 0
         PluginCheck = False
         Exit Function
     End If
