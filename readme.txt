@@ -1,158 +1,178 @@
 # sakuraupdate
-Sakura-Editor Update Plugin (v20180903 (beta))
+Sakura-Editor Update Plugin (v20180908 (beta))
 
-ãƒ—ãƒ©ã‚°ã‚¤ãƒ³ã§ã‚µã‚¯ãƒ©ã‚¨ãƒ‡ã‚£ã‚¿ã®ãƒãƒ¼ã‚¸ãƒ§ãƒ³ã‚¢ãƒƒãƒ—æ©Ÿèƒ½ã‚’å®Ÿè£…ã—ã¦ã¿ã‚‹
+ƒvƒ‰ƒOƒCƒ“‚ÅƒTƒNƒ‰ƒGƒfƒBƒ^‚Ìƒo[ƒWƒ‡ƒ“ƒAƒbƒv‹@”\‚ðŽÀ‘•‚µ‚Ä‚Ý‚é
 
-## æ©Ÿèƒ½
+## ‹@”\
 
-1.æ¬¡ã®ãƒ—ãƒ­ã‚°ãƒ©ãƒ ãƒ»ãƒ•ã‚¡ã‚¤ãƒ«ã‚’ã‚¤ãƒ³ã‚¿ãƒ¼ãƒãƒƒãƒˆã‹ã‚‰ãƒ€ã‚¦ãƒ³ãƒ­ãƒ¼ãƒ‰ã—ã¦æ›´æ–°ã—ã¾ã™ã€‚
+1. ŽŸ‚ÌƒvƒƒOƒ‰ƒ€Eƒtƒ@ƒCƒ‹‚ðƒCƒ“ƒ^[ƒlƒbƒg‚©‚çƒ_ƒEƒ“ƒ[ƒh‚µ‚ÄXV‚µ‚Ü‚·B
 
-* ã‚µã‚¯ãƒ©ã‚¨ãƒ‡ã‚£ã‚¿æœ¬ä½“
-* ãƒ˜ãƒ«ãƒ—ãƒ•ã‚¡ã‚¤ãƒ«
-* æ­£è¦è¡¨ç¾ãƒ©ã‚¤ãƒ–ãƒ©ãƒª
-* Diffã‚³ãƒžãƒ³ãƒ‰
+	* ƒTƒNƒ‰ƒGƒfƒBƒ^–{‘Ì
+	* ƒwƒ‹ƒvƒtƒ@ƒCƒ‹
+	* ³‹K•\Œ»ƒ‰ƒCƒuƒ‰ƒŠ
+	* DiffƒRƒ}ƒ“ƒh
+	* CtagsƒRƒ}ƒ“ƒh
+	* “–ƒvƒ‰ƒOƒCƒ“Ž©g
 
-2.ã‚µã‚¯ãƒ©ã‚¨ãƒ‡ã‚£ã‚¿èµ·å‹•æ™‚ã«è‡ªå‹•çš„ã«ãƒã‚§ãƒƒã‚¯ã™ã‚‹ã“ã¨ãŒã§ãã¾ã™ã€‚
+2. ƒTƒNƒ‰ƒGƒfƒBƒ^‹N“®Žž‚ÉŽ©“®“I‚Éƒ`ƒFƒbƒN‚·‚é‚±‚Æ‚ª‚Å‚«‚Ü‚·B
 
-	è‡ªå‹•ãƒã‚§ãƒƒã‚¯ã¯åˆæœŸè¨­å®šã§7æ—¥å˜ä½ã§ã€ç„¡åŠ¹ã«ã™ã‚‹ã“ã¨ã‚‚ã§ãã¾ã™ã€‚  
-	æ‰‹å‹•ã«ã‚ˆã‚‹ãƒã‚§ãƒƒã‚¯ã‚‚ã§ãã¾ã™ã€‚
+	Ž©“®ƒ`ƒFƒbƒN‚Í‰ŠúÝ’è‚Å7“ú’PˆÊ‚ÅA–³Œø‚É‚·‚é‚±‚Æ‚à‚Å‚«‚Ü‚·B  
+	Žè“®‚É‚æ‚éƒ`ƒFƒbƒN‚à‚Å‚«‚Ü‚·B
 
-## ã‚¤ãƒ³ã‚¹ãƒˆãƒ¼ãƒ«æ‰‹é †
+## ƒCƒ“ƒXƒg[ƒ‹Žè‡
 
-ä»¥ä¸‹ã¯zipãƒ—ãƒ©ã‚°ã‚¤ãƒ³æ©Ÿèƒ½ãŒä½¿ãˆã‚‹ã€v2.0.6.0ä»¥é™ã§ã®å°Žå…¥æ‰‹é †ã§ã™ã€‚zipãƒ—ãƒ©ã‚°ã‚¤ãƒ³ãŒä½¿ãˆãªã„å ´åˆã¯ã€
-zipã‚’å±•é–‹ã—ã¦ã€pluginsãƒ•ã‚©ãƒ«ãƒ€ã«sakuraupdateãƒ•ã‚©ãƒ«ãƒ€ã‚’ä½œã£ã¦ä¿å­˜ã—ã¦ãã ã•ã„ã€‚
+ˆÈ‰º‚Ízipƒvƒ‰ƒOƒCƒ“‹@”\‚ªŽg‚¦‚éAv2.0.6.0ˆÈ~‚Å‚Ì“±“üŽè‡‚Å‚·Bzipƒvƒ‰ƒOƒCƒ“‚ªŽg‚¦‚È‚¢ê‡‚ÍA
+zip‚ð“WŠJ‚µ‚ÄpluginsƒtƒHƒ‹ƒ_‚ÉsakuraupdateƒtƒHƒ‹ƒ_‚ðì‚Á‚Ä•Û‘¶‚µ‚Ä‚­‚¾‚³‚¢B
 
-1. ã‚µã‚¯ãƒ©ã‚¨ãƒ‡ã‚£ã‚¿ã‚’èµ·å‹•ã—ã€ãƒ¡ãƒ‹ãƒ¥ãƒ¼ã‹ã‚‰è¨­å®šâ‡’å…±é€šè¨­å®šã‚’èµ·å‹•ã—ã€ãƒ—ãƒ©ã‚°ã‚¤ãƒ³ã®ã‚¿ãƒ–ã‚’è¡¨ç¤ºã—ã¾ã™ã€‚
+1. ƒTƒNƒ‰ƒGƒfƒBƒ^‚ð‹N“®‚µAƒƒjƒ…[‚©‚çÝ’èË‹¤’ÊÝ’è‚ð‹N“®‚µAƒvƒ‰ƒOƒCƒ“‚Ìƒ^ƒu‚ð•\Ž¦‚µ‚Ü‚·B
 
-2. ã€Œãƒ—ãƒ©ã‚°ã‚¤ãƒ³ã‚’æœ‰åŠ¹ã«ã™ã‚‹ã€ã®ãƒã‚§ãƒƒã‚¯ãƒœãƒƒã‚¯ã‚¹ã®ãƒã‚§ãƒƒã‚¯ã‚’å…¥ã‚Œã¾ã™ã€‚  
-	ï¼ˆå…¥ã£ã¦ã„ã‚‹å ´åˆã¯ãã®ã¾ã¾ã§ã‚ˆã„ã§ã™)  
+2. uƒvƒ‰ƒOƒCƒ“‚ð—LŒø‚É‚·‚év‚Ìƒ`ƒFƒbƒNƒ{ƒbƒNƒX‚Ìƒ`ƒFƒbƒN‚ð“ü‚ê‚Ü‚·B  
+	i“ü‚Á‚Ä‚¢‚éê‡‚Í‚»‚Ì‚Ü‚Ü‚Å‚æ‚¢‚Å‚·)  
 
-3. ã€ŒZIPãƒ—ãƒ©ã‚°ã‚¤ãƒ³ã‚’å°Žå…¥ã€ãƒœã‚¿ãƒ³ã‚’ã‚¯ãƒªãƒƒã‚¯ã—ã¾ã™ã€‚  
-	ã“ã“ã§ã€ŒPluginãƒ•ã‚©ãƒ«ãƒ€ãŒã‚ã‚Šã¾ã›ã‚“ã€ã¨è¡¨ç¤ºã•ã‚ŒãŸã‚‰ã€ä¸€åº¦ã€Œãƒ•ã‚©ãƒ«ãƒ€ã‚’é–‹ãã€ã‚’ã‚¯ãƒªãƒƒã‚¯ã—ã¦ã‹ã‚‰ã‚„ã‚Šç›´ã—ã¦ãã ã•ã„ã€‚
+3. uZIPƒvƒ‰ƒOƒCƒ“‚ð“±“üvƒ{ƒ^ƒ“‚ðƒNƒŠƒbƒN‚µ‚Ü‚·B  
+	‚±‚±‚ÅuPluginƒtƒHƒ‹ƒ_‚ª‚ ‚è‚Ü‚¹‚ñv‚Æ•\Ž¦‚³‚ê‚½‚çAˆê“xuƒtƒHƒ‹ƒ_‚ðŠJ‚­v‚ðƒNƒŠƒbƒN‚µ‚Ä‚©‚ç‚â‚è’¼‚µ‚Ä‚­‚¾‚³‚¢B
 
-4. å½“ãƒ—ãƒ©ã‚°ã‚¤ãƒ³ã®zipãƒ•ã‚¡ã‚¤ãƒ«(SakuraUpdate.zip)ã‚’æŒ‡å®šã—ã¾ã™ã€‚
-
-
-5. ãƒ—ãƒ©ã‚°ã‚¤ãƒ³ä¸€è¦§ã«sakuraupdateãŒè¿½åŠ ã•ã‚Œã¾ã™ã€‚
-
-
-6. å…±é€šè¨­å®šã‚¦ã‚£ãƒ³ãƒ‰ã‚¦ã‚’ã€ŒOKã€ãƒœã‚¿ãƒ³ã§é–‰ã˜ã¾ã™ã€‚
+4. “–ƒvƒ‰ƒOƒCƒ“‚Ìzipƒtƒ@ƒCƒ‹(SakuraUpdate.zip)‚ðŽw’è‚µ‚Ü‚·B
 
 
-7. ã‚µã‚¯ãƒ©ã‚¨ãƒ‡ã‚£ã‚¿ã‚’ã„ã£ãŸã‚“ã™ã¹ã¦çµ‚äº†ã—ã¦ã‹ã‚‰å†åº¦èµ·å‹•ã—ã¾ã™ã€‚
+5. ƒvƒ‰ƒOƒCƒ“ˆê——‚Ésakuraupdate‚ª’Ç‰Á‚³‚ê‚Ü‚·B
 
 
-## ä½¿ã„æ–¹
+6. ‹¤’ÊÝ’èƒEƒBƒ“ƒhƒE‚ðuOKvƒ{ƒ^ƒ“‚Å•Â‚¶‚Ü‚·B
 
-1. æ¬¡ã®ã‚³ãƒžãƒ³ãƒ‰ãŒãƒ„ãƒ¼ãƒ«ãƒ¡ãƒ‹ãƒ¥ãƒ¼ã«è¿½åŠ ã•ã‚Œã¾ã™ã€‚
 
-	ã‚½ãƒ•ãƒˆã‚¦ã‚§ã‚¢ã®æ›´æ–°  
-	 â””æ›´æ–°ãƒã‚§ãƒƒã‚¯  
-	 â””ã‚µã‚¯ãƒ©ã‚¨ãƒ‡ã‚£ã‚¿æ›´æ–°  
-	 â””ãƒ˜ãƒ«ãƒ—ãƒ•ã‚¡ã‚¤ãƒ«æ›´æ–°  
-	 â””æ­£è¦è¡¨ç¾ãƒ©ã‚¤ãƒ–ãƒ©ãƒªæ›´æ–°  
-	 â””DIFFæ›´æ–°  
-	 â””ã“ã®ãƒ—ãƒ©ã‚°ã‚¤ãƒ³ã®æ›´æ–°  
+7. ƒTƒNƒ‰ƒGƒfƒBƒ^‚ð‚¢‚Á‚½‚ñ‚·‚×‚ÄI—¹‚µ‚Ä‚©‚çÄ“x‹N“®‚µ‚Ü‚·B
 
-2. æ›´æ–°ãƒã‚§ãƒƒã‚¯  
-	ã‚¤ãƒ³ã‚¿ãƒ¼ãƒãƒƒãƒˆã‚µã‚¤ãƒˆã®ãƒªãƒªãƒ¼ã‚¹ãƒãƒ¼ã‚¸ãƒ§ãƒ³ãŒæ›´æ–°ã•ã‚Œã¦ã„ã‚‹ã‹ã‚’ç¢ºèªã—ã¾ã™ã€‚
-	æ›´æ–°å¯èƒ½ãªå ´åˆã¯æ›´æ–°ã™ã‚‹ã“ã¨ãŒã§ãã¾ã™ã€‚
 
-3. ã‚µã‚¯ãƒ©ã‚¨ãƒ‡ã‚£ã‚¿æ›´æ–°  
-	ã‚µã‚¯ãƒ©ã‚¨ãƒ‡ã‚£ã‚¿æœ¬ä½“ã®ã¿ã‚’æ›´æ–°ã—ã¾ã™ã€‚
+## Žg‚¢•û
 
-4. ãƒ˜ãƒ«ãƒ—ãƒ•ã‚¡ã‚¤ãƒ«æ›´æ–°  
-	ãƒ˜ãƒ«ãƒ—ãƒ•ã‚¡ã‚¤ãƒ«ã®ã¿ã‚’æ›´æ–°ã—ã¾ã™ã€‚
+1. ŽŸ‚ÌƒRƒ}ƒ“ƒh‚ªƒc[ƒ‹ƒƒjƒ…[‚É’Ç‰Á‚³‚ê‚Ü‚·B
 
-5. æ­£è¦è¡¨ç¾ãƒ©ã‚¤ãƒ–ãƒ©ãƒªæ›´æ–°  
-	æ­£è¦è¡¨ç¾ãƒ©ã‚¤ãƒ–ãƒ©ãƒªã®ã¿ã‚’æ›´æ–°ã—ã¾ã™ã€‚
+	ƒ\ƒtƒgƒEƒFƒA‚ÌXV  
+	 „¤XVƒ`ƒFƒbƒN  
+	 „¤ƒTƒNƒ‰ƒGƒfƒBƒ^XV  
+	 „¤ƒwƒ‹ƒvƒtƒ@ƒCƒ‹XV  
+	 „¤³‹K•\Œ»ƒ‰ƒCƒuƒ‰ƒŠXV  
+	 „¤DIFFXV  
+	 „¤CTAGSXV  
+	 „¤‚±‚Ìƒvƒ‰ƒOƒCƒ“‚ÌXV  
 
-6. DIFFæ›´æ–°  
-	DIFFã‚³ãƒžãƒ³ãƒ‰ã®ã¿ã‚’æ›´æ–°ã—ã¾ã™ã€‚
+2. XVƒ`ƒFƒbƒN  
+	ƒCƒ“ƒ^[ƒlƒbƒgƒTƒCƒg‚ÌƒŠƒŠ[ƒXƒo[ƒWƒ‡ƒ“‚ªXV‚³‚ê‚Ä‚¢‚é‚©‚ðŠm”F‚µ‚Ü‚·B
+	XV‰Â”\‚Èê‡‚ÍXV‚·‚é‚±‚Æ‚ª‚Å‚«‚Ü‚·B
 
-7. ã“ã®ãƒ—ãƒ©ã‚°ã‚¤ãƒ³ã®æ›´æ–°  
-	sakuraupdateãƒ—ãƒ©ã‚°ã‚¤ãƒ³ã®ã¿ã‚’æ›´æ–°ã—ã¾ã™ã€‚
+3. ƒTƒNƒ‰ƒGƒfƒBƒ^XV  
+	ƒTƒNƒ‰ƒGƒfƒBƒ^–{‘Ì‚Ì‚Ý‚ðXV‚µ‚Ü‚·B
 
-## ã‚ªãƒ—ã‚·ãƒ§ãƒ³è¨­å®š
+4. ƒwƒ‹ƒvƒtƒ@ƒCƒ‹XV  
+	ƒwƒ‹ƒvƒtƒ@ƒCƒ‹‚Ì‚Ý‚ðXV‚µ‚Ü‚·B
 
-1. ãƒ€ã‚¦ãƒ³ãƒ­ãƒ¼ãƒ‰ã‚µã‚¤ãƒˆ  
-	GitHub:0 SourceForge:1 Custom:2  
-	ã‹ã‚‰é¸ã³ã¾ã™ã€‚  
-	â€»Customã¯æœªå®Ÿè£…ã®ãŸã‚ç¾æ™‚ç‚¹ã§ã¯ç„¡åŠ¹
+5. ³‹K•\Œ»ƒ‰ƒCƒuƒ‰ƒŠXV  
+	³‹K•\Œ»ƒ‰ƒCƒuƒ‰ƒŠ‚Ì‚Ý‚ðXV‚µ‚Ü‚·B
 
-2. sourceforgeã®sakura-edtiorãƒ—ãƒ­ã‚¸ã‚§ã‚¯ãƒˆRSS  
-	ãƒ€ã‚¦ãƒ³ãƒ­ãƒ¼ãƒ‰å¯¾è±¡ã‚’ã“ã®RSSã‹ã‚‰æ¤œç´¢ã—ã¾ã™ã€‚  
-	åˆæœŸå€¤:https://sourceforge.net/projects/sakura-editor/rss
+6. DIFFXV  
+	DIFFƒRƒ}ƒ“ƒh‚Ì‚Ý‚ðXV‚µ‚Ü‚·B
 
-3. GitHub sakura-editor Release URL(API)  
-	ãƒ€ã‚¦ãƒ³ãƒ­ãƒ¼ãƒ‰å¯¾è±¡ã‚’ã€ã“ã®URLã‹ã‚‰æ¤œç´¢ã—ã¾ã™ã€‚  
-	åˆæœŸå€¤:https://api.github.com/repos/sakura-editor/sakura/releases/latest
+7. CTAGSXV  
+	CTAGSƒRƒ}ƒ“ƒh‚Ì‚Ý‚ðXV‚µ‚Ü‚·B
 
-4. ãƒ˜ãƒ«ãƒ—ãƒ•ã‚¡ã‚¤ãƒ«ã®ãƒªãƒªãƒ¼ã‚¹URL(æœªæŒ‡å®šæ™‚ã¯ã¯è‡ªå‹•ãƒã‚§ãƒƒã‚¯å¯¾è±¡å¤–ã€‚æ‰‹å‹•æ™‚ã¯SFã‹ã‚‰è‡ªå‹•å–å¾—)  
-	ãƒ˜ãƒ«ãƒ—ãƒ•ã‚¡ã‚¤ãƒ«ãƒ€ã‚¦ãƒ³ãƒ­ãƒ¼ãƒ‰å¯¾è±¡ã‚’ã€ã“ã®URLã‹ã‚‰æ¤œç´¢ã—ã¾ã™ã€‚  
-	åˆæœŸå€¤:https://sourceforge.net/projects/sakura-editor/rss?path=/help2
+8. ‚±‚Ìƒvƒ‰ƒOƒCƒ“‚ÌXV  
+	sakuraupdateƒvƒ‰ƒOƒCƒ“‚Ì‚Ý‚ðXV‚µ‚Ü‚·B
 
-5. æ­£è¦è¡¨ç¾ãƒ©ã‚¤ãƒ–ãƒ©ãƒªã®ãƒªãƒªãƒ¼ã‚¹URL(æœªæŒ‡å®šæ™‚ã¯è‡ªå‹•ãƒã‚§ãƒƒã‚¯å¯¾è±¡å¤–ã€‚æ‰‹å‹•æ™‚ã¯SFã‹ã‚‰è‡ªå‹•å–å¾—)  
-	æ­£è¦è¡¨ç¾ãƒ©ã‚¤ãƒ–ãƒ©ãƒªã®ãƒ€ã‚¦ãƒ³ãƒ­ãƒ¼ãƒ‰å¯¾è±¡ã‚’ã€ã“ã®URLã‹ã‚‰æ¤œç´¢ã—ã¾ã™ã€‚  
-	åˆæœŸå€¤:https://api.bitbucket.org/2.0/repositories/k_takata/bregonig/downloads
+## ƒIƒvƒVƒ‡ƒ“Ý’è
 
-6. ç‹¬è‡ªãƒªãƒªãƒ¼ã‚¹ç”¨URL(file:// or http://)  
-	ç¤¾å†…ãƒãƒƒãƒˆç­‰ã‚¤ãƒ³ã‚¿ãƒ¼ãƒãƒƒãƒˆä»¥å¤–ã‹ã‚‰ãƒ€ã‚¦ãƒ³ãƒ­ãƒ¼ãƒ‰ã™ã‚‹éš›ã®URL  
-	â€»æœªå®Ÿè£…ã®ãŸã‚ç¾æ™‚ç‚¹ã§ã¯ç„¡åŠ¹  
-	åˆæœŸå€¤ã¯ãƒ€ãƒŸãƒ¼
+1. ƒ_ƒEƒ“ƒ[ƒhƒTƒCƒg  
+	GitHub:0 SourceForge:1 OSDN:2 Custom:3  
+	‚©‚ç‘I‚Ñ‚Ü‚·B  
+	‰Šú’l: GitHub
+	¦Custom‚Í–¢ŽÀ‘•‚Ì‚½‚ßŒ»Žž“_‚Å‚Í–³Œø
 
-7. ãƒ—ãƒ©ã‚°ã‚¤ãƒ³ã®ãƒªãƒªãƒ¼ã‚¹URL  
-	ã“ã®ãƒ—ãƒ©ã‚°ã‚¤ãƒ³ã‚’æ›´æ–°ã™ã‚‹ãŸã‚ã®URL  
-	åˆæœŸå€¤:https://github.com/osaboo/sakuraupdate/releases
+2. sourceforge‚Ìsakura-edtiorƒvƒƒWƒFƒNƒgRSS  
+	ƒ_ƒEƒ“ƒ[ƒh‘ÎÛ‚ð‚±‚ÌRSS‚©‚çŒŸõ‚µ‚Ü‚·B  
+	‰Šú’l:https://sourceforge.net/projects/sakura-editor/rss
 
-8. æœ€è¿‘ã®æ›´æ–°ãƒã‚§ãƒƒã‚¯æ—¥  
-	æ›´æ–°ãƒã‚§ãƒƒã‚¯ã—ãŸæœ€çµ‚æ—¥ã€‚ã“ã®æ—¥ã‹ã‚‰é »åº¦ã§è¨­å®šã—ãŸæ—¥æ•°ã‚’çµŒéŽã™ã‚‹ã¨ãƒã‚§ãƒƒã‚¯ã—ã¾ã™ã€‚
+3. OSDN‚ÌSakura Editor Downloads RSS  
+	ƒ_ƒEƒ“ƒ[ƒh‘ÎÛ‚ðA‚±‚ÌURL‚©‚çŒŸõ‚µ‚Ü‚·B  
+	‰Šú’l:https://osdn.net/projects/sakura-editor/releases/rss
 
-9. æ›´æ–°ãƒã‚§ãƒƒã‚¯ã®é »åº¦(å˜ä½=æ—¥ã€ç©ºç™½=è‡ªå‹•ãƒã‚§ãƒƒã‚¯ã—ãªã„)  
-	æ—¥å˜ä½ã§ãƒã‚§ãƒƒã‚¯é »åº¦ã‚’æŒ‡å®šã—ã¾ã™ã€‚
+4. GitHub sakura-editor Release URL(API)  
+	ƒ_ƒEƒ“ƒ[ƒh‘ÎÛ‚ðA‚±‚ÌURL‚©‚çŒŸõ‚µ‚Ü‚·B  
+	‰Šú’l:https://api.github.com/repos/sakura-editor/sakura/releases/latest
 
-10. Debug Level (0=NODEBUG)  
-	1ã‚ã‚‹ã„ã¯2ã§ã‚¢ã‚¦ãƒˆãƒ—ãƒƒãƒˆã‚¦ã‚£ãƒ³ãƒ‰ã‚¦ã«è©³ç´°ãªãƒ­ã‚°ã‚’å‡ºåŠ›ã—ã¾ã™ã€‚
+5. ƒwƒ‹ƒvƒtƒ@ƒCƒ‹‚ÌƒŠƒŠ[ƒXURL  
+	ƒwƒ‹ƒvƒtƒ@ƒCƒ‹ƒ_ƒEƒ“ƒ[ƒh‘ÎÛ‚ðA‚±‚ÌURL‚©‚çŒŸõ‚µ‚Ü‚·B  
+	(–¢Žw’èŽž‚ÍŽ©“®ƒ`ƒFƒbƒN‘ÎÛŠOBŽè“®Žž‚ÍSF‚©‚çŽ©“®Žæ“¾)  
+	‰Šú’l:https://sourceforge.net/projects/sakura-editor/rss?path=/help2
 
-## ä»•æ§˜ãƒ¡ãƒ¢
+6. ³‹K•\Œ»ƒ‰ƒCƒuƒ‰ƒŠ‚ÌƒŠƒŠ[ƒXURL  
+	³‹K•\Œ»ƒ‰ƒCƒuƒ‰ƒŠ‚Ìƒ_ƒEƒ“ƒ[ƒh‘ÎÛ‚ðA‚±‚ÌURL‚©‚çŒŸõ‚µ‚Ü‚·B  
+	(–¢Žw’èŽž‚ÍŽ©“®ƒ`ƒFƒbƒN‘ÎÛŠOBŽè“®Žž‚ÍSF‚©‚çŽ©“®Žæ“¾)  
+	‰Šú’l:https://api.bitbucket.org/2.0/repositories/k_takata/bregonig/downloads
 
-* æ›´æ–°å¯¾è±¡ã¯ã€ã‚µã‚¯ãƒ©ã‚¨ãƒ‡ã‚£ã‚¿æœ¬ä½“ã€ãƒ˜ãƒ«ãƒ—ãƒ•ã‚¡ã‚¤ãƒ«ã€æ­£è¦è¡¨ç¾ãƒ©ã‚¤ãƒ–ãƒ©ãƒªã€diffã®4ã¤ã®ã¿
-* å¯¾è±¡ã®ã‚µã‚¯ãƒ©ã‚¨ãƒ‡ã‚£ã‚¿ã¯Ver2ä»¥é™ã®32bitç‰ˆ
-* å‹•ä½œOSã¯ã€XPä»¥é™
-* C:\Program Filesé…ä¸‹ã¸ã®ã‚³ãƒ”ãƒ¼æ™‚ã¯ç®¡ç†è€…ãƒ¢ãƒ¼ãƒ‰ã§ã‚³ãƒ”ãƒ¼
-* SourceForgeã¨Githubã€OSDNã®ã©ã‚Œã§ã‚‚ãƒ€ã‚¦ãƒ³ãƒ­ãƒ¼ãƒ‰å¯èƒ½ã¨ã™ã‚‹
-* ã‚µã‚¯ãƒ©ã‚¨ãƒ‡ã‚£ã‚¿ã®ãƒ€ã‚¦ãƒ³ãƒ­ãƒ¼ãƒ‰ã¯ã€SFã¨GitHub,OSDNã®3ç¨®é¡žã‹ã‚‰é¸ã¹ã‚‹
-* ãƒ˜ãƒ«ãƒ—ãƒ•ã‚¡ã‚¤ãƒ«ã¯ç¾çŠ¶SFã®ã¿ã ãŒã€å°†æ¥GitHubã«ãƒªãƒªãƒ¼ã‚¹ã•ã‚Œã‚Œã°å–å¾—å¯èƒ½ã¨ã™ã‚‹
-* ãƒ˜ãƒ«ãƒ—ãƒ•ã‚¡ã‚¤ãƒ«è‡ªèº«ã«ãƒãƒ¼ã‚¸ãƒ§ãƒ³æƒ…å ±ãŒç„¡ã„ãŸã‚ã‚¿ã‚¤ãƒ ã‚¹ã‚¿ãƒ³ãƒ—ã§åˆ¤å®š
-* ãƒãƒƒãƒˆã‹ã‚‰ã®ãƒ€ã‚¦ãƒ³ãƒ­ãƒ¼ãƒ‰ã¯ã€MSXMLã‚’ä½¿ã‚ãšcURLã§å–å¾—ã€‚ï¼ˆç’°å¢ƒä¾å­˜ã®å›žé¿)
-* zipå±•é–‹ã¯ã€7zã®ã‚³ãƒžãƒ³ãƒ‰ãƒ©ã‚¤ãƒ³ç‰ˆã‚’ä½¿ç”¨ã€‚(ã“ã‚Œã‚‚ç’°å¢ƒä¾å­˜ã®å›žé¿)
-* vbsã‚’jsã«ç§»è¡Œã—ãŸã„
-* è¤‡æ•°æ›´æ–°ã‚ã‚‹å ´åˆã¯ã€ã¾ã¨ã‚ã¦æ›´æ–°ã™ã‚‹
-* OSæ–°ã—ã„ãªã‚‰CURLä½¿ã‚ãªã„ã‚ˆã†ã«ã—ã¦ãƒ‘ãƒ•ã‚©ãƒ¼ãƒžãƒ³ã‚¹ä¸Šã’ã‚‹
+7. DIFF‚ÌƒŠƒŠ[ƒXURL  
+	DIFF‚Ìƒ_ƒEƒ“ƒ[ƒh‘ÎÛ‚ÌURL‚ðŽw’è‚µ‚Ü‚·B  
+	(–¢Žw’èŽž‚ÍŽæ“¾‚µ‚È‚¢)  
+	‰Šú’l:http://www.ring.gr.jp/archives/text/TeX/ptex-win32/w32/patch-diff-w32.zip
+
+8. CTAGS‚ÌƒŠƒŠ[ƒXURL  
+	CTAGS‚Ìƒ_ƒEƒ“ƒ[ƒh‘ÎÛ‚ÌURL‚ðŽw’è‚µ‚Ü‚·B  
+	(–¢Žw’èŽž‚ÍŽæ“¾‚µ‚È‚¢)  
+	‰Šú’l:http://hp.vector.co.jp/authors/VA025040/ctags/
+
+9. “ÆŽ©ƒŠƒŠ[ƒX—pURL(file:// or http://)  
+	ŽÐ“àƒlƒbƒg“™ƒCƒ“ƒ^[ƒlƒbƒgˆÈŠO‚©‚çƒ_ƒEƒ“ƒ[ƒh‚·‚éÛ‚ÌURL  
+	¦–¢ŽÀ‘•‚Ì‚½‚ßŒ»Žž“_‚Å‚Í–³Œø  
+	‰Šú’l‚Íƒ_ƒ~[
+
+10. ƒvƒ‰ƒOƒCƒ“‚ÌƒŠƒŠ[ƒXURL  
+	‚±‚Ìƒvƒ‰ƒOƒCƒ“‚ðXV‚·‚é‚½‚ß‚ÌURL  
+	‰Šú’l:https://github.com/osaboo/sakuraupdate/releases
+
+11. Å‹ß‚ÌXVƒ`ƒFƒbƒN“ú  
+	XVƒ`ƒFƒbƒN‚µ‚½ÅI“úB‚±‚Ì“ú‚©‚ç•p“x‚ÅÝ’è‚µ‚½“ú”‚ðŒo‰ß‚·‚é‚Æƒ`ƒFƒbƒN‚µ‚Ü‚·B
+
+12. XVƒ`ƒFƒbƒN‚Ì•p“x(’PˆÊ=“úA‹ó”’=Ž©“®ƒ`ƒFƒbƒN‚µ‚È‚¢)  
+	“ú’PˆÊ‚Åƒ`ƒFƒbƒN•p“x‚ðŽw’è‚µ‚Ü‚·B
+
+13. Debug Level (0=NODEBUG)  
+	1‚ ‚é‚¢‚Í2‚ÅƒAƒEƒgƒvƒbƒgƒEƒBƒ“ƒhƒE‚ÉÚ×‚ÈƒƒO‚ðo—Í‚µ‚Ü‚·B
+
+## Žd—lƒƒ‚
+
+* XV‘ÎÛ‚ÍAƒTƒNƒ‰ƒGƒfƒBƒ^–{‘ÌAƒwƒ‹ƒvƒtƒ@ƒCƒ‹A³‹K•\Œ»ƒ‰ƒCƒuƒ‰ƒŠAdiffAƒvƒ‰ƒOƒCƒ“Ž©g
+* ‘ÎÛ‚ÌƒTƒNƒ‰ƒGƒfƒBƒ^‚ÍVer2ˆÈ~‚Ì32bit”Å
+* “®ìOS‚ÍAXPˆÈ~
+* C:\Program Files”z‰º‚Ö‚ÌƒRƒs[Žž‚ÍŠÇ—ŽÒƒ‚[ƒh‚ÅƒRƒs[
+* SourceForge‚ÆGithubAOSDN‚Ì‚Ç‚ê‚Å‚àƒ_ƒEƒ“ƒ[ƒh‰Â”\‚Æ‚·‚é
+* ƒTƒNƒ‰ƒGƒfƒBƒ^‚Ìƒ_ƒEƒ“ƒ[ƒh‚ÍASF‚ÆGitHub,OSDN‚Ì3Ží—Þ‚©‚ç‘I‚×‚é
+* ƒwƒ‹ƒvƒtƒ@ƒCƒ‹‚ÍŒ»óSF‚Ì‚Ý‚¾‚ªA«—ˆGitHub‚âOSDN‚ÉƒŠƒŠ[ƒX‚³‚ê‚ê‚ÎŽæ“¾‰Â”\‚Æ‚·‚é
+* ƒwƒ‹ƒvƒtƒ@ƒCƒ‹Ž©g‚Éƒo[ƒWƒ‡ƒ“î•ñ‚ª–³‚¢‚½‚ßƒ^ƒCƒ€ƒXƒ^ƒ“ƒv‚Å”»’è
+* ƒlƒbƒg‚©‚ç‚Ìƒ_ƒEƒ“ƒ[ƒh‚ÍAMSXML‚ÅƒGƒ‰[‚É‚È‚éê‡‚ÉCURL‚ÅŽæ“¾BiŠÂ‹«ˆË‘¶‚Ì‰ñ”ð)
+* zip“WŠJ‚ÍA7z‚ÌƒRƒ}ƒ“ƒhƒ‰ƒCƒ“”Å‚ðŽg—pB(‚±‚ê‚àŠÂ‹«ˆË‘¶‚Ì‰ñ”ð)
+* •¡”XV‚ ‚éê‡‚ÍA‚Ü‚Æ‚ß‚ÄXV‚·‚é
+* OSV‚µ‚¢‚È‚çCURLŽg‚í‚È‚¢‚æ‚¤‚É‚µ‚ÄƒpƒtƒH[ƒ}ƒ“ƒXã‚°‚é
 
 ## ToDo
 
-* ãƒžã‚¯ãƒ­ãƒ˜ãƒ«ãƒ—ã€ãƒ—ãƒ©ã‚°ã‚¤ãƒ³ãƒ˜ãƒ«ãƒ—ã‚‚ç„¡ã‘ã‚Œã°ãƒ€ã‚¦ãƒ³ãƒ­ãƒ¼ãƒ‰ã™ã‚‹
-* æ–°ã—ã„ã‚­ãƒ¼ãƒ¯ãƒ¼ãƒ‰å®šç¾©ã‚ã‚Œã°ãƒ€ã‚¦ãƒ³ãƒ­ãƒ¼ãƒ‰ã™ã‚‹
-* VirtualStoreãŒæœ‰åŠ¹ã«ãªã£ã¦ã„ã‚‹ã‹åˆ¤æ–­ã—ã¦ç„¡åŠ¹åŒ–ã™ã‚‹
-* ã‚´ãƒŸæŽƒé™¤
-```
-	å‡¦ç†å¾Œã«%temp%\sakuraupdateã‚’å‰Šé™¤ã™ã‚‹
-		Cleanup
-```	
+* vbs‚ðjs‚ÉˆÚs‚µ‚½‚¢Bƒ\[ƒX‚à‚«‚ê‚¢‚É‚µ‚½‚¢B
+* ƒ}ƒNƒƒwƒ‹ƒvAƒvƒ‰ƒOƒCƒ“ƒwƒ‹ƒv‚à–³‚¯‚ê‚Îƒ_ƒEƒ“ƒ[ƒh‚·‚é
+* V‚µ‚¢ƒL[ƒ[ƒh’è‹`‚ ‚ê‚Îƒ_ƒEƒ“ƒ[ƒh‚·‚é
+* VirtualStore‚ª—LŒø‚É‚È‚Á‚Ä‚¢‚é‚©”»’f‚µ‚Ä–³Œø‰»‚·‚é
+* ƒSƒ~‘|œ(ˆ—Œã‚É%temp%\sakuraupdate‚ðíœ‚·‚é(Cleanup))
 
-## è‘—ä½œæ¨©è¡¨ç¤º
 
-1. ã‚µã‚¯ãƒ©ã‚¨ãƒ‡ã‚£ã‚¿ã¯ã€Norio Nakatani & CollaboratorsãŒé–‹ç™ºãƒ»é…å¸ƒã—ã¦ã„ã‚‹ãƒ•ãƒªãƒ¼ãƒ»ã‚½ãƒ•ãƒˆã‚¦ã‚§ã‚¢ã§ã™ã€‚  
+## ’˜ìŒ •\Ž¦
+
+1. ƒTƒNƒ‰ƒGƒfƒBƒ^‚ÍANorio Nakatani & Collaborators‚ªŠJ”­E”z•z‚µ‚Ä‚¢‚éƒtƒŠ[Eƒ\ƒtƒgƒEƒFƒA‚Å‚·B  
 https://sakura-editor.github.io/
 
-2. æ­£è¦è¡¨ç¾ãƒ©ã‚¤ãƒ–ãƒ©ãƒª bregonig.dllã¯ã€ K.Takata (é«˜ç”° è¬™)æ°ãŒé–‹ç™ºãƒ»é…å¸ƒã—ã¦ã„ã‚‹ãƒ•ãƒªãƒ¼ãƒ»ã‚½ãƒ•ãƒˆã‚¦ã‚§ã‚¢ã§ã™ã€‚  
+2. ³‹K•\Œ»ƒ‰ƒCƒuƒ‰ƒŠ bregonig.dll‚ÍA K.Takata (‚“c Œª)Ž‚ªŠJ”­E”z•z‚µ‚Ä‚¢‚éƒtƒŠ[Eƒ\ƒtƒgƒEƒFƒA‚Å‚·B  
 http://k-takata.o.oo7.jp/mysoft/bregonig.html
 
-3. åŒå°ã®curl.exeã¯Dirk Paehlæ°ãŒã‚³ãƒ³ãƒ‘ã‚¤ãƒ«ãƒ»é…å¸ƒã—ã¦ã„ã‚‹ã‚‚ã®ã§ã™ã€‚  
+3. “¯••‚Ìcurl.exe‚ÍDirk PaehlŽ‚ªƒRƒ“ƒpƒCƒ‹E”z•z‚µ‚Ä‚¢‚é‚à‚Ì‚Å‚·B  
 http://www.paehl.com/open_source/?CURL_7.61.0
 
-4. åŒå°ã®7za.exeã¯ã€GNU LGPLã§ãƒ©ã‚¤ã‚»ãƒ³ã‚¹ã•ã‚Œã¦ã„ã‚‹ã€Igor Pavlovã®è‘—ä½œç‰©ã§ã™ã€‚  
+4. “¯••‚Ì7za.exe‚ÍAGNU LGPL‚Åƒ‰ƒCƒZƒ“ƒX‚³‚ê‚Ä‚¢‚éAIgor Pavlov‚Ì’˜ì•¨‚Å‚·B  
 	7-Zip Extra is package of extra modules of 7-Zip.   
 	7-Zip Copyright (C) 1999-2018 Igor Pavlov.  
 	7-Zip is free software. Read License.txt for more information about license.  

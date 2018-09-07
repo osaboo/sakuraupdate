@@ -100,7 +100,7 @@ Dim OSVer
 
 ' 初期化
 Sub Init()
-  Version = "v20180903"
+  Version = "v20180908"
 
   DebugLvl = Plugin.GetOption("サクラエディタ", "DEBUGLVL")
 
@@ -1268,6 +1268,16 @@ Sub UpdateCheck(amode)
         End If
     End If
     
+    If Plugin.GetOption("サクラエディタ", "CTAGSURL") <> "" Then
+        If amode = 2 Then log vbCrLf & "Ctags(タグ生成)ツールの最新バージョンを確認します。", 0
+        wchk4 = CtagsCheck(amode, wnewver, wurl)
+        If wchk4 = true and amode = 2 Then
+            Call CtagsDownload(wurl)
+            redim preserve wtargets(ubound(wtargets)+1)
+            wtargets(ubound(wtargets)) = "ctags.exe"
+        End If
+    End If
+
     if ubound(wtargets) > 0 Then
         Call FileSetup(wtargets)
     End If
@@ -1815,6 +1825,143 @@ on error goto 0
     End If
 
 End Sub
+
+Sub CtagsUpdate()
+    Dim wurl
+    Dim wnewver
+
+    Editor.ActivateWinOutput
+
+    log vbCrLf & "★★sakuraupdate " & Version & "★★", 0
+    log "Ctags(タグ生成)ツールを配置します。", 0
+    
+    If CtagsCheck(2, wnewver, wurl) = false Then
+        If WSH.Popup("すでに配置済みですが、更新しますか?", 0, "ソフトウェアの更新", 4) = 7 Then
+            Exit Sub
+        End If
+    End If
+
+    Call CtagsDownload(wurl)
+
+    Call FileSetup(Array("","ctags.exe"))
+
+End Sub
+
+
+'   Ctags(タグ生成)ツールの更新チェック
+'   amode = 1:自動モード,  2:手動モード
+'   戻り値: true=更新あり false=更新なし
+'
+Function CtagsCheck(amode, ByRef aver, ByRef aurl)
+
+    'Editor.ActivateWinOutput
+
+    Dim wurl
+    Dim wlink
+    Dim wsakurapath
+    Dim wctagspath
+    Dim wcurdate
+    
+    wsakurapath = Editor.ExpandParameter("$S")
+    wcurdate = ""
+on error resume next
+    wctagspath = FS.GetParentFolderName(wsakurapath) & "\ctags.exe"
+    wcurdate = DateValue(FS.GetFile(wctagspath).DateLastModified)
+on error goto 0
+
+    aurl = Plugin.GetOption("サクラエディタ", "CTAGSURL")
+    aver = ""
+
+    if aurl = "" Then
+        Exit Function
+    End If
+    
+    Dim wpage
+    
+    If instr(aurl, "hp.vector.co.jp/authors/VA025040/ctags") > 0 Then
+        wpage = DownloadFile(aurl, "")
+
+        Dim re, match, matchs
+        Set re = CreateObject("VBScript.RegExp")
+        re.Pattern = "downloads/ec(\d+j\d)w32bin\.zip"
+        'a href="downloads/ec58j2w32bin.zip
+
+        With re
+            .Global = True
+            Set matchs = .Execute(wpage)
+            If matchs.Count > 0 Then
+                wlink = matchs(0)
+                log "見つかったファイル:" & wlink, 2
+                aurl = aurl & wlink
+                If matchs(0).SubMatches.Count > 0 Then
+                    aver = matchs(0).SubMatches(0)
+                End If
+            End If
+        End With
+    End If
+
+    If aver = "" Then
+        If amode = 2 Then log "×最新版を確認できませんでした。", 0
+        CtagsCheck = False
+        Exit Function
+    End If
+    
+    If amode = 2 Then log "現在のCtags(差分)ツールの更新日付:" & wcurdate, 0
+
+    If wcurdate <> "" Then
+        If amode = 2 Then log "●Ctags(差分)ツールは配置済みです。", 0
+        CtagsCheck = False
+        Exit Function
+    End If
+
+    log "★Ctags(差分)ツールがダウンロード可能です。", 0
+    
+    CtagsCheck = True
+
+End Function
+
+' Ctags(差分)ツールのzipダウンロード
+
+Sub CtagsDownload(wurl)
+    
+    Dim wlink
+    Dim wcmd
+    Dim wzipfile
+    
+    wzipfile = WorkDir & "\Ctags.zip"
+    
+    wlink = wurl
+    
+    log "Ctags(差分)ツールをダウンロードします.. " & wlink, 0
+
+    'wcmd = "bitsadmin.exe /TRANSFER sakura2 " & wurl & " " & wzipfile
+    wcmd = CurlExe & " -L """ & wlink & """ -o " & wzipfile
+    log ">" & wcmd, 1
+    'DoCmd wcmd, ""
+    WSH.Run wcmd, 7, True '
+
+    If Not IsExistFile(wzipfile) Then
+        log "ダウンロードできませんでした。", 0
+        Exit Sub
+    End If
+    
+    log "ダウンロードファイルを展開します。", 1
+
+    'zip展開
+    wcmd = UnzipExe & " e -aoa " & wzipfile & " ctags.exe -o" & WorkDir
+    log ">" & wcmd, 1
+    WSH.Run wcmd, 7, False
+
+on error resume next
+    Editor.Sleep 500
+on error goto 0
+
+    If Not IsExistFile(WorkDir & "\ctags.exe") Then
+        log "ctags.exeがダウンロードファイルにありませんでした。", 0
+        Exit Sub
+    End If
+
+End
 
 '	プラグインの更新処理
 

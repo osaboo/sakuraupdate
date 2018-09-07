@@ -4,15 +4,13 @@ Id=SoftwareUpdate
 Name=ソフトウェアの更新(&W)
 Description=SakuraEditorを自動更新します
 Type=wsh
-Version=v20180903
+Version=v20180908
 Url=https://github.com/osaboo/sakuraupdate/
 Author=osaboo
 
 [Command]
 C[1]=CheckOnDemand.vbs
 C[1].Label=更新チェック(&C)
-;C[2]=AllUpdate.vbs
-;C[2].Label=まとめて更新(&S)
 C[2]=SakuraUpdate.vbs
 C[2].Label=サクラエディタ更新(&S)
 C[3]=HelpUpdate.vbs
@@ -21,6 +19,8 @@ C[4]=RegexpUpdate.vbs
 C[4].Label=正規表現ライブラリ更新(&R)
 C[5]=DiffUpdate.vbs
 C[5].Label=DIFF更新(&D)
+C[5]=CtagsUpdate.vbs
+C[5].Label=CTAGS更新(&T)
 C[6]=PluginUpdate.vbs
 C[6].Label=このプラグインの更新(&U)
 
@@ -70,31 +70,37 @@ O[7].Label=DIFFのリリースURL(未指定時は取得しない)
 O[7].Type=Str
 O[7].Default=http://www.ring.gr.jp/archives/text/TeX/ptex-win32/w32/patch-diff-w32.zip
 
-O[8].Key=CUSTOMURL
-O[8].Label=独自リリース用URL(file:// or http://)
+O[8].Key=CTAGSURL
+O[8].Label=CTAGSのリリースURL(未指定時は取得しない)
 O[8].Type=Str
-O[8].Default=file://hogehoge/share/sakura
+O[8].Default=http://hp.vector.co.jp/authors/VA025040/ctags/
+;O[8].Default=https://sourceforge.net/projects/ctags/rss?path=/ctags
 
-O[9].Key=PLUGINURL
-O[9].Label=プラグインのリリースURL
+O[9].Key=CUSTOMURL
+O[9].Label=独自リリース用URL(file:// or http://)
 O[9].Type=Str
-O[9].Default=https://api.github.com/repos/osaboo/sakuraupdate/releases
+O[9].Default=file://hogehoge/share/sakura
 
-O[10].Key=LASTCHECK
-O[10].Label=最近の更新チェック日
-;Date of last update check
+O[10].Key=PLUGINURL
+O[10].Label=プラグインのリリースURL
 O[10].Type=Str
+O[10].Default=https://api.github.com/repos/osaboo/sakuraupdate/releases
 
-O[11].Key=CHECKFREQ
-O[11].Label=更新チェックの頻度(単位=日、空白=自動チェックしない)
-;Frequency of update check (unit=day. null=stop auto check)
+O[11].Key=LASTCHECK
+O[11].Label=最近の更新チェック日
+;Date of last update check
 O[11].Type=Str
-O[11].Default=7
 
-O[12].Key=DEBUGLVL
-O[12].Label=Debug Level (0=NODEBUG)
+O[12].Key=CHECKFREQ
+O[12].Label=更新チェックの頻度(単位=日、空白=自動チェックしない)
+;Frequency of update check (unit=day. null=stop auto check)
 O[12].Type=Str
-O[12].Default=0
+O[12].Default=7
+
+O[13].Key=DEBUGLVL
+O[13].Label=Debug Level (0=NODEBUG)
+O[13].Type=Str
+O[13].Default=0
 
 [Plug]
 EditorStart=UpdateCheck.vbs

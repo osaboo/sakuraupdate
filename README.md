@@ -1,5 +1,5 @@
 # sakuraupdate
-Sakura-Editor Update Plugin (v20180903 (beta))
+Sakura-Editor Update Plugin (v20180908 (beta))
 
 プラグインでサクラエディタのバージョンアップ機能を実装してみる
 
@@ -11,6 +11,7 @@ Sakura-Editor Update Plugin (v20180903 (beta))
 	* ヘルプファイル
 	* 正規表現ライブラリ
 	* Diffコマンド
+	* Ctagsコマンド
 	* 当プラグイン自身
 
 2. サクラエディタ起動時に自動的にチェックすることができます。
@@ -53,6 +54,7 @@ zipを展開してpluginsフォルダにsakuraupdateフォルダを作って保�
 	 └ヘルプファイル更新  
 	 └正規表現ライブラリ更新  
 	 └DIFF更新  
+	 └CTAGS更新  
 	 └このプラグインの更新  
 
 2. 更新チェック  
@@ -71,7 +73,10 @@ zipを展開してpluginsフォルダにsakuraupdateフォルダを作って保�
 6. DIFF更新  
 	DIFFコマンドのみを更新します。
 
-7. このプラグインの更新  
+7. CTAGS更新  
+	CTAGSコマンドのみを更新します。
+
+8. このプラグインの更新  
 	sakuraupdateプラグインのみを更新します。
 
 ## オプション設定
@@ -109,22 +114,27 @@ zipを展開してpluginsフォルダにsakuraupdateフォルダを作って保�
 	(未指定時は取得しない)  
 	初期値:http://www.ring.gr.jp/archives/text/TeX/ptex-win32/w32/patch-diff-w32.zip
 
-8. 独自リリース用URL(file:// or http://)  
+8. CTAGSのリリースURL  
+	CTAGSのダウンロード対象のURLを指定します。  
+	(未指定時は取得しない)  
+	初期値:http://hp.vector.co.jp/authors/VA025040/ctags/
+
+9. 独自リリース用URL(file:// or http://)  
 	社内ネット等インターネット以外からダウンロードする際のURL  
 	※未実装のため現時点では無効  
 	初期値はダミー
 
-9. プラグインのリリースURL  
+10. プラグインのリリースURL  
 	このプラグインを更新するためのURL  
 	初期値:https://github.com/osaboo/sakuraupdate/releases
 
-10. 最近の更新チェック日  
+11. 最近の更新チェック日  
 	更新チェックした最終日。この日から頻度で設定した日数を経過するとチェックします。
 
-11. 更新チェックの頻度(単位=日、空白=自動チェックしない)  
+12. 更新チェックの頻度(単位=日、空白=自動チェックしない)  
 	日単位でチェック頻度を指定します。
 
-12. Debug Level (0=NODEBUG)  
+13. Debug Level (0=NODEBUG)  
 	1あるいは2でアウトプットウィンドウに詳細なログを出力します。
 
 ## 仕様メモ
