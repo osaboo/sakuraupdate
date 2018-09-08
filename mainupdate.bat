@@ -1,10 +1,6 @@
 @echo off
 call "%TEMP%\sakuraupdate\_setenv.bat"
 
-rem set srcfile=%srcfolder%\%targetfile%
-rem set newfile=%targetfolder%\%targetfile%
-rem set oldfile=%targetfolder%\%targetfile%.old
-
 @echo _runas      =%_runas%
 @echo srcfolder   =%srcfolder%
 @echo targetfolder=%targetfolder%
@@ -12,6 +8,7 @@ rem set oldfile=%targetfolder%\%targetfile%.old
 @echo targetfile2 =%targetfile2%
 @echo targetfile3 =%targetfile3%
 @echo targetfile4 =%targetfile4%
+@echo targetfile5 =%targetfile5%
 
 set _fileupdate=%~dp0fileupdate.bat
 
@@ -32,13 +29,13 @@ if "%targetfile3%"=="sakura.exe" goto :L3
 if "%targetfile3%"=="plugin" goto :L3
 if "%targetfile4%"=="sakura.exe" goto :L3
 if "%targetfile4%"=="plugin" goto :L3
+if "%targetfile5%"=="sakura.exe" goto :L3
+if "%targetfile5%"=="plugin" goto :L3
 goto :end
 
 :L3
 echo サクラエディタを再起動します。
-rem @timeout /t 2
 if not exist "%sakurafolder%\sakura.exe" goto :end
 start "" "%sakurafolder%\sakura.exe"
 
 :end
-rem timeout /t 10
