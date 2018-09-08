@@ -20,6 +20,7 @@
         <method name="HelpUpdate" />
         <method name="RegExpUpdate" />
         <method name="DiffUpdate" />
+        <method name="CtagsUpdate" />
         <method name="PluginUpdate" />
         <method name="log">
                 <PARAMETER name="amsg"/>
@@ -1906,21 +1907,21 @@ on error goto 0
         Exit Function
     End If
     
-    If amode = 2 Then log "現在のCtags(差分)ツールの更新日付:" & wcurdate, 0
+    If amode = 2 Then log "現在のCtags(タグ生成)ツールの更新日付:" & wcurdate, 0
 
     If wcurdate <> "" Then
-        If amode = 2 Then log "●Ctags(差分)ツールは配置済みです。", 0
+        If amode = 2 Then log "●Ctags(タグ生成)ツールは配置済みです。", 0
         CtagsCheck = False
         Exit Function
     End If
 
-    log "★Ctags(差分)ツールがダウンロード可能です。", 0
+    log "★Ctags(タグ生成)ツールがダウンロード可能です。", 0
     
     CtagsCheck = True
 
 End Function
 
-' Ctags(差分)ツールのzipダウンロード
+' Ctags(タグ生成)ツールのzipダウンロード
 
 Sub CtagsDownload(wurl)
     
@@ -1932,7 +1933,7 @@ Sub CtagsDownload(wurl)
     
     wlink = wurl
     
-    log "Ctags(差分)ツールをダウンロードします.. " & wlink, 0
+    log "Ctags(タグ生成)ツールをダウンロードします.. " & wlink, 0
 
     'wcmd = "bitsadmin.exe /TRANSFER sakura2 " & wurl & " " & wzipfile
     wcmd = CurlExe & " -L """ & wlink & """ -o " & wzipfile
@@ -1948,7 +1949,7 @@ Sub CtagsDownload(wurl)
     log "ダウンロードファイルを展開します。", 1
 
     'zip展開
-    wcmd = UnzipExe & " e -aoa " & wzipfile & " ctags.exe -o" & WorkDir
+    wcmd = UnzipExe & " e -aoa " & wzipfile & " -o" & WorkDir
     log ">" & wcmd, 1
     WSH.Run wcmd, 7, False
 
@@ -1961,7 +1962,7 @@ on error goto 0
         Exit Sub
     End If
 
-End
+End Sub
 
 '	プラグインの更新処理
 
