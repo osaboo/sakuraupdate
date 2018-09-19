@@ -39,12 +39,6 @@
         <method name="GetBitBucket">
                 <PARAMETER name="aurl"/>
         </method>
-        <method name="YYYYMMDD">
-                <PARAMETER name="aDT"/>
-        </method>
-        <method name="HHNNSS">
-                <PARAMETER name="aDT"/>
-        </method>
         <method name="IsExistFile">
                 <PARAMETER name="afile"/>
         </method>
@@ -59,9 +53,6 @@
         </method>
         <method name="DoCmd">
                 <PARAMETER name="acmd"/>
-        </method>
-        <method name="GetFileEncode">
-                <PARAMETER name="afile"/>
         </method>
         <method name="LoadText">
                 <PARAMETER name="afile"/>
@@ -113,6 +104,7 @@ Sub Init()
       Plugin.SetOption "サクラエディタ", "HELPURL",  "https://sourceforge.net/projects/sakura-editor/rss?path=/help2"
       Plugin.SetOption "サクラエディタ", "REGEXPURL","https://api.bitbucket.org/2.0/repositories/k_takata/bregonig/downloads"
       Plugin.SetOption "サクラエディタ", "DIFFURL",  "http://www.ring.gr.jp/archives/text/TeX/ptex-win32/w32/patch-diff-w32.zip"
+      Plugin.SetOption "サクラエディタ", "CTAGSURL", "http://hp.vector.co.jp/authors/VA025040/ctags/"
       Plugin.SetOption "サクラエディタ", "PLUGINURL","https://api.github.com/repos/osaboo/sakuraupdate/releases"
       Plugin.SetOption "サクラエディタ", "CHECKFREQ","7"
       Plugin.SetOption "サクラエディタ", "DEBUGLVL", "0"
@@ -202,22 +194,6 @@ Function DeleteFile(afile)
   If Err.Number <> 0 Then
      log afile & "を削除できませんでした。", 1
   End If
-End Function
-
-'    日付変換
-Function YYYYMMDD(aDT)
-    On Error Resume Next
-    YYYYMMDD = "00000000"
-    If IsDate(aDT) Then
-        YYYYMMDD = Right("0000" & Year(aDT), 4) & Right("00" & Month(aDT), 2) & Right("00" & Day(aDT), 2)
-    End If
-End Function
-
-'   時刻変換
-Function HHNNSS(aDT)
-    On Error Resume Next
-    HHNNSS = "000000"
-    HHNNSS = Right("00" & Hour(aDT), 2) & Right("00" & Minute(aDT), 2) & Right("00" & Second(aDT), 2)
 End Function
 
 'Function DoCmd(acmd, aenc)
@@ -465,44 +441,6 @@ Function AppendText(atext, apath, aenc)
     Set st = Nothing
   
   AppendText = atext
-End Function
-
-Function FindApp(app)
-    Dim oXL
-    On Error Resume Next
-    
-    Set FindApp = Nothing
-
-'    Dim oWD 'As Word.Application
-'    Dim task 'As Word.task
-    
-'    Set oWD = CreateObject("Word.Application")
-    
-'    oWD.Visible = True
-'    For Each task In oWD.Tasks
-'        If InStr(task.Name, app) > 0 Then
-'            'task.WindowState = wdWindowStateNormal
-'            'task.Activate
-'        End If
-'        'Debug.Print task.Parent
-'    Next
-
-'    Dim Locator
-'    Dim Server
-'    Dim oSet
-'    Dim o
-'
-'    Set Locator = CreateObject("WbemScripting.SWbemLocator")
-'    Set Server = Locator.ConnectServer
-'    Set oSet = Server.ExecQuery("Select * From Win32_Process")
-'
-'    For Each o In oSet
-'        Debug.Print o.Caption
-'        If o.Caption = app Then
-'             Stop
-'        End If
-'    Next
-
 End Function
 
 'WinHttpRequest/XMLHTTPRequestオブジェクト作成
@@ -828,6 +766,7 @@ Function GetGitHub(ByRef aurl)
     Dim i, j, k
     Dim wcmd
     Dim wtmpfile
+    Dim re, match, matchs
 
     wlink = aurl
     log "GitHub確認中.. " & wlink, 1
@@ -841,39 +780,72 @@ Function GetGitHub(ByRef aurl)
     'wpage = LoadText(wtmpfile, "utf-8")
     wpage = DownloadFile(wlink, "")
 
-    mesg = "browser_download_url"":"
-    i = InStr(wpage, mesg)
-    If i > 0 Then
-        wlink = Mid(wpage, i + Len(mesg))
-        '    "xxxxxx"
-        ' j  1
-        ' k         8
-        '     2----7  (9-2-3)
-        j = InStr(wlink, """")
-        If j > 0 Then
-            k = InStr(j + 1, wlink, """")
-            If k > 0 Then
-                wlink = Mid(wlink, j + 1, k - j - 1)
-                aurl = wlink
+    If Instr(aurl, "sakura") > 0 Then
+        mesg = "browser_download_url"":"
+        i = InStr(wpage, mesg)
+        If i > 0 Then
+            wlink = Mid(wpage, i + Len(mesg))
+            '    "xxxxxx"
+            ' j  1
+            ' k         8
+            '     2----7  (9-2-3)
+            j = InStr(wlink, """")
+            If j > 0 Then
+                k = InStr(j + 1, wlink, """")
+                If k > 0 Then
+                    wlink = Mid(wlink, j + 1, k - j - 1)
+                    aurl = wlink
+                End If
+            Else
+                wlink = ""
             End If
-        Else
-            wlink = ""
+            log "見つかったファイル:" & wlink, 2
         End If
-        log "見つかったファイル:" & wlink, 2
-    End If
-     
-    If wlink <> "" Then
-        Dim re, match, matchs
+        
+        If wlink <> "" Then
+            Set re = CreateObject("VBScript.RegExp")
+
+            With re
+                .Pattern = "([0-9]+\.[0-9]+\.[0-9]+\.[0-9]+|v[0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9])"
+                .Global = True
+                Set matchs = .Execute(wlink)
+                'Debug.Print matchs.Count
+                For Each match In matchs
+                    'Debug.Print match.Value
+                    wver = match.Value
+                Next
+            End With
+        End If
+
+    ElseIf Instr(aurl, "universal-ctags") > 0 Then
         Set re = CreateObject("VBScript.RegExp")
+
         With re
-            .Pattern = "([0-9]+\.[0-9]+\.[0-9]+\.[0-9]+|v[0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9])"
+            wlink = ""
+            
+            '.Pattern = "ctags-2018-09-18_3480c6de-x86.zip"
+            .Pattern = """browser_download_url"": ?""([^ ""]+ctags-\d+-\d+-\d+_[0-9a-z]+-x86\.zip)"
             .Global = True
-            Set matchs = .Execute(wlink)
-            'Debug.Print matchs.Count
-            For Each match In matchs
-                'Debug.Print match.Value
-                wver = match.Value
-            Next
+            Set matchs = .Execute(wpage)
+            If matchs.Count > 0 Then
+                If matchs(0).SubMatches.Count > 0 Then
+                    wlink = matchs(0).SubMatches(0)
+                    log "見つかったファイル:" & wlink, 2
+                    aurl = wlink
+                End If
+            End If
+            
+            If wlink <> "" Then
+                .Pattern = "ctags-(\d+-\d+-\d+)_[0-9a-z]+-x86\.zip"
+                .Global = True
+                Set matchs = .Execute(wlink)
+                If matchs.Count > 0 Then
+                    If matchs(0).SubMatches.Count > 0 Then
+                        wver = matchs(0).SubMatches(0)
+                        wver = replace(wver,"-","/")
+                    End If
+                End If
+            End If
         End With
     End If
 
@@ -1225,8 +1197,9 @@ Sub UpdateCheck(amode)
     wchk0 = PluginCheck(amode, wnewver, wurl)
     If wchk0 = true Then
         If amode = 2 Then
-            Call PluginDownload(wurl)
-            Call PluginSetup("plugin")
+            If PluginDownload(wurl) = true Then
+                Call PluginSetup("plugin")
+            End If
         End If
         Exit Sub
     End If
@@ -1234,18 +1207,20 @@ Sub UpdateCheck(amode)
     If amode = 2 Then log vbCrLf & "サクラエディタ本体の最新バージョンを確認します。", 0
     wchk1 = SakuraCheck(amode, wnewver, wurl)
     If wchk1 = true and amode = 2 Then
-        Call SakuraDownload(wurl)
-        redim preserve wtargets(ubound(wtargets)+1)
-        wtargets(ubound(wtargets)) = "sakura.exe"
+        If SakuraDownload(wurl) = True Then
+            redim preserve wtargets(ubound(wtargets)+1)
+            wtargets(ubound(wtargets)) = "sakura.exe"
+        End If
     End If
 
     If Plugin.GetOption("サクラエディタ", "HELPURL") <> "" Then
         If amode = 2 Then log vbCrLf & "ヘルプファイルの最新バージョンを確認します。", 0
         wchk2 = HelpCheck(amode, wnewver, wurl)
         If wchk2 = true and amode = 2 Then
-            Call HelpDownload(wurl)
-            redim preserve wtargets(ubound(wtargets)+1)
-            wtargets(ubound(wtargets)) = "sakura.chm"
+            If HelpDownload(wurl) = true Then
+                redim preserve wtargets(ubound(wtargets)+1)
+                wtargets(ubound(wtargets)) = "sakura.chm"
+            End If
         End If
     End If
     
@@ -1253,9 +1228,10 @@ Sub UpdateCheck(amode)
         If amode = 2 Then log vbCrLf & "正規表現ライブラリの最新バージョンを確認します。", 0
         wchk3 = RegExpCheck(amode, wnewver, wurl)
         If wchk3 = true and amode = 2 Then
-            Call RegExpDownload(wurl)
-            redim preserve wtargets(ubound(wtargets)+1)
-            wtargets(ubound(wtargets)) = "bregonig.dll"
+            If RegExpDownload(wurl) = true Then
+                redim preserve wtargets(ubound(wtargets)+1)
+                wtargets(ubound(wtargets)) = "bregonig.dll"
+            End If
         End If
     End If
     
@@ -1263,9 +1239,10 @@ Sub UpdateCheck(amode)
         If amode = 2 Then log vbCrLf & "Diff(差分)ツールの最新バージョンを確認します。", 0
         wchk4 = DiffCheck(amode, wnewver, wurl)
         If wchk4 = true and amode = 2 Then
-            Call DiffDownload(wurl)
-            redim preserve wtargets(ubound(wtargets)+1)
-            wtargets(ubound(wtargets)) = "diff.exe"
+            If DiffDownload(wurl) = True Then
+                redim preserve wtargets(ubound(wtargets)+1)
+                wtargets(ubound(wtargets)) = "diff.exe"
+            End If
         End If
     End If
     
@@ -1273,9 +1250,10 @@ Sub UpdateCheck(amode)
         If amode = 2 Then log vbCrLf & "Ctags(タグ生成)ツールの最新バージョンを確認します。", 0
         wchk4 = CtagsCheck(amode, wnewver, wurl)
         If wchk4 = true and amode = 2 Then
-            Call CtagsDownload(wurl)
-            redim preserve wtargets(ubound(wtargets)+1)
-            wtargets(ubound(wtargets)) = "ctags.exe"
+            If CtagsDownload(wurl) = true Then
+                redim preserve wtargets(ubound(wtargets)+1)
+                wtargets(ubound(wtargets)) = "ctags.exe"
+            End If
         End If
     End If
 
@@ -1286,6 +1264,7 @@ Sub UpdateCheck(amode)
 End Sub
 
 Sub SakuraUpdate()
+    Dim wchk
     Dim wurl
     Dim wnewver
 
@@ -1294,13 +1273,18 @@ Sub SakuraUpdate()
     log vbCrLf & "★★sakuraupdate " & Version & "★★", 0
     log "サクラエディタ本体を最新バージョンに更新します。", 0
 
-    If SakuraCheck(2, wnewver, wurl) = false Then
+    wchk = SakuraCheck(2, wnewver, wurl)
+    If IsNull(wchk) Then Exit Sub
+
+    If wchk = False Then
         If WSH.Popup("すでに最新版ですが、更新しますか?", 0, "ソフトウェアの更新", 4) = 7 Then
             Exit Sub
         End If
     End If
-
-    Call SakuraDownload(wurl)
+    
+    If SakuraDownload(wurl) = False Then
+        Exit Sub
+    End If
 
     Call FileSetup(Array("","sakura.exe"))
 
@@ -1312,12 +1296,12 @@ End Sub
 '
 Function SakuraCheck(amode, ByRef aver, ByRef aurl)
 
-    'Editor.ActivateWinOutput
-
     'Dim wurl
     Dim wlink
     Dim wcurver
     wcurver = Editor.ExpandParameter("$V")
+
+    If amode = 2 Then log "現在のサクラエディタのバージョン:" & wcurver, 0
     
     Select Case Plugin.GetOption("サクラエディタ", "SITEPRIORITY")
     Case "0"
@@ -1340,11 +1324,10 @@ Function SakuraCheck(amode, ByRef aver, ByRef aurl)
 
     If aver = "" Then
         If amode = 2 Then log "×最新版を確認できませんでした。", 0
-        SakuraCheck = False
+        SakuraCheck = Null
         Exit Function
     End If
     
-    If amode = 2 Then log "現在のサクラエディタのバージョン:" & wcurver, 0
     If amode = 2 Then log "最新のサクラエディタのバージョン:" & aver, 0
 
     If aver <= wcurver Then
@@ -1361,7 +1344,7 @@ End Function
 
 ' サクラエディタのzipダウンロード
 
-Sub SakuraDownload(wurl)
+Function SakuraDownload(wurl)
 
     Dim wlink
     Dim wcmd
@@ -1392,7 +1375,8 @@ Sub SakuraDownload(wurl)
 
     If Not FS.FileExists(wzipfile) Then
         log "ダウンロードできませんでした。", 0
-        Exit Sub
+        SakuraDownload = False
+        Exit Function
     End If
     
     log "ダウンロードファイルを展開します。", 0
@@ -1410,14 +1394,17 @@ on error goto 0
 
     If Not FS.FileExists(WorkDir & "\sakura.exe") Then
         log WorkDir & "\sakura.exeがダウンロードファイルにありませんでした。", 0
-        Exit Sub
+        SakuraDownload = False
+        Exit Function
     End If
 
     'Editor.ExitAll
-    
-End Sub
+    SakuraDownload = True
+
+End Function
 
 Sub RegExpUpdate()
+    Dim wchk
     Dim wurl
     Dim wnewver
 
@@ -1426,13 +1413,18 @@ Sub RegExpUpdate()
     log vbCrLf & "★★sakuraupdate " & Version & "★★", 0
     log "正規表現ライブラリを最新バージョンに更新します。", 0
     
-    If RegExpCheck(2, wnewver, wurl) = false Then
+    wchk = RegExpCheck(2, wnewver, wurl) 
+    If IsNull(wchk) Then Exit Sub
+
+    If wchk = False Then
         If WSH.Popup("すでに最新版ですが、更新しますか?", 0, "ソフトウェアの更新", 4) = 7 Then
             Exit Sub
         End If
     End If
 
-    Call RegExpDownload(wurl)
+    If RegExpDownload(wurl) = False Then
+        Exit Sub
+    End If
 
     Call FileSetup(Array("","bregonig.dll"))
 
@@ -1478,6 +1470,8 @@ on error goto 0
         End If
     End With
     
+    If amode = 2 Then log "現在の正規表現ライブラリのバージョン:" & wcurver, 0
+
     wurl = Plugin.GetOption("サクラエディタ", "REGEXPURL")
 
     If InStr(wurl, "sourceforge.net") > 0 Then
@@ -1491,13 +1485,12 @@ on error goto 0
     
     If aver = "" Then
         If amode = 2 Then log "×最新版を確認できませんでした。", 0
-        RegExpCheck = False
+        RegExpCheck = Null
         Exit Function
     End If
     
     aurl = wurl
     
-    If amode = 2 Then log "現在の正規表現ライブラリのバージョン:" & wcurver, 0
     If amode = 2 Then log "最新の正規表現ライブラリのバージョン:" & aver, 0
 
     If aver <= wcurver Then
@@ -1514,7 +1507,7 @@ End Function
 
 ' 正規表現ライブラリのzipダウンロード
 
-Sub RegExpDownload(wurl)
+Function RegExpDownload(wurl)
     
     Dim wlink
     Dim wcmd
@@ -1528,7 +1521,7 @@ Sub RegExpDownload(wurl)
         'wlink = GetSFLink(wurl)
         'if wlink = "" then
         '    If DebugLvl > 0 Then log "ダウンロードリンクを取得できませんでした。"
-        '    exit sub
+        '    exit Function
         'End If
     ElseIf InStr(wurl, "bitbucket.org") > 0 Then
         wlink = wurl
@@ -1544,7 +1537,8 @@ Sub RegExpDownload(wurl)
 
     If Not IsExistFile(wzipfile) Then
         log "ダウンロードできませんでした。", 0
-        Exit Sub
+        RegExpDownload = False
+        Exit Function
     End If
     
     log "ダウンロードファイルを展開します。", 1
@@ -1560,12 +1554,16 @@ on error goto 0
 
     If Not IsExistFile(WorkDir & "\bregonig.dll") Then
         log "bregonig.dllがダウンロードファイルにありませんでした。", 0
-        Exit Sub
+        RegExpDownload = False
+        Exit Function
     End If
 
-End Sub
+    RegExpDownload = True
+
+End Function
 
 Sub HelpUpdate()
+    Dim wchk
     Dim wurl
     Dim wnewver
 
@@ -1574,13 +1572,18 @@ Sub HelpUpdate()
     log vbCrLf & "★★sakuraupdate " & Version & "★★", 0
     log "ヘルプファイルを最新バージョンに更新します。", 0
 
-    If HelpCheck(2, wnewver, wurl) = false Then
+    wchk = HelpCheck(2, wnewver, wurl)
+    If IsNull(wchk) Then Exit Sub
+
+    If wchk = False Then
         If WSH.Popup("すでに最新版ですが、更新しますか?", 0, "ソフトウェアの更新", 4) = 7 Then
             Exit Sub
         End If
     End If
 
-    Call HelpDownload(wurl)
+    If HelpDownload(wurl) = False Then
+        Exit Sub
+    End If
 
     Call FileSetup(Array("","sakura.chm"))
 
@@ -1608,6 +1611,9 @@ Function HelpCheck(amode, ByRef aver, ByRef aurl)
     wcurdate = DateValue(FS.GetFile(whelppath).DateLastModified)
     on error goto 0
 
+    'If amode = 2 Then log "現在のサクラエディタのバージョン:" & wsakuraver, 0
+    If amode = 2 Then log "現在のヘルプファイル更新日付:" & wcurdate, 0
+
     wsakuraver = Editor.ExpandParameter("$V")
     wurl = Plugin.GetOption("サクラエディタ", "HELPURL")
     aver = ""
@@ -1621,14 +1627,12 @@ Function HelpCheck(amode, ByRef aver, ByRef aurl)
     
     If aver = "" Then
         If amode = 2 Then log "×最新版を確認できませんでした。", 0
-        HelpCheck = False
+        HelpCheck = Null
         Exit Function
     End If
     
     aurl = wurl
     
-    'If amode = 2 Then log "現在のサクラエディタのバージョン:" & wsakuraver, 0
-    If amode = 2 Then log "現在のヘルプファイル更新日付:" & wcurdate, 0
     'If amode = 2 Then log "最新のヘルプファイルバージョン:" & wnewver, 0
     If amode = 2 Then log "最新のヘルプファイル発行日付:" & aver, 0
 
@@ -1644,7 +1648,7 @@ Function HelpCheck(amode, ByRef aver, ByRef aurl)
 End Function
 
 ' ヘルプファイルのzipダウンロード
-Sub HelpDownload(wurl)
+Function HelpDownload(wurl)
     
     Dim wlink
     Dim wcmd
@@ -1666,7 +1670,8 @@ Sub HelpDownload(wurl)
 
     If Not IsExistFile(wzipfile) Then
         log "ダウンロードできませんでした。", 0
-        Exit Sub
+        HelpDownload = False
+        Exit Function
     End If
     
     log "ダウンロードファイルを展開します。", 0
@@ -1682,12 +1687,16 @@ on error goto 0
 
     If Not IsExistFile(WorkDir & "\sakura.chm") Then
         log "sakura.chmがダウンロードファイルにありませんでした。", 0
-        Exit Sub
+        HelpDownload = False
+        Exit Function
     End If
 
-End Sub
+    HelpDownload = True
+
+End Function
 
 Sub DiffUpdate()
+    Dim wchk
     Dim wurl
     Dim wnewver
 
@@ -1696,13 +1705,18 @@ Sub DiffUpdate()
     log vbCrLf & "★★sakuraupdate " & Version & "★★", 0
     log "Diff(差分)ツールを配置します。", 0
     
-    If DiffCheck(2, wnewver, wurl) = false Then
+    wchk = DiffCheck(2, wnewver, wurl)
+    If IsNull(wchk) Then Exit Sub
+
+    If wchk = False Then
         If WSH.Popup("すでに配置済みですが、更新しますか?", 0, "ソフトウェアの更新", 4) = 7 Then
             Exit Sub
         End If
     End If
-
-    Call DiffDownload(wurl)
+    
+    If DiffDownload(wurl) = False Then
+        Exit Sub
+    End If
 
     Call FileSetup(Array("","diff.exe"))
 
@@ -1730,10 +1744,17 @@ on error resume next
     wcurdate = DateValue(FS.GetFile(wdiffpath).DateLastModified)
 on error goto 0
 
+    If wcurdate = "" Then
+        If amode = 2 Then log "現在、Diff(差分)ツールは配置されていません。", 0
+    Else
+        If amode = 2 Then log "現在のDiff(差分)ツールの更新日付:" & wcurdate, 0
+    End If
+
     aurl = Plugin.GetOption("サクラエディタ", "DIFFURL")
     aver = ""
 
     if aurl = "" Then
+        DiffCheck = Null
         Exit Function
     End If
     
@@ -1766,12 +1787,10 @@ on error goto 0
         aver = "any date"
     Else
         If amode = 2 Then log "×最新版を確認できませんでした。", 0
-        DiffCheck = False
+        DiffCheck = Null
         Exit Function
     End If
     
-    If amode = 2 Then log "現在のDiff(差分)ツールの更新日付:" & wcurdate, 0
-
     If wcurdate <> "" Then
         If amode = 2 Then log "●Diff(差分)ツールは配置済みです。", 0
         DiffCheck = False
@@ -1786,7 +1805,7 @@ End Function
 
 ' Diff(差分)ツールのzipダウンロード
 
-Sub DiffDownload(wurl)
+Function DiffDownload(wurl)
     
     Dim wlink
     Dim wcmd
@@ -1806,7 +1825,8 @@ Sub DiffDownload(wurl)
 
     If Not IsExistFile(wzipfile) Then
         log "ダウンロードできませんでした。", 0
-        Exit Sub
+        DiffDownload = False
+        Exit Function
     End If
     
     log "ダウンロードファイルを展開します。", 1
@@ -1822,12 +1842,16 @@ on error goto 0
 
     If Not IsExistFile(WorkDir & "\diff.exe") Then
         log "diff.exeがダウンロードファイルにありませんでした。", 0
-        Exit Sub
+        DiffDownload = False
+        Exit Function
     End If
 
-End Sub
+    DiffDownload = True
+
+End Function
 
 Sub CtagsUpdate()
+    Dim wchk
     Dim wurl
     Dim wnewver
 
@@ -1836,13 +1860,18 @@ Sub CtagsUpdate()
     log vbCrLf & "★★sakuraupdate " & Version & "★★", 0
     log "Ctags(タグ生成)ツールを配置します。", 0
     
-    If CtagsCheck(2, wnewver, wurl) = false Then
+    wchk = CtagsCheck(2, wnewver, wurl)
+    
+    If IsNull(wchk) Then Exit Sub
+    If wchk = false Then
         If WSH.Popup("すでに配置済みですが、更新しますか?", 0, "ソフトウェアの更新", 4) = 7 Then
             Exit Sub
         End If
     End If
-
-    Call CtagsDownload(wurl)
+    
+    If CtagsDownload(wurl) = False Then
+        Exit Sub
+    End If
 
     Call FileSetup(Array("","ctags.exe"))
 
@@ -1855,7 +1884,7 @@ End Sub
 '
 Function CtagsCheck(amode, ByRef aver, ByRef aurl)
 
-    'Editor.ActivateWinOutput
+    CtagsCheck = Null
 
     Dim wurl
     Dim wlink
@@ -1870,6 +1899,16 @@ on error resume next
     wcurdate = DateValue(FS.GetFile(wctagspath).DateLastModified)
 on error goto 0
 
+    If wcurdate = "" Then
+        If amode = 2 Then log "現在、Ctags(タグ生成)ツールは配置されていません。", 0
+    Else
+        If amode = 2 Then log "現在のCtags(タグ生成)ツールの更新日付:" & wcurdate, 0
+        If amode = 1 Then
+            CtagsCheck = False
+            Exit Function
+        End If
+    End If
+
     aurl = Plugin.GetOption("サクラエディタ", "CTAGSURL")
     aver = ""
 
@@ -1881,6 +1920,9 @@ on error goto 0
     
     If instr(aurl, "hp.vector.co.jp/authors/VA025040/ctags") > 0 Then
         wpage = DownloadFile(aurl, "")
+        If wpage = "" or Left(wpage,7) = "#ERROR#" Then
+            Exit function 
+        End If
 
         Dim re, match, matchs
         Set re = CreateObject("VBScript.RegExp")
@@ -1899,16 +1941,18 @@ on error goto 0
                 End If
             End If
         End With
+    ElseIf instr(aurl, "github.com") > 0 Then
+        aver = GetGitHub(aurl)
     End If
 
     If aver = "" Then
         If amode = 2 Then log "×最新版を確認できませんでした。", 0
-        CtagsCheck = False
+        CtagsCheck = Null
         Exit Function
+    else
+        If amode = 2 Then log "最新のCtags(タグ生成)ツールのバージョン:" & aver, 0
     End If
     
-    If amode = 2 Then log "現在のCtags(タグ生成)ツールの更新日付:" & wcurdate, 0
-
     If wcurdate <> "" Then
         If amode = 2 Then log "●Ctags(タグ生成)ツールは配置済みです。", 0
         CtagsCheck = False
@@ -1923,7 +1967,7 @@ End Function
 
 ' Ctags(タグ生成)ツールのzipダウンロード
 
-Sub CtagsDownload(wurl)
+Function CtagsDownload(wurl)
     
     Dim wlink
     Dim wcmd
@@ -1943,7 +1987,8 @@ Sub CtagsDownload(wurl)
 
     If Not IsExistFile(wzipfile) Then
         log "ダウンロードできませんでした。", 0
-        Exit Sub
+        CtagsDownload = False
+        Exit Function
     End If
     
     log "ダウンロードファイルを展開します。", 1
@@ -1959,14 +2004,18 @@ on error goto 0
 
     If Not IsExistFile(WorkDir & "\ctags.exe") Then
         log "ctags.exeがダウンロードファイルにありませんでした。", 0
-        Exit Sub
+        CtagsDownload = False
+        Exit Function
     End If
 
-End Sub
+    CtagsDownload = True
+
+End Function
 
 '	プラグインの更新処理
 
 Sub PluginUpdate()
+    Dim wchk
     Dim wurl
     Dim wnewver
 
@@ -1975,13 +2024,18 @@ Sub PluginUpdate()
     log vbCrLf & "★★sakuraupdate " & Version & "★★", 0
     log "sakuraupdateプラグインを最新バージョンに更新します。", 0
 
-    If PluginCheck(2, wnewver, wurl) = false Then
+    wchk = PluginCheck(2, wnewver, wurl)
+    If IsNull(wchk) Then Exit Sub
+
+    If wchk = False Then
         If WSH.Popup("すでに最新版ですが、更新しますか?", 0, "ソフトウェアの更新", 4) = 7 Then
             Exit Sub
         End If
     End If
 
-    Call PluginDownload(wurl)
+    If PluginDownload(wurl) = False Then
+        Exit Sub
+    End If
     
     Call PluginSetup("plugin")
 
@@ -2022,16 +2076,17 @@ Function PluginCheck(amode, ByRef aver, ByRef aurl)
 
     End With
 
+    If amode = 2 Then log "現在のプラグインのバージョン:" & wcurver, 0
+
     aurl = Plugin.GetOption("サクラエディタ", "PLUGINURL")
     aver = GetGitHub(aurl)
 
     If aver = "" Then
         If amode = 2 Then log "×最新版を確認できませんでした。", 0
-        PluginCheck = False
+        PluginCheck = Null
         Exit Function
     End If
     
-    If amode = 2 Then log "現在のプラグインのバージョン:" & wcurver, 0
     If amode = 2 Then log "最新のプラグインのバージョン:" & aver, 0
 
     If aver <= wcurver Then
@@ -2046,7 +2101,7 @@ Function PluginCheck(amode, ByRef aver, ByRef aurl)
 End Function
 
 ' プラグインのzipダウンロード
-Sub PluginDownload(wurl)
+Function PluginDownload(wurl)
     
     Dim wlink
     Dim wcmd
@@ -2066,7 +2121,8 @@ Sub PluginDownload(wurl)
 
     If Not IsExistFile(wzipfile) Then
         log "ダウンロードできませんでした。", 0
-        Exit Sub
+        PluginDownload = False
+        Exit Function
     End If
     
     log "ダウンロードファイルを展開します。", 0
@@ -2083,10 +2139,13 @@ on error goto 0
 
     If Not IsExistFile(WorkDir & "\sakuraupdate\plugin.def") Then
         log "プラグインzipではありませんでした。", 0
-        Exit Sub
+        PluginDownload = False
+        Exit Function
     End If
 
-End Sub
+    PluginDownload = True
+
+End Function
 
 '   pluginのファイルをインストールフォルダへコピーする。
 '	

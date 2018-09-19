@@ -1,5 +1,5 @@
 # sakuraupdate
-Sakura-Editor Update Plugin (v20180908 (beta))
+Sakura-Editor Update Plugin (v20180919 (beta))
 
 プラグインでサクラエディタのバージョンアップ機能を実装してみる
 
@@ -14,7 +14,7 @@ Sakura-Editor Update Plugin (v20180908 (beta))
 	* Ctagsコマンド
 	* 当プラグイン自身
 
-2. サクラエディタ起動時に自動的にチェックすることができます。
+2. サクラエディタ起動時(正確には編集開始時)に自動的にチェックすることができます。
 
 	自動チェックは初期設定で7日単位で、無効にすることもできます。  
 	手動によるチェックもできます。
@@ -118,6 +118,7 @@ zipを展開してpluginsフォルダにsakuraupdateフォルダを作って保存してください。
 	CTAGSのダウンロード対象のURLを指定します。  
 	(未指定時は取得しない)  
 	初期値:http://hp.vector.co.jp/authors/VA025040/ctags/
+	他に設定可能な値:https://api.github.com/repos/universal-ctags/ctags-win32/releases
 
 9. 独自リリース用URL(file:// or http://)  
 	社内ネット等インターネット以外からダウンロードする際のURL  
@@ -150,7 +151,12 @@ zipを展開してpluginsフォルダにsakuraupdateフォルダを作って保存してください。
 * ネットからのダウンロードは、MSXMLでエラーになる場合にCURLで取得。（環境依存の回避)
 * zip展開は、7zのコマンドライン版を使用。(これも環境依存の回避)
 * 複数更新ある場合は、まとめて更新する
-* OS新しいならCURL使わないようにしてパフォーマンス上げる
+* ctagsを、https://github.com/universal-ctags/ctags-win32/releasesからも収集可能とする。
+	ただしdaily更新なので何かしら歯止めが必要
+	自動では更新せず、手動時に上書きするかを確認するようにする。
+* ctagsでエラーでもDownloadしようとした。CtagsCheckの戻り値にtrue/false以外にNullを返すようにする。
+* 次の動作がOSから割り込むことがある。
+パッケージ Microsoft .NET Framework 3.0 の更新 NetFx3 を有効にするために、変更を開始しています。クライアント ID: Windows Optional Component Manager Command-Line。
 
 ## ToDo
 
@@ -160,8 +166,28 @@ zipを展開してpluginsフォルダにsakuraupdateフォルダを作って保存してください。
 * VirtualStoreが有効になっているか判断して無効化する
 * ゴミ掃除(処理後に%temp%\sakuraupdateを削除する(Cleanup))
 
-
 ## 著作権表示
+
+0. sakuraupdateは、osabooがzlib/libpngライセンスで開発・配布しているフリー・ソフトウェアです。
+
+```
+zlib/libpngライセンス
+
+Copyright 2018 osaboo
+
+本ソフトウェアは「現状のまま」で、明示であるか暗黙であるかを問わず、何らの保証もなく提供されます。 本ソフトウェアの使用によって生じるいかなる損害についても、作者は一切の責任を負わないものとします。
+
+以下の制限に従う限り、商用アプリケーションを含めて、本ソフトウェアを任意の目的に使用し、自由に改変して再頒布することをすべての人に許可します。
+
+本ソフトウェアの出自について虚偽の表示をしてはなりません。あなたがオリジナルのソフトウェアを作成したと主張してはなりません。 あなたが本ソフトウェアを製品内で使用する場合、製品の文書に謝辞を入れていただければ幸いですが、必須ではありません。
+ソースを変更した場合は、そのことを明示しなければなりません。オリジナルのソフトウェアであるという虚偽の表示をしてはなりません。
+ソースの頒布物から、この表示を削除したり、表示の内容を変更したりしてはなりません。
+
+(ライセンス原文)
+https://opensource.org/licenses/zlib-license.php  
+(日本語訳)  
+https://ja.osdn.net/projects/opensource/wiki/licenses%2Fzlib_libpng_license  
+```
 
 1. サクラエディタは、Norio Nakatani & Collaboratorsが開発・配布しているフリー・ソフトウェアです。  
 https://sakura-editor.github.io/
@@ -169,10 +195,16 @@ https://sakura-editor.github.io/
 2. 正規表現ライブラリ bregonig.dllは、 K.Takata (高田 謙)氏が開発・配布しているフリー・ソフトウェアです。  
 http://k-takata.o.oo7.jp/mysoft/bregonig.html
 
-3. 同封のcurl.exeはDirk Paehl氏がコンパイル・配布しているものです。  
+3. diff（ディフ）とはファイルの比較を行うためのコマンドで2つのファイル間の違いを出力できるプログラム。(wikipediaより)  
+https://ja.wikipedia.org/wiki/Diff
+
+4. Ctagsは、はソース及びヘッダ内にある名前のインデックス（又はタグ）ファイルを生成するプログラム。(wikipediaより)  
+https://ja.wikipedia.org/wiki/Ctags
+
+5. 同封のcurl.exeはDirk Paehl氏がコンパイル・配布しているものです。  
 http://www.paehl.com/open_source/?CURL_7.61.0
 
-4. 同封の7za.exeは、GNU LGPLでライセンスされている、Igor Pavlovの著作物です。  
+6. 同封の7za.exeは、GNU LGPLでライセンスされている、Igor Pavlovの著作物です。  
 	7-Zip Extra is package of extra modules of 7-Zip.   
 	7-Zip Copyright (C) 1999-2018 Igor Pavlov.  
 	7-Zip is free software. Read License.txt for more information about license.  
