@@ -13,15 +13,39 @@
         <property name="PluginDir"/>
         <property name="SakuraDir"/>
         <method name="Init" />
+
         <method name="UpdateCheck">
                 <PARAMETER name="amode"/>
         </method>
-        <method name="SakuraUpdate" />
-        <method name="HelpUpdate" />
+
+        <method name="SakuraCheck">
+            <PARAMETER name="amode"/>
+            <PARAMETER name="aver"/>
+            <PARAMETER name="aurl"/>
+        </method>
+        <method name="SakuraDownload">
+            <PARAMETER name="wurl"/>
+        </method>
+
+        <method name="HelpCheck">
+            <PARAMETER name="amode"/>
+            <PARAMETER name="apath"/>
+            <PARAMETER name="aver"/>
+            <PARAMETER name="aurl"/>
+        </method>
+        <method name="HelpDownload">
+            <PARAMETER name="atarget"/>
+            <PARAMETER name="wurl"/>
+        </method>
+
         <method name="RegExpUpdate" />
         <method name="DiffUpdate" />
         <method name="CtagsUpdate" />
         <method name="PluginUpdate" />
+
+        <method name="FileSetup">
+            <PARAMETER name="atargets"/>
+        </method>
         <method name="log">
                 <PARAMETER name="amsg"/>
                 <PARAMETER name="alvl"/>
@@ -92,7 +116,7 @@ Dim OSVer
 
 ' 初期化
 Sub Init()
-  Version = "v20180908"
+  Version = "v20181001"
 
   DebugLvl = Plugin.GetOption("サクラエディタ", "DEBUGLVL")
 
@@ -533,6 +557,8 @@ Function GetSFRSS(ByRef aurl, apath)
     If InStr(wlink, "?path=") = 0 Then
         If apath = "sakura2" Then wlink = aurl & "?path=/sakura2"
         If apath = "help2" Then wlink = aurl & "?path=/help2"
+        If apath = "macro2" Then wlink = aurl & "?path=/help2"
+        If apath = "plugin2" Then wlink = aurl & "?path=/help2"
         If apath = "regexp" Then wlink = aurl & "?path=/wiki"
     End If
     
@@ -627,7 +653,7 @@ Function GetSFRSS(ByRef aurl, apath)
             End With
         End If
     
-    Case "help2"
+    Case "help2", "macro2", "plugin2"
         Dim items, ItemLink, ItemDate
         Dim j
 
@@ -636,7 +662,13 @@ Function GetSFRSS(ByRef aurl, apath)
 
         'Dim re, match, matchs
         Set re = CreateObject("VBScript.RegExp")
-        re.Pattern = "([0-9]+\.[0-9]+\.[0-9]+\.[0-9]+)/sakura_help[0-9\-]+\.zip"
+        if apath = "help2" Then
+            re.Pattern = "([0-9]+\.[0-9]+\.[0-9]+\.[0-9]+)/sakura_help[0-9\-]+\.zip"
+        elseIf apath = "macro2" Then
+            re.Pattern = "([0-9]+\.[0-9]+\.[0-9]+\.[0-9]+)/macro[0-9\-]+\.zip"
+        elseIf apath = "plugin2" Then
+            re.Pattern = "([0-9]+\.[0-9]+\.[0-9]+\.[0-9]+)/plugin[0-9\-]+\.zip"
+        End If
 
         wlink = ""
         '
@@ -1215,11 +1247,25 @@ Sub UpdateCheck(amode)
 
     If Plugin.GetOption("サクラエディタ", "HELPURL") <> "" Then
         If amode = 2 Then log vbCrLf & "ヘルプファイルの最新バージョンを確認します。", 0
-        wchk2 = HelpCheck(amode, wnewver, wurl)
+        wchk2 = HelpCheck(amode, "sakura.chm", wnewver, wurl)
         If wchk2 = true and amode = 2 Then
-            If HelpDownload(wurl) = true Then
+            If HelpDownload("sakura.chm", wurl) = true Then
                 redim preserve wtargets(ubound(wtargets)+1)
                 wtargets(ubound(wtargets)) = "sakura.chm"
+            End If
+        End If
+        wchk2 = HelpCheck(amode, "macro.chm", wnewver, wurl)
+        If wchk2 = true and amode = 2 Then
+            If HelpDownload("macro.chm", wurl) = true Then
+                redim preserve wtargets(ubound(wtargets)+1)
+                wtargets(ubound(wtargets)) = "macro.chm"
+            End If
+        End If
+        wchk2 = HelpCheck(amode, "plugin.chm", wnewver, wurl)
+        If wchk2 = true and amode = 2 Then
+            If HelpDownload("plugin.chm", wurl) = true Then
+                redim preserve wtargets(ubound(wtargets)+1)
+                wtargets(ubound(wtargets)) = "plugin.chm"
             End If
         End If
     End If
@@ -1263,32 +1309,6 @@ Sub UpdateCheck(amode)
 
 End Sub
 
-Sub SakuraUpdate()
-    Dim wchk
-    Dim wurl
-    Dim wnewver
-
-    Editor.ActivateWinOutput
-    
-    log vbCrLf & "★★sakuraupdate " & Version & "★★", 0
-    log "サクラエディタ本体を最新バージョンに更新します。", 0
-
-    wchk = SakuraCheck(2, wnewver, wurl)
-    If IsNull(wchk) Then Exit Sub
-
-    If wchk = False Then
-        If WSH.Popup("すでに最新版ですが、更新しますか?", 0, "ソフトウェアの更新", 4) = 7 Then
-            Exit Sub
-        End If
-    End If
-    
-    If SakuraDownload(wurl) = False Then
-        Exit Sub
-    End If
-
-    Call FileSetup(Array("","sakura.exe"))
-
-End Sub
 
 '   サクラエディタ本体の更新チェック
 '   amode = 1:自動モード,  2:手動モード
@@ -1562,38 +1582,12 @@ on error goto 0
 
 End Function
 
-Sub HelpUpdate()
-    Dim wchk
-    Dim wurl
-    Dim wnewver
-
-    Editor.ActivateWinOutput
-    
-    log vbCrLf & "★★sakuraupdate " & Version & "★★", 0
-    log "ヘルプファイルを最新バージョンに更新します。", 0
-
-    wchk = HelpCheck(2, wnewver, wurl)
-    If IsNull(wchk) Then Exit Sub
-
-    If wchk = False Then
-        If WSH.Popup("すでに最新版ですが、更新しますか?", 0, "ソフトウェアの更新", 4) = 7 Then
-            Exit Sub
-        End If
-    End If
-
-    If HelpDownload(wurl) = False Then
-        Exit Sub
-    End If
-
-    Call FileSetup(Array("","sakura.chm"))
-
-End Sub
-
 '   ヘルプファイルの更新チェック
 '   amode = 1:自動モード,  2:手動モード
+'   atarget = "sakura.chm", "macro.chm", "plugin.chm"
 '   戻り値: true=更新あり false=更新なし
 '
-Function HelpCheck(amode, ByRef aver, ByRef aurl)
+Function HelpCheck(amode, atarget, ByRef aver, ByRef aurl)
 
     'Editor.ActivateWinOutput
 
@@ -1603,26 +1597,31 @@ Function HelpCheck(amode, ByRef aver, ByRef aurl)
     Dim whelppath
     Dim wcurdate
     Dim wsakuraver
-    
+    Dim wpath
+
     wcurdate = ""
     wsakurapath = Editor.ExpandParameter("$S")
     on error resume next
-    whelppath = FS.GetParentFolderName(wsakurapath) & "\sakura.chm"
+    whelppath = FS.GetParentFolderName(wsakurapath) & "\" & atarget
     wcurdate = DateValue(FS.GetFile(whelppath).DateLastModified)
     on error goto 0
 
     'If amode = 2 Then log "現在のサクラエディタのバージョン:" & wsakuraver, 0
-    If amode = 2 Then log "現在のヘルプファイル更新日付:" & wcurdate, 0
+    If amode = 2 Then log "現在の" & atarget & "ヘルプファイル更新日付:" & wcurdate, 0
 
     wsakuraver = Editor.ExpandParameter("$V")
     wurl = Plugin.GetOption("サクラエディタ", "HELPURL")
     aver = ""
 
+    if atarget = "sakura.chm" then wpath = "help2"
+    if atarget = "macro.chm" then wpath = "macro2"
+    if atarget = "plugin.chm" then wpath = "plugin2"
+
     If InStr(wurl, "sourceforge.net") > 0 Then
-        aver = GetSFRSS(wurl, "help2")
+        aver = GetSFRSS(wurl, wpath)
     ElseIf wurl = "" Then '指定なしの場合は、SourceForgeから検索
         wurl = Plugin.GetOption("サクラエディタ", "SFRSSURL")
-        aver = GetSFRSS(wurl, "help2")
+        aver = GetSFRSS(wurl, wpath)
     End If
     
     If aver = "" Then
@@ -1634,21 +1633,23 @@ Function HelpCheck(amode, ByRef aver, ByRef aurl)
     aurl = wurl
     
     'If amode = 2 Then log "最新のヘルプファイルバージョン:" & wnewver, 0
-    If amode = 2 Then log "最新のヘルプファイル発行日付:" & aver, 0
+    If amode = 2 Then log "最新の" & atarget & "ヘルプファイル発行日付:" & aver, 0
 
-    If aver <= wcurdate and wcurdate <> "" Then
-        If amode = 2 Then log "●ヘルプファイルは最新バージョンです。", 0
-        HelpCheck = False
-        Exit Function
+    If IsDate(wcurdate) and IsDate(aver) Then
+        If DateDiff("d", aver, wcurdate) < 7 Then
+            If amode = 2 Then log "●" & atarget & "ヘルプファイルは最新バージョンです。", 0
+            HelpCheck = False
+            Exit Function
+        End If
     End If
 
-    log "★ヘルプファイルの新バージョンがリリースされています。", 0
+    log "★" & atarget & "ヘルプファイルの新バージョンがリリースされています。", 0
     
     HelpCheck = True
 End Function
 
 ' ヘルプファイルのzipダウンロード
-Function HelpDownload(wurl)
+Function HelpDownload(atarget, wurl)
     
     Dim wlink
     Dim wcmd
@@ -1677,7 +1678,7 @@ Function HelpDownload(wurl)
     log "ダウンロードファイルを展開します。", 0
 
     'zip展開
-    wcmd = UnzipExe & " e -aoa " & wzipfile & " sakura.chm -o" & WorkDir
+    wcmd = UnzipExe & " e -aoa " & wzipfile & " " & atarget & " -o" & WorkDir
     log ">" & wcmd, 1
     WSH.Run wcmd, 7, False
 
@@ -1685,8 +1686,8 @@ on error resume next
     Editor.Sleep 500
 on error goto 0
 
-    If Not IsExistFile(WorkDir & "\sakura.chm") Then
-        log "sakura.chmがダウンロードファイルにありませんでした。", 0
+    If Not IsExistFile(WorkDir & "\" & atarget) Then
+        log atarget & "がダウンロードファイルにありませんでした。", 0
         HelpDownload = False
         Exit Function
     End If
