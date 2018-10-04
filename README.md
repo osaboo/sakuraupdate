@@ -1,5 +1,5 @@
 # sakuraupdate
-Sakura-Editor Update Plugin (v20181001 (beta))
+Sakura-Editor Update Plugin (v20181004 (beta))
 
 プラグインでサクラエディタのバージョンアップ機能を実装してみる
 
@@ -115,14 +115,14 @@ Sakura-Editor Update Plugin (v20181001 (beta))
 7. DIFFのリリースURL  
 	DIFFのダウンロード対象のURLを指定します。  
 	(未指定時は取得しない)  
-	初期値:http://www.ring.gr.jp/archives/text/TeX/ptex-win32/w32/patch-diff-w32.zip
+	初期値:http://www.ring.gr.jp/archives/text/TeX/ptex-win32/w32/patch-diff-w32.zip  
 	一度配置されると、自動チェックではバージョンアップしない。手動更新で更新可能。
 
 8. CTAGSのリリースURL  
 	CTAGSのダウンロード対象のURLを指定します。  
 	(未指定時は取得しない)  
 	初期値:http://hp.vector.co.jp/authors/VA025040/ctags/  
-	他に設定可能な値:https://api.github.com/repos/universal-ctags/ctags-win32/releases
+	他に設定可能な値:https://api.github.com/repos/universal-ctags/ctags-win32/releases  
 	一度配置されると、自動チェックではバージョンアップしない。手動更新で更新可能。
 
 9. 独自リリース用URL(file:// or http://)  

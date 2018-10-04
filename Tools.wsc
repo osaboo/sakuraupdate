@@ -116,7 +116,7 @@ Dim OSVer
 
 ' 初期化
 Sub Init()
-  Version = "v20181001"
+  Version = "v20181004"
 
   DebugLvl = Plugin.GetOption("サクラエディタ", "DEBUGLVL")
 
@@ -1636,7 +1636,8 @@ Function HelpCheck(amode, atarget, ByRef aver, ByRef aurl)
     If amode = 2 Then log "最新の" & atarget & "ヘルプファイル発行日付:" & aver, 0
 
     If IsDate(wcurdate) and IsDate(aver) Then
-        If DateDiff("d", aver, wcurdate) < 7 Then
+        If amode = 2 Then log "発行日付と更新日付の日数差: " & DateDiff("d", wcurdate, aver), 0
+        If DateDiff("d", wcurdate, aver) < 7 Then
             If amode = 2 Then log "●" & atarget & "ヘルプファイルは最新バージョンです。", 0
             HelpCheck = False
             Exit Function
