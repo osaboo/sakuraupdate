@@ -1,4 +1,4 @@
-' サクラエディタ本体の更新処理
+'   プラグインの更新処理
 '
 Option Explicit
 
@@ -9,4 +9,31 @@ Set Tools.Editor = Editor
 Set Tools.Plugin = Plugin
 Tools.Init
 
-Call Tools.PluginUpdate()
+Sub PluginUpdate()
+    Dim wchk
+    Dim wurl
+    Dim wnewver
+
+    Editor.ActivateWinOutput
+    
+    Tools.log vbCrLf & "★★sakuraupdate " & Tools.Version & "★★", 0
+    Tools.log "sakuraupdateプラグインを最新バージョンに更新します。", 0
+
+    wchk = Tools.PluginCheck(2, wnewver, wurl)
+    If IsNull(wchk) Then Exit Sub
+
+    If wchk = False Then
+        If Tools.WSH.Popup("すでに最新版ですが、更新しますか?", 0, "ソフトウェアの更新", 4) = 7 Then
+            Exit Sub
+        End If
+    End If
+
+    If Tools.PluginDownload(wurl) = False Then
+        Exit Sub
+    End If
+    
+    Call Tools.PluginSetup("plugin")
+
+End Sub
+
+PluginUpdate

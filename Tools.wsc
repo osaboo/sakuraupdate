@@ -38,10 +38,41 @@
             <PARAMETER name="wurl"/>
         </method>
 
-        <method name="RegExpUpdate" />
-        <method name="DiffUpdate" />
-        <method name="CtagsUpdate" />
-        <method name="PluginUpdate" />
+        <method name="RegExpCheck">
+            <PARAMETER name="amode"/>
+            <PARAMETER name="aver"/>
+            <PARAMETER name="aurl"/>
+        </method>
+        <method name="RegExpDownload">
+            <PARAMETER name="wurl"/>
+        </method>
+
+        <method name="DiffCheck">
+            <PARAMETER name="amode"/>
+            <PARAMETER name="aver"/>
+            <PARAMETER name="aurl"/>
+        </method>
+        <method name="DiffDownload">
+            <PARAMETER name="wurl"/>
+        </method>
+
+        <method name="CtagsCheck">
+            <PARAMETER name="amode"/>
+            <PARAMETER name="aver"/>
+            <PARAMETER name="aurl"/>
+        </method>
+        <method name="CtagsDownload">
+            <PARAMETER name="wurl"/>
+        </method>
+
+        <method name="PluginCheck">
+            <PARAMETER name="amode"/>
+            <PARAMETER name="aver"/>
+            <PARAMETER name="aurl"/>
+        </method>
+        <method name="PluginDownload">
+            <PARAMETER name="wurl"/>
+        </method>
 
         <method name="FileSetup">
             <PARAMETER name="atargets"/>
@@ -91,7 +122,7 @@
         </method>
         <method name="GetOSInfo"/>
     </public>
-<script language="VBScript">
+<!--<script language="VBScript">
 <![CDATA[
 Option Explicit
 
@@ -116,7 +147,7 @@ Dim OSVer
 
 ' 初期化
 Sub Init()
-  Version = "v20181004"
+  Version = "v20181021"
 
   DebugLvl = Plugin.GetOption("サクラエディタ", "DEBUGLVL")
 
@@ -476,23 +507,24 @@ Function CreateHttpRequest() ' As Object
   Dim i 'As Long
    
   Set ret = Nothing '初期化
-  progIDs = Array("MSXML.XMLHTTPRequest", _
-                  "WinHttp.WinHttpRequest.5.1", _
-                  "WinHttp.WinHttpRequest.5", _
-                  "WinHttp.WinHttpRequest", _
-                  "Msxml2.ServerXMLHTTP.6.0", _
-                  "Msxml2.ServerXMLHTTP.5.0", _
-                  "Msxml2.ServerXMLHTTP.4.0", _
-                  "Msxml2.ServerXMLHTTP.3.0", _
-                  "Msxml2.ServerXMLHTTP", _
-                  "Microsoft.ServerXMLHTTP", _
-                  "Msxml2.XMLHTTP.6.0", _
-                  "Msxml2.XMLHTTP.5.0", _
-                  "Msxml2.XMLHTTP.4.0", _
-                  "Msxml2.XMLHTTP.3.0", _
-                  "Msxml2.XMLHTTP", _
-                  "Microsoft.XMLHTTP")
-  progIDs = Array("Msxml2.XMLHTTP")
+'  progIDs = Array("MSXML.XMLHTTPRequest", _
+'                  "WinHttp.WinHttpRequest.5.1", _
+'                  "WinHttp.WinHttpRequest.5", _
+'                  "WinHttp.WinHttpRequest", _
+'                  "Msxml2.ServerXMLHTTP.6.0", _
+'                  "Msxml2.ServerXMLHTTP.5.0", _
+'                  "Msxml2.ServerXMLHTTP.4.0", _
+'                  "Msxml2.ServerXMLHTTP.3.0", _
+'                  "Msxml2.ServerXMLHTTP", _
+'                  "Microsoft.ServerXMLHTTP", _
+'                  "Msxml2.XMLHTTP.6.0", _
+'                  "Msxml2.XMLHTTP.5.0", _
+'                  "Msxml2.XMLHTTP.4.0", _
+'                  "Msxml2.XMLHTTP.3.0", _
+'                  "Msxml2.XMLHTTP", _
+'                  "Microsoft.XMLHTTP")
+  progIDs = Array("Msxml2.ServerXMLHTTP", _
+                  "Msxml2.XMLHTTP")
   On Error Resume Next
   For i = LBound(progIDs) To UBound(progIDs)
     Set ret = CreateObject(progIDs(i))
@@ -1423,34 +1455,6 @@ on error goto 0
 
 End Function
 
-Sub RegExpUpdate()
-    Dim wchk
-    Dim wurl
-    Dim wnewver
-
-    Editor.ActivateWinOutput
-
-    log vbCrLf & "★★sakuraupdate " & Version & "★★", 0
-    log "正規表現ライブラリを最新バージョンに更新します。", 0
-    
-    wchk = RegExpCheck(2, wnewver, wurl) 
-    If IsNull(wchk) Then Exit Sub
-
-    If wchk = False Then
-        If WSH.Popup("すでに最新版ですが、更新しますか?", 0, "ソフトウェアの更新", 4) = 7 Then
-            Exit Sub
-        End If
-    End If
-
-    If RegExpDownload(wurl) = False Then
-        Exit Sub
-    End If
-
-    Call FileSetup(Array("","bregonig.dll"))
-
-End Sub
-
-
 '   正規表現ライブラリの更新チェック
 '   amode = 1:自動モード,  2:手動モード
 '   戻り値: true=更新あり false=更新なし
@@ -1636,7 +1640,7 @@ Function HelpCheck(amode, atarget, ByRef aver, ByRef aurl)
     If amode = 2 Then log "最新の" & atarget & "ヘルプファイル発行日付:" & aver, 0
 
     If IsDate(wcurdate) and IsDate(aver) Then
-        If amode = 2 Then log "発行日付と更新日付の日数差: " & DateDiff("d", wcurdate, aver), 0
+        If amode = 2 Then log "発行日付と更新日付の日数差: " & DateDiff("d", wcurdate, aver), 1
         If DateDiff("d", wcurdate, aver) < 7 Then
             If amode = 2 Then log "●" & atarget & "ヘルプファイルは最新バージョンです。", 0
             HelpCheck = False
@@ -1697,32 +1701,6 @@ on error goto 0
 
 End Function
 
-Sub DiffUpdate()
-    Dim wchk
-    Dim wurl
-    Dim wnewver
-
-    Editor.ActivateWinOutput
-
-    log vbCrLf & "★★sakuraupdate " & Version & "★★", 0
-    log "Diff(差分)ツールを配置します。", 0
-    
-    wchk = DiffCheck(2, wnewver, wurl)
-    If IsNull(wchk) Then Exit Sub
-
-    If wchk = False Then
-        If WSH.Popup("すでに配置済みですが、更新しますか?", 0, "ソフトウェアの更新", 4) = 7 Then
-            Exit Sub
-        End If
-    End If
-    
-    If DiffDownload(wurl) = False Then
-        Exit Sub
-    End If
-
-    Call FileSetup(Array("","diff.exe"))
-
-End Sub
 
 
 '   Diff(差分)ツールの更新チェック
@@ -1852,34 +1830,6 @@ on error goto 0
 
 End Function
 
-Sub CtagsUpdate()
-    Dim wchk
-    Dim wurl
-    Dim wnewver
-
-    Editor.ActivateWinOutput
-
-    log vbCrLf & "★★sakuraupdate " & Version & "★★", 0
-    log "Ctags(タグ生成)ツールを配置します。", 0
-    
-    wchk = CtagsCheck(2, wnewver, wurl)
-    
-    If IsNull(wchk) Then Exit Sub
-    If wchk = false Then
-        If WSH.Popup("すでに配置済みですが、更新しますか?", 0, "ソフトウェアの更新", 4) = 7 Then
-            Exit Sub
-        End If
-    End If
-    
-    If CtagsDownload(wurl) = False Then
-        Exit Sub
-    End If
-
-    Call FileSetup(Array("","ctags.exe"))
-
-End Sub
-
-
 '   Ctags(タグ生成)ツールの更新チェック
 '   amode = 1:自動モード,  2:手動モード
 '   戻り値: true=更新あり false=更新なし
@@ -1923,26 +1873,26 @@ on error goto 0
     If instr(aurl, "hp.vector.co.jp/authors/VA025040/ctags") > 0 Then
         wpage = DownloadFile(aurl, "")
         If wpage = "" or Left(wpage,7) = "#ERROR#" Then
-            Exit function 
-        End If
+            ' nop
+        Else
+            Dim re, match, matchs
+            Set re = CreateObject("VBScript.RegExp")
+            re.Pattern = "downloads/ec(\d+j\d)w32bin\.zip"
+            'a href="downloads/ec58j2w32bin.zip
 
-        Dim re, match, matchs
-        Set re = CreateObject("VBScript.RegExp")
-        re.Pattern = "downloads/ec(\d+j\d)w32bin\.zip"
-        'a href="downloads/ec58j2w32bin.zip
-
-        With re
-            .Global = True
-            Set matchs = .Execute(wpage)
-            If matchs.Count > 0 Then
-                wlink = matchs(0)
-                log "見つかったファイル:" & wlink, 2
-                aurl = aurl & wlink
-                If matchs(0).SubMatches.Count > 0 Then
-                    aver = matchs(0).SubMatches(0)
+            With re
+                .Global = True
+                Set matchs = .Execute(wpage)
+                If matchs.Count > 0 Then
+                    wlink = matchs(0)
+                    log "見つかったファイル:" & wlink, 2
+                    aurl = aurl & wlink
+                    If matchs(0).SubMatches.Count > 0 Then
+                        aver = matchs(0).SubMatches(0)
+                    End If
                 End If
-            End If
-        End With
+            End With
+        End If
     ElseIf instr(aurl, "github.com") > 0 Then
         aver = GetGitHub(aurl)
     End If
@@ -2014,34 +1964,6 @@ on error goto 0
 
 End Function
 
-'	プラグインの更新処理
-
-Sub PluginUpdate()
-    Dim wchk
-    Dim wurl
-    Dim wnewver
-
-    Editor.ActivateWinOutput
-    
-    log vbCrLf & "★★sakuraupdate " & Version & "★★", 0
-    log "sakuraupdateプラグインを最新バージョンに更新します。", 0
-
-    wchk = PluginCheck(2, wnewver, wurl)
-    If IsNull(wchk) Then Exit Sub
-
-    If wchk = False Then
-        If WSH.Popup("すでに最新版ですが、更新しますか?", 0, "ソフトウェアの更新", 4) = 7 Then
-            Exit Sub
-        End If
-    End If
-
-    If PluginDownload(wurl) = False Then
-        Exit Sub
-    End If
-    
-    Call PluginSetup("plugin")
-
-End Sub
 
 '   プラグインファイルの更新チェック
 '   amode = 1:自動モード,  2:手動モード
@@ -2261,5 +2183,5 @@ Sub FileSetup(atargets)
 End Sub
 
 ]]>
-</script>
+</script>-->
 </component>

@@ -36,6 +36,8 @@ set oldfile=%targetfolder%\%targetfile%.old
 
 if "%targetfile%"=="plugin" goto :plugin
 
+if not exist "%srcfile%" goto :err0
+
 if "%targetfile%"=="sakura.exe" taskkill /im %targetfile% 2>nul
 @if "%targetfile%"=="sakura.exe" @cscript //nologo %~dp0sleep.vbs 1000
 if "%targetfile%"=="sakura.exe" taskkill /im %targetfile% 2>nul
@@ -44,7 +46,10 @@ if "%targetfile%"=="sakura.exe" taskkill /im %targetfile% 2>nul
 if exist "%oldfile%" del "%oldfile%"
 ren "%newfile%" %targetfile%.old
 @if exist "%newfile%" goto :err
+@echo copy from "%srcfile%"
+@echo      to   "%newfile%"
 copy /y "%srcfile%" "%newfile%"
+@if not exist "%newfile%" goto :err
 @echo %newfile%の差し替えに成功しました。
 goto :LOOP
 
@@ -53,6 +58,9 @@ taskkill /im sakura.exe
 xcopy /i /y "%srcfolder%" "%targetfolder%"
 @echo プラグインの差し替えに成功しました。
 goto :LOOP
+
+:err0
+echo コピー元の %srcfile% がありません。
 
 :err
 @echo %newfile%の差し替えに失敗しました。サクラエディタを再起動してやり直してください。

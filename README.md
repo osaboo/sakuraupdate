@@ -1,5 +1,5 @@
 # sakuraupdate
-Sakura-Editor Update Plugin (v20181004 (beta))
+Sakura-Editor Update Plugin (v20181021 (beta))
 
 プラグインでサクラエディタのバージョンアップ機能を実装してみる
 
@@ -138,10 +138,12 @@ Sakura-Editor Update Plugin (v20181004 (beta))
 	更新チェックした最終日。この日から頻度で設定した日数を経過すると編集開始時に自動チェックします。
 
 12. 更新チェックの頻度(単位=日、空白=自動チェックしない)  
-	日単位で自動チェック頻度を指定します。
+	日単位で自動チェック頻度を指定します。  
+	初期値: 7(日)
 
 13. Debug Level (0=NODEBUG)  
-	1あるいは2でアウトプットウィンドウに詳細なログを出力します。
+	1あるいは2でアウトプットウィンドウに詳細なログを出力します。  
+	初期値: 0
 
 ## 仕様メモ
 
@@ -156,7 +158,7 @@ Sakura-Editor Update Plugin (v20181004 (beta))
 * ネットからのダウンロードは、MSXMLでエラーになる場合にCURLで取得。（環境依存の回避)
 * zip展開は、7zのコマンドライン版を使用。(これも環境依存の回避)
 * 複数更新ある場合は、まとめて更新する
-* ctagsを、https://github.com/universal-ctags/ctags-win32/releasesからも収集可能とする。  
+* ctagsを、https://github.com/universal-ctags/ctags-win32/releases からも収集可能とする。  
 * 次の動作がOSから割り込むことがある。  
 	>パッケージ Microsoft .NET Framework 3.0 の更新 NetFx3 を有効にするために、変更を開始しています。クライアント ID: Windows Optional Component Manager Command-Line。
 * マクロヘルプ、プラグインヘルプも無ければダウンロードする
