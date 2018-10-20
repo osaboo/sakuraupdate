@@ -77,6 +77,10 @@
         <method name="FileSetup">
             <PARAMETER name="atargets"/>
         </method>
+        <method name="PluginSetup">
+            <PARAMETER name="atarget"/>
+        </method>
+
         <method name="log">
                 <PARAMETER name="amsg"/>
                 <PARAMETER name="alvl"/>
@@ -122,7 +126,7 @@
         </method>
         <method name="GetOSInfo"/>
     </public>
-<!--<script language="VBScript">
+<script language="VBScript">
 <![CDATA[
 Option Explicit
 
@@ -2183,5 +2187,5 @@ Sub FileSetup(atargets)
 End Sub
 
 ]]>
-</script>-->
+</script>
 </component>
