@@ -28,6 +28,9 @@ Sub CtagsUpdate()
         End If
     End If
     
+    'WorkDir‚ğ‹ó‚É‚·‚éB
+    Tools.WorkCleanup(true)
+
     If Tools.CtagsDownload(wurl) = False Then
         Exit Sub
     End If

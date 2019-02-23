@@ -19,6 +19,9 @@ Sub SakuraUpdate()
     Tools.log vbCrLf & "★★sakuraupdate " & Tools.Version & "★★", 0
     Tools.log "サクラエディタ本体を最新バージョンに更新します。", 0
 
+    'WorkDirを空にする。
+    Tools.WorkCleanup(true)
+
     wchk = Tools.SakuraCheck(2, wnewver, wurl)
     If IsNull(wchk) Then Exit Sub
 

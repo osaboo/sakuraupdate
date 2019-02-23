@@ -19,6 +19,9 @@ Sub PluginUpdate()
     Tools.log vbCrLf & "★★sakuraupdate " & Tools.Version & "★★", 0
     Tools.log "sakuraupdateプラグインを最新バージョンに更新します。", 0
 
+    'WorkDirを空にする。
+    Tools.WorkCleanup(true)
+
     wchk = Tools.PluginCheck(2, wnewver, wurl)
     If IsNull(wchk) Then Exit Sub
 

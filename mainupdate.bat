@@ -1,5 +1,6 @@
 @echo off
 call "%TEMP%\sakuraupdate\_setenv.bat"
+if "%debuglvl%" == "3" echo on
 
 @echo _runas      =%_runas%
 @echo srcfolder   =%srcfolder%
@@ -17,13 +18,15 @@ if not "%targetfile9%"=="" echo targetfile9 =%targetfile9%
 set _fileupdate=%~dp0fileupdate.bat
 
 if "%_runas%"=="" goto :L1
-powershell -NoProfile -ExecutionPolicy unrestricted -Command "Start-Process -File \"%_fileupdate%\" -Wait %_runas%"
+powershell -NoProfile -ExecutionPolicy unrestricted -File %~dp0runas.ps1 %_fileupdate%
+if errorlevel 1 pause
 goto :L2
 
 :L1
 call "%_fileupdate%"
 
 :L2
+if "%debuglvl%" == "3" pause
 
 if "%targetfile1%"=="sakura.exe" goto :L3
 if "%targetfile1%"=="plugin" goto :L3
@@ -47,7 +50,10 @@ goto :end
 
 :L3
 echo サクラエディタを再起動します。
+cscript //nologo %~dp0sleep.vbs 3000
 if not exist "%sakurafolder%\sakura.exe" goto :end
 start "" "%sakurafolder%\sakura.exe"
 
 :end
+if "%debuglvl%" == "3" pause
+if not "%debuglvl%" == "3" del /q "%TEMP%\sakuraupdate\*.*"

@@ -1,5 +1,6 @@
 @echo off
 call "%TEMP%\sakuraupdate\_setenv.bat"
+if "%debuglvl%" == "3" echo on
 
 @echo srcfolder   =%srcfolder%
 @echo targetfolder=%targetfolder%
@@ -35,13 +36,16 @@ set newfile=%targetfolder%\%targetfile%
 set oldfile=%targetfolder%\%targetfile%.old
 
 if "%targetfile%"=="plugin" goto :plugin
+if not "%targetfile%"=="sakura.exe" goto :nosakura
+
+taskkill /im %targetfile% 2>nul
+@cscript //nologo %~dp0sleep.vbs 1000
+taskkill /im %targetfile% 2>nul
+@cscript //nologo %~dp0sleep.vbs 1000
+
+:nosakura
 
 if not exist "%srcfile%" goto :err0
-
-if "%targetfile%"=="sakura.exe" taskkill /im %targetfile% 2>nul
-@if "%targetfile%"=="sakura.exe" @cscript //nologo %~dp0sleep.vbs 1000
-if "%targetfile%"=="sakura.exe" taskkill /im %targetfile% 2>nul
-@if "%targetfile%"=="sakura.exe" @cscript //nologo %~dp0sleep.vbs 1000
 
 if exist "%oldfile%" del "%oldfile%"
 ren "%newfile%" %targetfile%.old
@@ -69,4 +73,6 @@ goto :LOOP
 
 :LEXIT
 cscript //nologo %~dp0sleep.vbs 2000
+if "%debuglvl%" == "3" pause
 :end
+exit /b 0

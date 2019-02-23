@@ -1,5 +1,5 @@
 # sakuraupdate
-Sakura-Editor Update Plugin (v20181021 (beta))
+Sakura-Editor Update Plugin (v20190224 (beta))
 
 プラグインでサクラエディタのバージョンアップ機能を実装してみる
 
@@ -104,12 +104,12 @@ Sakura-Editor Update Plugin (v20181021 (beta))
 
 5. ヘルプファイルのリリースURL  
 	ヘルプファイルダウンロード対象を、このURLから検索します。  
-	(未指定時は自動チェック対象外。手動時はSFから自動取得)  
+	(未指定時は自動チェック対象外。未指定時も手動更新ではSFから自動取得)  
 	初期値:https://sourceforge.net/projects/sakura-editor/rss?path=/help2
 
 6. 正規表現ライブラリのリリースURL  
 	正規表現ライブラリのダウンロード対象を、このURLから検索します。  
-	(未指定時は自動チェック対象外。手動時はSFから自動取得)  
+	(未指定時は自動チェック対象外。未指定時も手動更新ではSFから自動取得)  
 	初期値:https://api.bitbucket.org/2.0/repositories/k_takata/bregonig/downloads
 
 7. DIFFのリリースURL  
@@ -142,7 +142,7 @@ Sakura-Editor Update Plugin (v20181021 (beta))
 	初期値: 7(日)
 
 13. Debug Level (0=NODEBUG)  
-	1あるいは2でアウトプットウィンドウに詳細なログを出力します。  
+	1あるいは2。アウトプットウィンドウに詳細なログを出力します。  
 	初期値: 0
 
 ## 仕様メモ
@@ -162,6 +162,9 @@ Sakura-Editor Update Plugin (v20181021 (beta))
 * 次の動作がOSから割り込むことがある。  
 	>パッケージ Microsoft .NET Framework 3.0 の更新 NetFx3 を有効にするために、変更を開始しています。クライアント ID: Windows Optional Component Manager Command-Line。
 * マクロヘルプ、プラグインヘルプも無ければダウンロードする
+* 次のメッセージが出たら、fix itを適用してください。  
+	>エラー: セキュリティで保護されたチャネル サポートでエラーが発生しました  
+	http://download.microsoft.com/download/0/6/5/0658B1A7-6D2E-474F-BC2C-D69E5B9E9A68/MicrosoftEasyFix51044.msi
 
 ## ToDo
 

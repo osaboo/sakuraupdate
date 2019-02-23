@@ -22,6 +22,9 @@ Sub HelpUpdate
     Tools.log vbCrLf & "★★sakuraupdate " & Tools.Version & "★★", 0
     Tools.log "ヘルプファイルを最新バージョンに更新します。", 0
 
+    'WorkDirを空にする。
+    Tools.WorkCleanup(true)
+
     Dim wtargets
     wtargets = Array("")
 

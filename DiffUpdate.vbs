@@ -18,6 +18,9 @@ Sub DiffUpdate()
 
     Tools.log vbCrLf & "★★sakuraupdate " & Tools.Version & "★★", 0
     Tools.log "Diff(差分)ツールを配置します。", 0
+
+    'WorkDirを空にする。
+    Tools.WorkCleanup(true)
     
     wchk = Tools.DiffCheck(2, wnewver, wurl)
     If IsNull(wchk) Then Exit Sub

@@ -12,7 +12,12 @@
         <property name="WorkDir"/>
         <property name="PluginDir"/>
         <property name="SakuraDir"/>
+
         <method name="Init" />
+
+        <method name="WorkCleanup">
+                <PARAMETER name="afileonly"/>
+        </method>
 
         <method name="UpdateCheck">
                 <PARAMETER name="amode"/>
@@ -151,7 +156,7 @@ Dim OSVer
 
 ' 初期化
 Sub Init()
-  Version = "v20181021"
+  Version = "v20190224"
 
   DebugLvl = Plugin.GetOption("サクラエディタ", "DEBUGLVL")
 
@@ -186,14 +191,24 @@ Sub Init()
   Set WSH = CreateObject("Wscript.Shell")
   WorkDir = WSH.ExpandEnvironmentStrings("%TEMP%") & "\sakuraupdate"
 
-  If IsExistDir(WorkDir) Then
-    DeleteDir WorkDir
-  End If
-
   'log "更新作業用フォルダ " & WorkDir, 1
   If Not IsExistDir(WorkDir) Then
     'log "更新作業用フォルダを作成します", 1
     CreateDir WorkDir
+  End If
+
+End Sub
+
+' WorkDirを消す afileony=trueでファイルのみ消す
+Sub WorkCleanup(afileonly)
+
+  If IsExistDir(WorkDir) Then
+    If afileonly Then
+      Log "ワークディレクトリ消去。" & WorkDir , 2
+      DeleteFile WorkDir & "\*.*"
+    Else
+      DeleteDir WorkDir
+    End If
   End If
 
 End Sub
@@ -1129,7 +1144,8 @@ Function DownloadFile(ByVal aurl, ByVal SaveFilePath)
     req.Send
     
     If err.number <> 0 Then
-        log "エラー: " & Err.Description , 1
+        log "XMLHTTPRequestでの取得が失敗しました。(" & Err.Number & ":" & Err.Description & ")", 1
+        log "CURL.exeでの取得に切り替えます。", 1
         DownloadFile = DownloadCURL(aurl, SaveFilePath)
         Exit Function
     End If
@@ -1260,6 +1276,9 @@ Sub UpdateCheck(amode)
     
     If amode = 2 Then Editor.ActivateWinOutput
     If amode = 2 Then log vbCrLf & "★★sakuraupdate " & Version & "★★", 0
+
+    'WorkDirを空にする。
+    Call WorkCleanup(true)
 
     If amode = 2 Then log vbCrLf & "プラグインの最新バージョンを確認します。", 0
     wchk0 = PluginCheck(amode, wnewver, wurl)
@@ -1445,7 +1464,7 @@ Function SakuraDownload(wurl)
     WSH.Run wcmd, 7, False
     
 on error resume next
-    Editor.Sleep 500
+    Editor.Sleep 2000
 on error goto 0
 
     If Not FS.FileExists(WorkDir & "\sakura.exe") Then
@@ -1577,7 +1596,7 @@ Function RegExpDownload(wurl)
     WSH.Run wcmd, 7, False
 
 on error resume next
-    Editor.Sleep 500
+    Editor.Sleep 2000
 on error goto 0
 
     If Not IsExistFile(WorkDir & "\bregonig.dll") Then
@@ -1692,7 +1711,7 @@ Function HelpDownload(atarget, wurl)
     WSH.Run wcmd, 7, False
 
 on error resume next
-    Editor.Sleep 500
+    Editor.Sleep 2000
 on error goto 0
 
     If Not IsExistFile(WorkDir & "\" & atarget) Then
@@ -1821,7 +1840,7 @@ Function DiffDownload(wurl)
     WSH.Run wcmd, 7, False
 
 on error resume next
-    Editor.Sleep 500
+    Editor.Sleep 2000
 on error goto 0
 
     If Not IsExistFile(WorkDir & "\diff.exe") Then
@@ -1955,7 +1974,7 @@ Function CtagsDownload(wurl)
     WSH.Run wcmd, 7, False
 
 on error resume next
-    Editor.Sleep 500
+    Editor.Sleep 2000
 on error goto 0
 
     If Not IsExistFile(WorkDir & "\ctags.exe") Then
@@ -2062,7 +2081,7 @@ Function PluginDownload(wurl)
     WSH.Run wcmd, 7, False
 
 on error resume next
-    Editor.Sleep 500
+    Editor.Sleep 2000
 on error goto 0
 
     If Not IsExistFile(WorkDir & "\sakuraupdate\plugin.def") Then
@@ -2098,7 +2117,8 @@ Sub PluginSetup(atarget)
     wcmd = "set srcfolder=" & WorkDir & "\sakuraupdate" & vbLf & _
                "set sakurafolder=" & SakuraDir & vbLf & _
                "set targetfolder=" & PluginDir & vbLf & _
-               "set targetfile1=" & atarget & vbLf
+               "set targetfile1=" & atarget & vbLf & _
+               "set debuglvl=" & debuglvl & vbLf
 
     If (Left(OSVer, 2) = "6." Or Left(OSVer, 3) = "10.") And Left(PluginDir, Len(programfiles)) = programfiles Then
         wcmd = wcmd & "set _runas=-Verb runas"
@@ -2111,6 +2131,7 @@ Sub PluginSetup(atarget)
     FS.CopyFile PluginDir & "\sleep.vbs",      WorkDir & "\", true
     FS.CopyFile PluginDir & "\mainupdate.bat", WorkDir & "\", true
     FS.CopyFile PluginDir & "\fileupdate.bat", WorkDir & "\", true
+    FS.CopyFile PluginDir & "\runas.ps1", WorkDir & "\", true
 
     wcmd = """" & WorkDir & "\mainupdate.bat"""
 
@@ -2158,7 +2179,8 @@ Sub FileSetup(atargets)
     
     wcmd = "set srcfolder=" & WorkDir & vbLf & _
                "set sakurafolder=" & SakuraDir & vbLf & _
-               "set targetfolder=" & SakuraDir & vbLf
+               "set targetfolder=" & SakuraDir & vbLf & _
+               "set debuglvl=" & debuglvl & vbLf
     
     for i = 1 to ubound(atargets)
         wcmd = wcmd & "set targetfile" & i & "=" & atargets(i) & vbLf
@@ -2172,11 +2194,12 @@ Sub FileSetup(atargets)
     SaveText wcmd, wcmdfile, "Shift_JIS"
 
     'mainupdate.batとfileupdate.batの退避
-    'FS.CopyFile PluginDir & "\sleep.vbs",      WorkDir & "\", true
-    'FS.CopyFile PluginDir & "\mainupdate.bat", WorkDir & "\", true
-    'FS.CopyFile PluginDir & "\fileupdate.bat", WorkDir & "\", true
+    FS.CopyFile PluginDir & "\sleep.vbs",      WorkDir & "\", true
+    FS.CopyFile PluginDir & "\mainupdate.bat", WorkDir & "\", true
+    FS.CopyFile PluginDir & "\fileupdate.bat", WorkDir & "\", true
+    FS.CopyFile PluginDir & "\runas.ps1", WorkDir & "\", true
 
-    wcmd = """" & PluginDir & "\mainupdate.bat"""
+    wcmd = """" & WorkDir & "\mainupdate.bat"""
 
     log ">" & wcmd, 1
     'DoCmd wcmd, ""
