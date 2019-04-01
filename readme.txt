@@ -1,5 +1,5 @@
 # sakuraupdate
-Sakura-Editor Update Plugin (v20190224 (beta))
+Sakura-Editor Update Plugin (v20190402 (beta))
 
 プラグインでサクラエディタのバージョンアップ機能を実装してみる
 
@@ -18,6 +18,11 @@ Sakura-Editor Update Plugin (v20190224 (beta))
 
 	自動チェックは初期設定で7日単位で、無効にすることもできます。  
 	手動によるチェックもできます。
+
+3, サクラエディタのプレリリース版を反映可能です。
+
+	2019.3.27からリリースされているプレリリース版をダウンロード可能です。  
+	オプションの「プレリリース版のダウンロード可否」で設定を変更できます。
 
 ## インストール手順
 
@@ -87,7 +92,7 @@ Sakura-Editor Update Plugin (v20190224 (beta))
 1. ダウンロードサイト  
 	GitHub:0 SourceForge:1 OSDN:2 Custom:3  
 	から選びます。  
-	初期値: GitHub
+	初期値: GitHub:0
 	※Customは未実装のため現時点では無効
 
 2. sourceforgeのsakura-edtiorプロジェクトRSS  
@@ -102,46 +107,52 @@ Sakura-Editor Update Plugin (v20190224 (beta))
 	ダウンロード対象を、このURLから検索します。  
 	初期値:https://api.github.com/repos/sakura-editor/sakura/releases/latest
 
-5. ヘルプファイルのリリースURL  
+5. プレリリース版のダウンロード可否
+    未設定:0 プレリリースもダウンロード:1 リリース版のみ:2
+	から選びます。1の場合、サクラエディタのプレリリース版が出ていればダウンロードします。
+	更新チェック時に初回のみ画面で選択します。
+	初期値：0
+
+6. ヘルプファイルのリリースURL  
 	ヘルプファイルダウンロード対象を、このURLから検索します。  
 	(未指定時は自動チェック対象外。未指定時も手動更新ではSFから自動取得)  
 	初期値:https://sourceforge.net/projects/sakura-editor/rss?path=/help2
 
-6. 正規表現ライブラリのリリースURL  
+7. 正規表現ライブラリのリリースURL  
 	正規表現ライブラリのダウンロード対象を、このURLから検索します。  
 	(未指定時は自動チェック対象外。未指定時も手動更新ではSFから自動取得)  
 	初期値:https://api.bitbucket.org/2.0/repositories/k_takata/bregonig/downloads
 
-7. DIFFのリリースURL  
+8. DIFFのリリースURL  
 	DIFFのダウンロード対象のURLを指定します。  
 	(未指定時は取得しない)  
 	初期値:http://www.ring.gr.jp/archives/text/TeX/ptex-win32/w32/patch-diff-w32.zip  
 	一度配置されると、自動チェックではバージョンアップしない。手動更新で更新可能。
 
-8. CTAGSのリリースURL  
+9. CTAGSのリリースURL  
 	CTAGSのダウンロード対象のURLを指定します。  
 	(未指定時は取得しない)  
 	初期値:http://hp.vector.co.jp/authors/VA025040/ctags/  
 	他に設定可能な値:https://api.github.com/repos/universal-ctags/ctags-win32/releases  
 	一度配置されると、自動チェックではバージョンアップしない。手動更新で更新可能。
 
-9. 独自リリース用URL(file:// or http://)  
+10. 独自リリース用URL(file:// or http://)  
 	社内ネット等インターネット以外からダウンロードする際のURL  
 	※未実装のため現時点では無効  
 	初期値はダミー
 
-10. プラグインのリリースURL  
+11. プラグインのリリースURL  
 	このプラグインを更新するためのURL  
-	初期値:https://github.com/osaboo/sakuraupdate/releases
+	初期値:https://api.github.com/repos/osaboo/sakuraupdate/releases
 
-11. 最近の更新チェック日  
+12. 最近の更新チェック日  
 	更新チェックした最終日。この日から頻度で設定した日数を経過すると編集開始時に自動チェックします。
 
-12. 更新チェックの頻度(単位=日、空白=自動チェックしない)  
+13. 更新チェックの頻度(単位=日、空白=自動チェックしない)  
 	日単位で自動チェック頻度を指定します。  
 	初期値: 7(日)
 
-13. Debug Level (0=NODEBUG)  
+14. Debug Level (0=NODEBUG)  
 	1あるいは2。アウトプットウィンドウに詳細なログを出力します。  
 	初期値: 0
 
@@ -165,9 +176,26 @@ Sakura-Editor Update Plugin (v20190224 (beta))
 * 次のメッセージが出たら、fix itを適用してください。  
 	>エラー: セキュリティで保護されたチャネル サポートでエラーが発生しました  
 	http://download.microsoft.com/download/0/6/5/0658B1A7-6D2E-474F-BC2C-D69E5B9E9A68/MicrosoftEasyFix51044.msi
+* v2.4.0からのbuild式およびプレリリース対応  
+	* v2.4.0からのexe.zipには、sakura.exe以外にヘルプファイル,ctags,bregonigも同封されている。  
+	あとsakura_lang_en_US.dllもある。これは英語モードにしたいときのみ必要。
+	ossライセンスファイルも同封されている。これも一緒に展開が必要。  
+	sakura-doxygen.chmヘルプファイルは開発者以外は不要かな。
+	考え方として、exeのみに絞るか、ヘルプファイルは個別は無しとしてここから取るか。sakura.chm以外はそのままぽい。  
+	あと、リリースにはexe.zipの他、installer.zipも含まれる。  
+	バージョンアップとしてinstallerを起動するオプションも必要か。  
+	とりあえずはsakura.exeとsakura.chmを取り出すことにする。
+	
+	* プレリリース版はlatestではダウンロードできないため、/ratestを取って検索する。  
+	ただし、/latestのみにしたい場合のため、
+	sakuraupdateプラグインのv20190330アップデート時に、プレリリース版をダウンロードするかのフラグを
+	オプションに追加する。フラグはデフォルトでoffで、その場合は/latestから検索する。
+	そのままにすれば、リリース版のみ取得する。
 
 ## ToDo
 
+* GitHubでの新しいExe配布形式に同封されている英語言語DLL, OSSライセンスファイルの反映
+* GitHubでの新しいInstaller配布形式への対応。インストーラの起動ができるといい。
 * vbsをjsに移行したい。ソースもきれいにしたい。
 * ほんとはチェック・ダウンロード処理はサクラエディタと別プロセスで非同期がいいんだろう
 * 新しいキーワード定義あればダウンロードし、タイプ別に自動設定する

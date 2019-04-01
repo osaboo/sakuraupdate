@@ -156,11 +156,11 @@ Dim OSVer
 
 ' 初期化
 Sub Init()
-  Version = "v20190224"
+  Version = "v20190402"
 
   DebugLvl = Plugin.GetOption("サクラエディタ", "DEBUGLVL")
 
-  If DebugLvl = "" Then
+  If DebugLvl = "" Then '初期値が設定されない古いバージョンの場合
       Plugin.SetOption "サクラエディタ", "SITEPRIORITY","0"
       Plugin.SetOption "サクラエディタ", "SFRSSURL", "https://sourceforge.net/projects/sakura-editor/rss"
       Plugin.SetOption "サクラエディタ", "OSDNURL",  "https://osdn.net/projects/sakura-editor/releases/rss"
@@ -172,6 +172,7 @@ Sub Init()
       Plugin.SetOption "サクラエディタ", "PLUGINURL","https://api.github.com/repos/osaboo/sakuraupdate/releases"
       Plugin.SetOption "サクラエディタ", "CHECKFREQ","7"
       Plugin.SetOption "サクラエディタ", "DEBUGLVL", "0"
+      Plugin.SetOption "サクラエディタ", "USEPREREL", "0"
       DebugLvl = 0
   End If
   
@@ -851,6 +852,7 @@ Function GetGitHub(ByRef aurl)
     Dim wtmpfile
     Dim re, match, matchs
 
+    wver = ""
     wlink = aurl
     log "GitHub確認中.. " & wlink, 1
 
@@ -863,46 +865,72 @@ Function GetGitHub(ByRef aurl)
     'wpage = LoadText(wtmpfile, "utf-8")
     wpage = DownloadFile(wlink, "")
 
-    If Instr(aurl, "sakura") > 0 Then
-        mesg = "browser_download_url"":"
-        i = InStr(wpage, mesg)
-        If i > 0 Then
-            wlink = Mid(wpage, i + Len(mesg))
-            '    "xxxxxx"
-            ' j  1
-            ' k         8
-            '     2----7  (9-2-3)
-            j = InStr(wlink, """")
-            If j > 0 Then
-                k = InStr(j + 1, wlink, """")
-                If k > 0 Then
-                    wlink = Mid(wlink, j + 1, k - j - 1)
+    Set re = CreateObject("VBScript.RegExp")
+
+    If Instr(aurl, "sakura") > 0 Then 'sakura or sakuraupdate
+        With re
+            wlink = ""
+
+            if instr(aurl, "sakuraupdate") > 0 Then
+                '.Pattern = "ctags-2018-09-18_3480c6de-x86.zip"
+                '  sakuraupdate "https://github.com/osaboo/sakuraupdate/releases/download/v20190224/sakuraupdate.zip"
+                .Pattern = """browser_download_url"": ?""([^ ""]+\.zip)"
+            ElseIf instr(aurl, "sakura-editor") > 0 Then
+                    '  sakura "https://github.com/sakura-editor/sakura/releases/download/v2.3.2.0/sakura2-3-2-0.zip"
+                    '  sakura pre-release "https://github.com/sakura-editor/sakura/releases/download/v2.4.0-alpha1/sakura-tag-v2.4.0-alpha1-build1699-2582c34c-Win32-Release-Exe.zip"
+                .Pattern = """browser_download_url"": ?""([^ ""]+sakura2-[0-9]+-[0-9]+-[0-9]+\.zip)|([^ ""]+sakura-tag-[^ ""]+-Win32-Release-Exe\.zip)"
+            End If
+            .Global = True
+            Set matchs = .Execute(wpage)
+            'For Each match In matchs
+            '    log "見つかった文字列:" & match.Value, 2
+            'Next
+            If matchs.Count > 0 Then
+                log "見つかった文字列:" & matchs(0).Value, 2
+                log "見つかった副文字列の数:" & matchs(0).SubMatches.Count, 2
+                If matchs(0).SubMatches.Count > 1 Then
+                    wlink = Trim(matchs(0).SubMatches(1))
+                End If
+                If wlink = "" Then
+                    If matchs(0).SubMatches.Count > 0 Then
+                        wlink = matchs(0).SubMatches(0)
+                    End If
+                End If
+                If wlink <> "" Then
+                    log "見つかったファイル:" & wlink, 2
                     aurl = wlink
                 End If
-            Else
-                wlink = ""
             End If
-            log "見つかったファイル:" & wlink, 2
-        End If
         
-        If wlink <> "" Then
-            Set re = CreateObject("VBScript.RegExp")
-
-            With re
-                .Pattern = "([0-9]+\.[0-9]+\.[0-9]+\.[0-9]+|v[0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9])"
-                .Global = True
-                Set matchs = .Execute(wlink)
-                'Debug.Print matchs.Count
-                For Each match In matchs
-                    'Debug.Print match.Value
-                    wver = match.Value
-                Next
-            End With
-        End If
+            If wlink <> "" Then
+                if instr(aurl, "sakuraupdate") > 0 Then
+                    '  sakuraupdate "https://github.com/osaboo/sakuraupdate/releases/download/v20190224/sakuraupdate.zip"
+                    .Pattern = "v[0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9]"
+                    Set matchs = .Execute(wlink)
+                    If matchs.count > 0 Then
+                        wver = matchs(0).Value
+                    End If
+                ElseIf instr(aurl, "sakura-editor") > 0 Then
+                    '  sakura "https://github.com/sakura-editor/sakura/releases/download/v2.3.2.0/sakura2-3-2-0.zip"
+                    .Pattern = "v[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+"
+                    Set matchs = .Execute(wlink)
+                    If matchs.count > 0 Then
+                        wver = Mid(matchs(0).Value,2)
+                    Else
+                        '  sakura pre-release "https://github.com/sakura-editor/sakura/releases/download/v2.4.0-alpha1/sakura-tag-v2.4.0-alpha1-build1699-2582c34c-Win32-Release-Exe.zip"
+                        .Pattern = "tag-v([0-9]+\.[0-9]+\.[0-9]+)-.+build([0-9]+)"
+                        Set matchs = .Execute(wlink)
+                        If matchs.count > 0 Then
+                            If matchs(0).SubMatches.Count > 1 Then
+                                wver = matchs(0).SubMatches(0) & "." & matchs(0).SubMatches(1)
+                            End If
+                        End If
+                    End If
+                End If
+            End If
+        End With
 
     ElseIf Instr(aurl, "universal-ctags") > 0 Then
-        Set re = CreateObject("VBScript.RegExp")
-
         With re
             wlink = ""
             
@@ -1293,10 +1321,15 @@ Sub UpdateCheck(amode)
 
     If amode = 2 Then log vbCrLf & "サクラエディタ本体の最新バージョンを確認します。", 0
     wchk1 = SakuraCheck(amode, wnewver, wurl)
-    If wchk1 = true and amode = 2 Then
+    If wchk1 and amode = 2 Then
         If SakuraDownload(wurl) = True Then
             redim preserve wtargets(ubound(wtargets)+1)
             wtargets(ubound(wtargets)) = "sakura.exe"
+            
+            If FS.FileExists(WorkDir & "\sakura.chm") Then
+                redim preserve wtargets(ubound(wtargets)+1)
+                wtargets(ubound(wtargets)) = "sakura.chm"
+            End If
         End If
     End If
 
@@ -1367,11 +1400,12 @@ End Sub
 
 '   サクラエディタ本体の更新チェック
 '   amode = 1:自動モード,  2:手動モード
-'   戻り値: true=更新あり false=更新なし
-'
+'   戻り値: 1=プレリリースあり -1(true)=更新あり 0(false)=更新なし
+'   0ならFalse
+'   0以外はTrue
 Function SakuraCheck(amode, ByRef aver, ByRef aurl)
 
-    'Dim wurl
+    Dim wpre
     Dim wlink
     Dim wcurver
     wcurver = Editor.ExpandParameter("$V")
@@ -1389,9 +1423,25 @@ Function SakuraCheck(amode, ByRef aver, ByRef aurl)
         aurl = Plugin.GetOption("サクラエディタ", "CUSTOMURL")
     End Select
 
+    wpre = Plugin.GetOption("サクラエディタ", "USEPREREL")
+
     If InStr(aurl, "sourceforge.net") > 0 Then
         aver = GetSFRSS(aurl, "sakura2")
     ElseIf InStr(aurl, "github.com") > 0 Then
+        If wpre = "0" Then '未設定時
+            If WSH.Popup("GitHubのプレリリース版をダウンロードしますか?「はい」で次回以降もプレリリースの更新を反映します。「いいえ」でリリース版のみ反映します。この設定はプラグインのオプションで変更できます。", 0, "ソフトウェアの更新", 4) = 6 Then
+                wpre = "1" 'プレリリース
+            Else
+                wpre = "2" 'リリースのみ
+            End If
+            Plugin.SetOption "サクラエディタ", "USEPREREL", wpre
+        End If
+        If Right(aurl, 7) = "/latest" Then '最新版指定があったら一旦とる。
+        	aurl = Left(aurl, Len(aurl)-7)
+        End If
+        If wpre <> "1" Then 'プレリリース指定以外 /latestを付けなおす
+            aurl = aurl & "/latest"
+        End If
         aver = GetGitHub(aurl)
     ElseIf InStr(aurl, "osdn.net") > 0 Then
         aver = GetOSDNRSS(aurl, "sakura2")
@@ -1411,10 +1461,17 @@ Function SakuraCheck(amode, ByRef aver, ByRef aurl)
         Exit Function
     End If
 
+    If Instr(aurl, "alpha") > 0 or Instr(aurl, "beta") > 0 Then
+        log "★サクラエディタの新しいプレリリース版がリリースされています。", 0
+        SakuraCheck = 1
+        Exit Function
+    End If
+
     log "★サクラエディタの新バージョンがリリースされています。", 0
     
     SakuraCheck = True
 
+    
 End Function
 
 ' サクラエディタのzipダウンロード
@@ -1458,7 +1515,8 @@ Function SakuraDownload(wurl)
     
     'zip展開
     'wcmd = UnzipExe & " -o -j " & wzipfile & " */sakura.exe -d " & WorkDir
-    wcmd = UnzipExe & " e -aoa " & wzipfile & " */sakura.exe -o" & WorkDir
+    wcmd = UnzipExe & " e -aoa -r " & wzipfile & " sakura.exe sakura.chm -o" & WorkDir
+    'wcmd = UnzipExe & " e -aoa " & wzipfile & " -o" & WorkDir & "\sakura"
     log ">" & wcmd, 1
     'DoCmd wcmd, ""
     WSH.Run wcmd, 7, False
@@ -2208,6 +2266,38 @@ Sub FileSetup(atargets)
     log "更新処理を終了しました。", 0
 
 End Sub
+
+' WScript.Popup仕様 @see https://www.atmarkit.co.jp/ait/articles/0410/21/news099_3.html
+'
+' ボタン
+' 0 	vbOKOnly 	［OK］のみ表示する
+' 1 	vbOKCancel 	［OK］［キャンセル］を表示する
+' 2 	vbAbortRetryIgnore 	［中止］「再試行］「無視］を表示する
+' 3 	vbYesNoCancel 	［はい］［いいえ］［キャンセル］を表示する
+' 4 	vbYesNo 	［はい］［いいえ］を表示する
+' 5 	vbRetryCancel 	［再試行］［キャンセル］を表示する
+' 
+' アイコンの種類
+' 0 	なし 	アイコンを表示しない
+' 16 	vbCritical 	「STOP」アイコンを表示する
+' 32 	vbQuestion 	「?」アイコンを表示する
+' 48 	vbExclamation 	「!」アイコンを表示する
+' 64 	vbInformation 	「i」アイコンを表示する
+' 
+' デフォルトで入力フォーカスが設定されるボタン
+' 0 	vbDefaultButton1 	1番目のボタンにフォーカスを設定する
+' 256 	vbDefaultButton2 	2番目のボタンにフォーカスを設定する
+' 512 	vbDefaultButton3 	3番目のボタンにフォーカスを設定する
+' 
+' Popupメソッドからの戻り値
+' 1 	vbOK 	［OK］が押された
+' 2 	vbCancel 	［キャンセル］が押された
+' 3 	vbAbort 	［中止］が押された
+' 4 	vbRetry 	［再試行］が押された
+' 5 	vbIgnore 	［無視］が押された
+' 6 	vbYes 	［はい］が押された
+' 7 	vbNo 	［いいえ］が押された
+' -1 	なし 	制限時間が経過した
 
 ]]>
 </script>

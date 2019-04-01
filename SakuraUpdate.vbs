@@ -29,13 +29,21 @@ Sub SakuraUpdate()
         If Tools.WSH.Popup("すでに最新版ですが、更新しますか?", 0, "ソフトウェアの更新", 4) = 7 Then
             Exit Sub
         End If
+    ElseIf wchk > 0 Then
+        If Tools.WSH.Popup("新しいプレリリース版(" & wnewver & ")があります。更新しますか?", 0, "ソフトウェアの更新", 4) = 7 Then
+            Exit Sub
+        End If
     End If
     
     If Tools.SakuraDownload(wurl) = False Then
         Exit Sub
     End If
 
-    Call Tools.FileSetup(Array("","sakura.exe"))
+    If Tools.FS.FileExists(Tools.WorkDir & "\sakura.chm") Then
+        Call Tools.FileSetup(Array("","sakura.exe","sakura.chm"))
+    Else
+        Call Tools.FileSetup(Array("","sakura.exe"))
+    End If
 
 End Sub
 
