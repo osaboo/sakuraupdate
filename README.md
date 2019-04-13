@@ -1,5 +1,5 @@
 # sakuraupdate
-Sakura-Editor Update Plugin (v20190402 (beta))
+Sakura-Editor Update Plugin (v20190413 (beta))
 
 プラグインでサクラエディタのバージョンアップ機能を実装してみる
 
@@ -24,10 +24,10 @@ Sakura-Editor Update Plugin (v20190402 (beta))
 	2019.3.27からリリースされているプレリリース版をダウンロード可能です。  
 	オプションの「プレリリース版のダウンロード可否」で設定を変更できます。
 
-4. **2019.4.2現在、「更新チェック」の実行がWindows10のDeffenderの誤検知によりブロックされるようです。オンデマンドスキャンでは検知ありません。**  
+4. **2019.4.2現在、「更新チェック」の実行がWindows10のDeffenderの誤検知によりブロックされることがあるようです。オンデマンドスキャンでは検知ありません。**  
   すみませんが、まだ検知される個所が特定できていないため、誤検知が出た場合は、「更新チェック」を使わず個別でアップデートするか、pluginのsakuraupdateフォルダをウイルス検査対象から除外設定して対応ください。
 
-5. 更新バッチが動作する際に、PowerShellの実行で警告が出ることがあります。  
+5. 更新バッチが動作する際に、PowerShellの実行で実行警告が出ることがあります。  
 	その際は、[R]で実行を選択ください。
 
 ## インストール手順
@@ -138,8 +138,8 @@ Sakura-Editor Update Plugin (v20190402 (beta))
 9. CTAGSのリリースURL  
 	CTAGSのダウンロード対象のURLを指定します。  
 	(未指定時は取得しない)  
-	初期値:http://hp.vector.co.jp/authors/VA025040/ctags/  
-	他に設定可能な値:https://api.github.com/repos/universal-ctags/ctags-win32/releases  
+	初期値:https://api.github.com/repos/universal-ctags/ctags-win32/releases  
+	他に設定可能な値:http://hp.vector.co.jp/authors/VA025040/ctags/  
 	一度配置されると、自動チェックではバージョンアップしない。手動更新で更新可能。
 
 10. 独自リリース用URL(file:// or http://)  
@@ -197,6 +197,9 @@ Sakura-Editor Update Plugin (v20190402 (beta))
 	sakuraupdateプラグインのv20190402アップデート時に、プレリリース版をダウンロードするかのフラグを
 	オプションに追加する。フラグはデフォルトで未設定で、初回のみon/offを選択させる。
 	offにすれば、リリース版のみ取得する。
+
+* .NET 3.5xのインストールを要求する原因がわかった。どうも .NET 4.5から、VBSで.NET のオブジェクトが呼び出しできない。
+   なので、System.Text.StringBuilderを使わない実装にした。
 
 ## ToDo
 

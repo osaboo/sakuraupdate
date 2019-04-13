@@ -156,7 +156,7 @@ Dim OSVer
 
 ' 初期化
 Sub Init()
-  Version = "v20190402"
+  Version = "v20190413"
 
   DebugLvl = Plugin.GetOption("サクラエディタ", "DEBUGLVL")
 
@@ -168,7 +168,7 @@ Sub Init()
       Plugin.SetOption "サクラエディタ", "HELPURL",  "https://sourceforge.net/projects/sakura-editor/rss?path=/help2"
       Plugin.SetOption "サクラエディタ", "REGEXPURL","https://api.bitbucket.org/2.0/repositories/k_takata/bregonig/downloads"
       Plugin.SetOption "サクラエディタ", "DIFFURL",  "http://www.ring.gr.jp/archives/text/TeX/ptex-win32/w32/patch-diff-w32.zip"
-      Plugin.SetOption "サクラエディタ", "CTAGSURL", "http://hp.vector.co.jp/authors/VA025040/ctags/"
+      Plugin.SetOption "サクラエディタ", "CTAGSURL", "https://api.github.com/repos/universal-ctags/ctags-win32/releases"
       Plugin.SetOption "サクラエディタ", "PLUGINURL","https://api.github.com/repos/osaboo/sakuraupdate/releases"
       Plugin.SetOption "サクラエディタ", "CHECKFREQ","7"
       Plugin.SetOption "サクラエディタ", "DEBUGLVL", "0"
@@ -694,12 +694,14 @@ Function GetSFRSS(ByRef aurl, apath)
                 If matchs.Count > 0 Then
                     If matchs(0).SubMatches.Count > 0 Then
                         wver = matchs(0).SubMatches(0)
-                        Dim sb
-                        Set sb = CreateObject("System.Text.StringBuilder")
-                        sb.AppendFormat "{0,0:00}", Left(wver, 1)
-                        sb.Append_3 "."
-                        sb.AppendFormat "{0,0:00}", Mid(wver, 2)
-                        wver = sb.ToString()
+                        'Dim sb
+                        'Set sb = CreateObject("System.Text.StringBuilder")
+                        'sb.AppendFormat "{0,0:00}", Left(wver, 1)
+                        'sb.Append_3 "."
+                        'sb.AppendFormat "{0,0:00}", Mid(wver, 2)
+                        'wver = sb.ToString()
+                        wver = Mid(FormatNumber(Left(wver,1) / 100, 2, -1, 0, 0), 3) & _
+                         "." & Mid(FormatNumber(Mid(wver,2) / 100, 2, -1, 0, 0), 3)
                     End If
                 End If
             End With
@@ -1006,12 +1008,15 @@ Function GetBitBucket(ByRef aurl)
             aurl = wlink
             If matchs(0).SubMatches.Count > 0 Then
                 wver = matchs(0).SubMatches(0)
-                Dim sb
-                Set sb = CreateObject("System.Text.StringBuilder")
-                sb.AppendFormat "{0,0:00}", Left(wver, 1)
-                sb.Append_3 "."
-                sb.AppendFormat "{0,0:00}", Mid(wver, 2)
-                wver = sb.ToString()
+                log "version match = " & wver, 2
+                'Dim sb
+                'Set sb = CreateObject("System.Text.StringBuilder")
+                'sb.AppendFormat "{0,0:00}", Left(wver, 1)
+                'sb.Append_3 "."
+                'sb.AppendFormat "{0,0:00}", Mid(wver, 2)
+                'wver = sb.ToString()
+                wver = Mid(FormatNumber(Left(wver,1) / 100, 2, -1, 0, 0), 3) & _
+                 "." & Mid(FormatNumber(Mid(wver,2) / 100, 2, -1, 0, 0), 3)
             End If
         End If
     End With
@@ -1559,21 +1564,21 @@ on error goto 0
     Dim re, match, matchs
     Set re = CreateObject("VBScript.RegExp")
     
-    With re
-        .Pattern = "(\d+)\.(\d+)\.\d+\.\d+"
-        .Global = True
-        Set matchs = .Execute(wcurver)
-        If matchs.Count > 0 Then
-            If matchs(0).SubMatches.Count > 1 Then
-                Dim sb
-                Set sb = CreateObject("System.Text.StringBuilder")
-                sb.AppendFormat "{0,0:00}", matchs(0).SubMatches(0)
-                sb.Append_3 "."
-                sb.AppendFormat "{0,0:00}", matchs(0).SubMatches(1)
-                wcurver = sb.ToString()
-            End If
+    re.Pattern = "(\d+)\.(\d+)\.\d+\.\d+"
+    re.Global = False
+    Set matchs = re.Execute(wcurver)
+    If matchs.Count > 0 Then
+        If matchs(0).SubMatches.Count > 1 Then
+            'Dim sb
+            'Set sb = CreateObject("System.Text.StringBuilder")
+            'sb.AppendFormat "{0,0:00}", matchs(0).SubMatches(0)
+            'sb.Append_3 "."
+            'sb.AppendFormat "{0,0:00}", matchs(0).SubMatches(1)
+            'wcurver = sb.ToString()
+            wcurver = Mid(FormatNumber(matchs(0).SubMatches(0) / 100, 2, -1, 0, 0), 3) & _
+                 "." & Mid(FormatNumber(matchs(0).SubMatches(1) / 100, 2, -1, 0, 0), 3)
         End If
-    End With
+    End If
     
     If amode = 2 Then log "現在の正規表現ライブラリのバージョン:" & wcurver, 0
 
@@ -1597,6 +1602,15 @@ on error goto 0
     aurl = wurl
     
     If amode = 2 Then log "最新の正規表現ライブラリのバージョン:" & aver, 0
+
+    're.Pattern = "(\d+)\.(\d+)"
+    'Set matchs = re.Execute(aver)
+    'If matchs.Count > 0 Then
+    '    If matchs(0).SubMatches.Count > 1 Then
+    '        aver = Mid(FormatNumber(matchs(0).SubMatches(0) / 100, 2, -1, 0, 0), 3) & _
+    '             "." & Mid(FormatNumber(matchs(0).SubMatches(1) / 100, 2, -1, 0, 0), 3)
+    '    End If
+    'End If
 
     If aver <= wcurver Then
         If amode = 2 Then log "●正規表現ライブラリは最新バージョンです。", 0

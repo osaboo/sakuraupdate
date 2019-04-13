@@ -4,7 +4,7 @@ Id=SoftwareUpdate
 Name=ソフトウェアの更新(&W)
 Description=SakuraEditorを自動更新します
 Type=wsh
-Version=v20190402
+Version=v20190413
 Url=https://github.com/osaboo/sakuraupdate/
 Author=osaboo
 
@@ -79,7 +79,7 @@ O[8].Default=http://www.ring.gr.jp/archives/text/TeX/ptex-win32/w32/patch-diff-w
 O[9].Key=CTAGSURL
 O[9].Label=CTAGSのリリースURL(未指定時は取得しない)
 O[9].Type=Str
-O[9].Default=http://hp.vector.co.jp/authors/VA025040/ctags/
+O[9].Default=https://api.github.com/repos/universal-ctags/ctags-win32/releases
 ;O[9].Default=https://sourceforge.net/projects/ctags/rss?path=/ctags
 
 O[10].Key=CUSTOMURL
