@@ -156,7 +156,7 @@ Dim OSVer
 
 ' 初期化
 Sub Init()
-  Version = "v20191015"
+  Version = "v20200420"
 
   DebugLvl = Plugin.GetOption("サクラエディタ", "DEBUGLVL")
 
