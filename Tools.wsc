@@ -881,8 +881,9 @@ Function GetGitHub(ByRef aurl)
                     '  sakura "https://github.com/sakura-editor/sakura/releases/download/v2.3.2.0/sakura2-3-2-0.zip"
                     '  sakura pre-release "https://github.com/sakura-editor/sakura/releases/download/v2.4.0-alpha1/sakura-tag-v2.4.0-alpha1-build1699-2582c34c-Win32-Release-Exe.zip"
                     '  sakura betarelease "https://github.com/sakura-editor/sakura/releases/download/v2.4.0-beta/sakura-build2313-Win32-Release-Exe.zip"
-                '.Pattern = """browser_download_url"": ?""([^ ""]+sakura2-[0-9]+-[0-9]+-[0-9]+\.zip)|([^ ""]+sakura-tag-[^ ""]+-Win32-Release-Exe\.zip|([^ ""]+sakura-[^ ""]+-Win32-Release-Exe\.zip)"
-                .Pattern = """browser_download_url"": ?""([^ ""]+sakura2-[0-9]+-[0-9]+-[0-9]+\.zip)|([^ ""]+sakura-[^ ""]+-Win32-Release-Exe\.zip)"
+                    '  sakura product-rel "https://github.com/sakura-editor/sakura/releases/download/v2.4.0/sakura-tag-v2.4.0-build2686-782347a-Win32-Release-Exe.zip
+                '.Pattern = """browser_download_url"": ?""([^ ""]+sakura2-[0-9]+-[0-9]+-[0-9]+\.zip)|([^ ""]+sakura-tag-[^ ""]+-Win32-Release-Exe\.zip)|([^ ""]+sakura-[^ ""]+-Win32-Release-Exe\.zip)"
+                .Pattern = """browser_download_url"": ?""([^ ""]+sakura2-[0-9]+-[0-9]+-[0-9]+\.zip|[^ ""]+sakura-[^ ""]+-Win32-Release-Exe\.zip)"
             End If
             .Global = True
             Set matchs = .Execute(wpage)
@@ -890,8 +891,13 @@ Function GetGitHub(ByRef aurl)
             '    log "見つかった文字列:" & match.Value, 2
             'Next
             If matchs.Count > 0 Then
-                log "見つかった文字列:" & matchs(0).Value, 2
-                log "見つかった副文字列の数:" & matchs(0).SubMatches.Count, 2
+                if debuglvl > 2 Then
+                    log "見つかった文字列:" & matchs(0).Value, 2
+                    log "見つかった副文字列の数:" & matchs(0).SubMatches.Count, 2
+                    for i = 0 to matchs(0).SubMatches.Count -1 
+                        log "見つかった副文字列(" & i & "):" & matchs(0).SubMatches(i), 2
+                    next
+                End If
                 If matchs(0).SubMatches.Count > 1 Then
                     wlink = Trim(matchs(0).SubMatches(1))
                 End If
@@ -933,7 +939,7 @@ Function GetGitHub(ByRef aurl)
                     End If
                     If wver = "" Then
                         '  sakura pre-release "https://github.com/sakura-editor/sakura/releases/download/v2.4.0-alpha1/sakura-tag-v2.4.0-alpha1-build1699-2582c34c-Win32-Release-Exe.zip"
-                        .Pattern = "tag-v([0-9]+\.[0-9]+\.[0-9]+)-.+build([0-9]+)"
+                        .Pattern = "tag-v([0-9]+\.[0-9]+\.[0-9]+)-.*build([0-9]+)"
                         Set matchs = .Execute(wlink)
                         If matchs.count > 0 Then
                             If matchs(0).SubMatches.Count > 1 Then
