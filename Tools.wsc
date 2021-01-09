@@ -956,7 +956,8 @@ Function GetGitHub(ByRef aurl)
             wlink = ""
             
             '.Pattern = "ctags-2018-09-18_3480c6de-x86.zip"
-            .Pattern = """browser_download_url"": ?""([^ ""]+ctags-\d+-\d+-\d+_[0-9a-z]+-x86\.zip)"
+            '"browser_download_url": "../ctags-2021-01-06_p5.9.20210103.0-23-g08b1c490-x86.zip"
+            .Pattern = """browser_download_url"": ?""([^ ""]+ctags-\d+-\d+-\d+_[0-9a-z.\-]+-x86\.zip)"
             .Global = True
             Set matchs = .Execute(wpage)
             If matchs.Count > 0 Then
@@ -968,7 +969,7 @@ Function GetGitHub(ByRef aurl)
             End If
             
             If wlink <> "" Then
-                .Pattern = "ctags-(\d+-\d+-\d+)_[0-9a-z]+-x86\.zip"
+                .Pattern = "ctags-(\d+-\d+-\d+)_[0-9a-z.\-]+-x86\.zip"
                 .Global = True
                 Set matchs = .Execute(wlink)
                 If matchs.Count > 0 Then
