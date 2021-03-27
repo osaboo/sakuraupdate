@@ -241,7 +241,7 @@ Sakura-Editor Update Plugin (v20200420 (beta))
 	(ライセンス原文)  
 https://opensource.org/licenses/zlib-license.php  
 (日本語訳)  
-https://ja.osdn.net/projects/opensource/wiki/licenses%2Fzlib_libpng_license  
+https://licenses.opensource.jp/Zlib/Zlib.html
 
 1. サクラエディタは、Norio Nakatani & Collaboratorsが開発・配布しているフリー・ソフトウェアです。  
 https://sakura-editor.github.io/
