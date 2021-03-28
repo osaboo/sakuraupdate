@@ -1,5 +1,5 @@
 # sakuraupdate
-Sakura-Editor Update Plugin (v20200420 (beta))
+Sakura-Editor Update Plugin (v20230920 (beta))
 
 プラグインでサクラエディタのバージョンアップ機能を実装してみる
 
@@ -12,6 +12,7 @@ Sakura-Editor Update Plugin (v20200420 (beta))
 	* 正規表現ライブラリ
 	* Diffコマンド
 	* Ctagsコマンド
+	* Migemoライブラリ
 	* 当プラグイン自身
 
 2. サクラエディタ起動時(正確には編集開始時)に自動的にチェックすることができます。
@@ -19,16 +20,20 @@ Sakura-Editor Update Plugin (v20200420 (beta))
 	自動チェックは初期設定で7日単位で、無効にすることもできます。  
 	手動によるチェックもできます。
 
-3. サクラエディタのプレリリース版を反映可能です。
+3. サクラエディタのプレリリース版およびAppVeyorでの自動ビルド版を反映可能です。
 
 	2019.3.27からリリースされているプレリリース版をダウンロード可能です。  
 	オプションの「プレリリース版のダウンロード可否」で設定を変更できます。
+	
+	AppVeyorでの自動ビルド版をダウンロード可能です。
+	オプションの「ダウンロードサイト」でAppVeyorを選択してください。
+	
+	★開発版利用の注意事項★
+	AppVeyorビルド版は、正式リリース前の開発版のため、動作が予告なく変更されたり、不具合がある可能性があります。
+	不具合を報告する場合は使用バージョンを確認し「開発版を利用していること」を添えて報告しましょう。
+	あとAppVeyorの仕様でビルド後一定期間でファイルが消えると思うので、いつでもダウンロードできるわけではないはず。
 
-4. ~~**2019.4.2現在、「更新チェック」の実行がWindows10のDeffenderの誤検知によりブロックされることがあるようです。オンデマンドスキャンでは検知ありません。**~~
-  ~~すみませんが、まだ検知される個所が特定できていないため、誤検知が出た場合は、「更新チェック」を使わず個別でアップデートするか、pluginのsakuraupdateフォルダをウイルス検査対象から除外設定して対応ください。~~
-   **2020.3.22現在では誤検知でブロックはされない模様です。**
-   
-5. 更新バッチが動作する際に、PowerShellの実行で実行警告が出ることがあります。  
+4. 更新バッチが動作する際に、PowerShellの実行で実行警告が出ることがあります。  
 
 ```
 セキュリティ警告
@@ -69,14 +74,14 @@ Sakura-Editor Update Plugin (v20200420 (beta))
 
 1. 次のコマンドがツールメニューに追加されます。
 
-	ソフトウェアの更新  
-	 └更新チェック  
-	 └サクラエディタ更新  
-	 └ヘルプファイル更新  
-	 └正規表現ライブラリ更新  
-	 └DIFF更新  
-	 └CTAGS更新  
-	 └このプラグインの更新  
+	ソフトウェアの更新
+	 └更新チェック
+	 └サクラエディタ更新
+	 └正規表現ライブラリ更新
+	 └DIFF更新
+	 └CTAGS更新
+	 └MIGEMO更新
+	 └このプラグインの更新
 
 2. 更新チェック  
 	各ソフトウェアの最新版が更新されているかを、まとめて確認します。  
@@ -87,19 +92,19 @@ Sakura-Editor Update Plugin (v20200420 (beta))
 
 3. サクラエディタ更新  
 	サクラエディタ本体のみを更新します。
+	更新はファイル単位ではなく、インストーラ起動による上書き動作になります。
 
-4. ヘルプファイル更新  
-	ヘルプファイルのみを更新します。
-	sakura.chmの他、macro.chm, plugin.chmも不足していれば追加・更新します。
-
-5. 正規表現ライブラリ更新  
+4. 正規表現ライブラリ更新  
 	正規表現ライブラリのみを更新します。
 
-6. DIFF更新  
+5. DIFF更新  
 	DIFFコマンドのみを更新します。
 
-7. CTAGS更新  
+6. CTAGS更新  
 	CTAGSコマンドのみを更新します。
+
+7. MIGEMO更新  
+	MIGEMOのみを更新します。
 
 8. このプラグインの更新  
 	sakuraupdateプラグインのみを更新します。
@@ -107,50 +112,51 @@ Sakura-Editor Update Plugin (v20200420 (beta))
 ## オプション設定
 
 1. ダウンロードサイト  
-	GitHub:0 SourceForge:1 OSDN:2 Custom:3  
+	GitHub:0 AppVeyor:1 OSDN:2 Custom:3
 	から選びます。  
 	初期値: GitHub:0
 	※Customは未実装のため現時点では無効
 
-2. sourceforgeのsakura-edtiorプロジェクトRSS  
-	ダウンロード対象をこのRSSから検索します。  
-	初期値:https://sourceforge.net/projects/sakura-editor/rss
-
-3. OSDNのSakura Editor Downloads RSS  
-	ダウンロード対象を、このURLから検索します。  
-	初期値:https://osdn.net/projects/sakura-editor/releases/rss
-
-4. GitHub sakura-editor Release URL(API)  
+2. GitHub sakura-editor Release URL(API)  
 	ダウンロード対象を、このURLから検索します。  
 	初期値:https://api.github.com/repos/sakura-editor/sakura/releases/latest
 
-5. プレリリース版のダウンロード可否  
+3. AppVeyor sakura-editor Project URL(API)  
+	ダウンロード対象を、このURLから検索します。  
+	初期値:https://ci.appveyor.com/api/projects/sakuraeditor/sakura
+
+4. OSDNのSakura Editor Downloads RSS  
+	ダウンロード対象を、このURLから検索します。  
+	初期値:https://osdn.net/projects/sakura-editor/releases/rss
+
+5. GitHubプレリリース版のダウンロード可否  
     未設定:0 プレリリースもダウンロード:1 リリース版のみ:2  
     から選びます。1の場合、サクラエディタのプレリリース版が出ていればダウンロードします。  
     更新チェック時に初回のみ画面で選択します。  
     初期値：0
 
-6. ヘルプファイルのリリースURL  
-	ヘルプファイルダウンロード対象を、このURLから検索します。  
-	(未指定時は自動チェック対象外。未指定時も手動更新ではSFから自動取得)  
-	初期値:https://sourceforge.net/projects/sakura-editor/rss?path=/help2
-
-7. 正規表現ライブラリのリリースURL  
+6. 正規表現ライブラリのリリースURL  
 	正規表現ライブラリのダウンロード対象を、このURLから検索します。  
 	(未指定時は自動チェック対象外。未指定時も手動更新ではSFから自動取得)  
 	初期値:https://api.bitbucket.org/2.0/repositories/k_takata/bregonig/downloads
 
-8. DIFFのリリースURL  
+7. DIFFのリリースURL  
 	DIFFのダウンロード対象のURLを指定します。  
 	(未指定時は取得しない)  
 	初期値:http://www.ring.gr.jp/archives/text/TeX/ptex-win32/w32/patch-diff-w32.zip  
 	一度配置されると、自動チェックではバージョンアップしない。手動更新で更新可能。
 
-9. CTAGSのリリースURL  
+8. CTAGSのリリースURL  
 	CTAGSのダウンロード対象のURLを指定します。  
 	(未指定時は取得しない)  
 	初期値:https://api.github.com/repos/universal-ctags/ctags-win32/releases  
 	他に設定可能な値:http://hp.vector.co.jp/authors/VA025040/ctags/  
+	一度配置されると、自動チェックではバージョンアップしない。手動更新で更新可能。
+
+9. MIGEMOのリリースURL  
+	MIGEMOのダウンロード対象のURLを指定します。  
+	(未指定時は取得しない)  
+	初期値:https://files.kaoriya.net/goto/cmigemo_w32  
 	一度配置されると、自動チェックではバージョンアップしない。手動更新で更新可能。
 
 10. 独自リリース用URL(file:// or http://)  
@@ -162,34 +168,35 @@ Sakura-Editor Update Plugin (v20200420 (beta))
 	このプラグインを更新するためのURL  
 	初期値:https://api.github.com/repos/osaboo/sakuraupdate/releases
 
-12. 最近の更新チェック日  
-	更新チェックした最終日。この日から頻度で設定した日数を経過すると編集開始時に自動チェックします。
-
-13. 更新チェックの頻度(単位=日、空白=自動チェックしない)  
+12. 更新チェックの頻度(単位=日、空白=自動チェックしない)  
 	日単位で自動チェック頻度を指定します。  
 	初期値: 7(日)
 
-14. Debug Level (0=NODEBUG)  
-	1あるいは2。アウトプットウィンドウに詳細なログを出力します。  
+13. 最近の更新チェック日  
+	更新チェックした最終日。この日から頻度で設定した日数を経過すると編集開始時に自動チェックします。
+
+14. CURLのinsecureオプション
+	0または1。1の場合CURLに--insecureオプションを付加して実行します。証明書の問題を無視しますのでリスク理解した上で設定のこと。
+	初期値: 0
+
+15. Debug Level (0=NODEBUG)  
+	1-3。アウトプットウィンドウに詳細なログを出力します。  
 	初期値: 0
 
 ## 仕様メモ
 
-* 更新対象は、サクラエディタ本体、ヘルプファイル、正規表現ライブラリ、diff、プラグイン自身
+* 更新対象は、サクラエディタ本体、正規表現ライブラリ、diff、プラグイン自身
 * 対象のサクラエディタはVer2以降の32bit版
 * 動作OSは、XP以降
 * C:\Program Files配下へのコピー時は管理者モードでコピー
-* SourceForgeとGithub、OSDNのどれでもダウンロード可能とする
-* サクラエディタのダウンロードは、SFとGitHub,OSDNの3種類から選べる
-* ヘルプファイルは現状SFのみだが、将来GitHubやOSDNにリリースされれば取得可能とする
-* ヘルプファイル自身にバージョン情報が無いためタイムスタンプで判定
+* サクラエディタのダウンロードは、GitHubかOSDNの2種類から選べる(SourceForgeのダウンロードは廃止)
+* ヘルプファイルはインストーラに含まれる想定として個別ダウンロードは廃止
 * ネットからのダウンロードは、MSXMLでエラーになる場合にCURLで取得。（環境依存の回避)
 * zip展開は、7zのコマンドライン版を使用。(これも環境依存の回避)
 * 複数更新ある場合は、まとめて更新する
 * ctagsを、https://github.com/universal-ctags/ctags-win32/releases からも収集可能とする。  
 * 次の動作がOSから割り込むことがある。  
 	>パッケージ Microsoft .NET Framework 3.0 の更新 NetFx3 を有効にするために、変更を開始しています。クライアント ID: Windows Optional Component Manager Command-Line。
-* マクロヘルプ、プラグインヘルプも無ければダウンロードする
 * 次のメッセージが出たら、fix itを適用してください。  
 	>エラー: セキュリティで保護されたチャネル サポートでエラーが発生しました  
 	http://download.microsoft.com/download/0/6/5/0658B1A7-6D2E-474F-BC2C-D69E5B9E9A68/MicrosoftEasyFix51044.msi
@@ -199,9 +206,7 @@ Sakura-Editor Update Plugin (v20200420 (beta))
 	ossライセンスファイルも同封されている。これも一緒に展開が必要。  
 	sakura-doxygen.chmヘルプファイルは開発者以外は不要かな。
 	考え方として、exeのみに絞るか、ヘルプファイルは個別は無しとしてここから取るか。sakura.chm以外はそのままぽい。  
-	あと、リリースにはexe.zipの他、installer.zipも含まれる。  
-	バージョンアップとしてinstallerを起動するオプションも必要か。  
-	とりあえずはsakura.exeとsakura.chmを取り出すことにする。
+	リリースにはexe.zipの他、installer.zipも含まれるので、バージョンアップとしてinstallerを起動するようにする。
 	
 	* プレリリース版はlatestではダウンロードできないため、/latestを取って検索する。  
 	ただし、/latestのみにしたい場合のため、
@@ -212,19 +217,27 @@ Sakura-Editor Update Plugin (v20200420 (beta))
 * .NET 3.5xのインストールを要求する原因がわかった。どうも .NET 4.5から、VBSで.NET のオブジェクトが呼び出しできない。
    なので、System.Text.StringBuilderを使わない実装にした。
 
+* インストーラ形式に対応するために、サクラエディタ本体の更新はインストーラを起動するが、
+  その場合は同時に更新が検出された他のコンポーネントは無視する。（プラグインと同じ）
+
+* なんとかvbsからjsに変更した。(残念ながら技術不足で今時ではない)
+  JScriptなのでjsc.exeでコンパイルチェックするようにした。
+  C:\WINDOWS\Microsoft.NET\Framework\v4.0.30319\jsc.exe /warnaserror tools.js
+
+* 開発版もダウンロードできるようにしてみた。
+  注意書きで、開発版であることの注意点を補記した。
+
 ## ToDo
 
-* GitHubでの新しいExe配布形式に同封されている英語言語DLL, OSSライセンスファイルの反映
-* GitHubでの新しいInstaller配布形式への対応。インストーラの起動ができるといい。
-* vbsをjsに移行したい。ソースもきれいにしたい。
 * ほんとはチェック・ダウンロード処理はサクラエディタと別プロセスで非同期がいいんだろう
 * 新しいキーワード定義あればダウンロードし、タイプ別に自動設定する
 * VirtualStoreが有効になっているか判断して無効化する
 * 処理後のゴミ掃除(%temp%\sakuraupdateを削除する(Cleanup))
 
-## 著作権表示
+## ライセンス表示
 
 0. sakuraupdateは、osabooがzlib/libpngライセンスで開発・配布しているフリー・ソフトウェアです。
+   サクラエディタプロジェクト公式のものではなく、個人的に開発・配布しています。
 
 	**zlib/libpngライセンス**
 
@@ -234,34 +247,43 @@ Sakura-Editor Update Plugin (v20200420 (beta))
 
 	以下の制限に従う限り、商用アプリケーションを含めて、本ソフトウェアを任意の目的に使用し、自由に改変して再頒布することをすべての人に許可します。
 
-	本ソフトウェアの出自について虚偽の表示をしてはなりません。あなたがオリジナルのソフトウェアを作成したと主張してはなりません。 あなたが本ソフトウェアを製品内で使用する場合、製品の文書に謝辞を入れていただければ幸いですが、必須ではありません。  
-	ソースを変更した場合は、そのことを明示しなければなりません。オリジナルのソフトウェアであるという虚偽の表示をしてはなりません。  
-	ソースの頒布物から、この表示を削除したり、表示の内容を変更したりしてはなりません。
+	1. 本ソフトウェアの出自について虚偽の表示をしてはなりません。あなたがオリジナルのソフトウェアを作成したと主張してはなりません。 あなたが本ソフトウェアを製品内で使用する場合、製品の文書に謝辞を入れていただければ幸いですが、必須ではありません。
 
-	(ライセンス原文)  
-https://opensource.org/licenses/zlib-license.php  
-(日本語訳)  
-https://licenses.opensource.jp/Zlib/Zlib.html
+	2. ソースを変更した場合は、そのことを明示しなければなりません。オリジナルのソフトウェアであるという虚偽の表示をしてはなりません。
+
+	3. ソースの頒布物から、この表示を削除したり、表示の内容を変更したりしてはなりません
+
+  (ライセンス原文)  
+  https://opensource.org/license/zlib/
+
+  (日本語訳)  
+  https://licenses.opensource.jp/Zlib/Zlib.html
 
 1. サクラエディタは、Norio Nakatani & Collaboratorsが開発・配布しているフリー・ソフトウェアです。  
-https://sakura-editor.github.io/
+  https://sakura-editor.github.io/
 
 2. 正規表現ライブラリ bregonig.dllは、 K.Takata (高田 謙)氏が開発・配布しているフリー・ソフトウェアです。  
-http://k-takata.o.oo7.jp/mysoft/bregonig.html
+  http://k-takata.o.oo7.jp/mysoft/bregonig.html
 
 3. diff（ディフ）とはファイルの比較を行うためのコマンドで2つのファイル間の違いを出力できるプログラム。(wikipediaより)  
-https://ja.wikipedia.org/wiki/Diff
+  https://ja.wikipedia.org/wiki/Diff
 
 4. Ctagsは、はソース及びヘッダ内にある名前のインデックス（又はタグ）ファイルを生成するプログラム。(wikipediaより)  
-https://ja.wikipedia.org/wiki/Ctags
+  https://ja.wikipedia.org/wiki/Ctags
 
-5. 同封のcurl.exeはDirk Paehl氏がコンパイル・配布しているものです。  
-http://www.paehl.com/open_source/?CURL_7.61.0
+5. Migemoはローマ字のまま日本語をインクリメンタル検索するためのツールです。<br>
+  Satoru Takabayashi氏が開発・配布しているフリー・ソフトウェアです。 
+  http://0xcc.net/migemo/<br>
+  サクラエディタでは、Migemoのdll版であるC/Migemoを使用できます。<br>
+  C/Migemoは、MURAOKA Taro (KoRoN)氏が開発・配布しているフリー・ソフトウェアです。  
+  http://www.kaoriya.net/software/cmigemo/
 
-6. 同封の7za.exeは、GNU LGPLでライセンスされている、Igor Pavlovの著作物です。  
-	7-Zip Extra is package of extra modules of 7-Zip.   
-	7-Zip Copyright (C) 1999-2018 Igor Pavlov.  
-	7-Zip is free software. Read License.txt for more information about license.  
-	Source code of binaries can be found at:  
-	  http://www.7-zip.org/
+6. 同封のcurl.exeはDirk Paehl氏がコンパイル・配布しているものです。  
+  http://www.paehl.com/open_source/?CURL_7.61.0
 
+7. 同封の7za.exeは、GNU LGPLでライセンスされている、Igor Pavlovの著作物です。  
+  7-Zip Extra is package of extra modules of 7-Zip.   
+  7-Zip Copyright (C) 1999-2018 Igor Pavlov.  
+  7-Zip is free software. Read License.txt for more information about license.  
+  Source code of binaries can be found at:  
+  http://www.7-zip.org/

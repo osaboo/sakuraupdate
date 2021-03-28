@@ -50,7 +50,7 @@ goto :end
 
 :L3
 echo サクラエディタを再起動します。
-cscript //nologo %~dp0sleep.vbs 3000
+cscript //nologo %~dp0sleep.js 3000
 if not exist "%sakurafolder%\sakura.exe" goto :end
 start "" "%sakurafolder%\sakura.exe"
 

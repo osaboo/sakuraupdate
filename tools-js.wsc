@@ -1,0 +1,94 @@
+<?xml version="1.0" encoding="Shift_JIS"?>
+<component>
+<public>
+<property name="DebugLvl"/>
+<property name="Version"/>
+<property name="FS"/>
+<property name="WSH"/>
+<property name="CurlExe"/>
+<property name="UnzipExe"/>
+<property name="WorkDir"/>
+<property name="PluginDir"/>
+<property name="SakuraDir"/>
+<property name="OSVer"/>
+
+<method name="Init" >
+        <PARAMETER name="editor"/>
+        <PARAMETER name="plugin"/>
+</method>
+
+<method name="WorkCleanup">
+        <PARAMETER name="afileonly"/>
+</method>
+
+<method name="log">
+        <PARAMETER name="amsg"/>
+        <PARAMETER name="alvl"/>
+</method>
+
+<method name="SakuraCheck">
+    <PARAMETER name="amode"/>
+    <PARAMETER name="aver"/>
+    <PARAMETER name="aurl"/>
+</method>
+<method name="SakuraDownload">
+    <PARAMETER name="wurl"/>
+</method>
+<method name="SakuraSetup">
+    <PARAMETER name="atarget"/>
+</method>
+
+<method name="PluginCheck">
+    <PARAMETER name="amode"/>
+    <PARAMETER name="aver"/>
+    <PARAMETER name="aurl"/>
+</method>
+<method name="PluginDownload">
+    <PARAMETER name="wurl"/>
+</method>
+<method name="PluginSetup">
+    <PARAMETER name="atarget"/>
+</method>
+
+<method name="RegExpCheck">
+    <PARAMETER name="amode"/>
+    <PARAMETER name="aver"/>
+    <PARAMETER name="aurl"/>
+</method>
+<method name="RegExpDownload">
+    <PARAMETER name="wurl"/>
+</method>
+
+<method name="DiffCheck">
+    <PARAMETER name="amode"/>
+    <PARAMETER name="aver"/>
+    <PARAMETER name="aurl"/>
+</method>
+<method name="DiffDownload">
+    <PARAMETER name="wurl"/>
+</method>
+
+<method name="CtagsCheck">
+    <PARAMETER name="amode"/>
+    <PARAMETER name="aver"/>
+    <PARAMETER name="aurl"/>
+</method>
+<method name="CtagsDownload">
+    <PARAMETER name="wurl"/>
+</method>
+
+<method name="MigemoCheck">
+    <PARAMETER name="amode"/>
+    <PARAMETER name="aver"/>
+    <PARAMETER name="aurl"/>
+</method>
+<method name="MigemoDownload">
+    <PARAMETER name="wurl"/>
+</method>
+
+<method name="FileSetup">
+    <PARAMETER name="atargets"/>
+</method>
+</public>
+<script language="JScript" src="tools.js"></script>
+</component>

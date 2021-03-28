@@ -36,15 +36,38 @@ set newfile=%targetfolder%\%targetfile%
 set oldfile=%targetfolder%\%targetfile%.old
 
 if "%targetfile%"=="plugin" goto :plugin
+if "%targetfile%"=="dict" goto :migemo
+if "%targetfile%"=="migemo.dll" goto :migemo
 if not "%targetfile%"=="sakura.exe" goto :nosakura
 
+:sakura
 taskkill /im %targetfile% 2>nul
-@cscript //nologo %~dp0sleep.vbs 1000
+@cscript //nologo %~dp0sleep.js 1000
 taskkill /im %targetfile% 2>nul
-@cscript //nologo %~dp0sleep.vbs 1000
+@cscript //nologo %~dp0sleep.js 1000
+
+rem インストーラ起動
+start /WAIT %srcfile%
+rem サクラエディタの更新時はループしない
+goto :LEXIT
+
+:migemo
+if "%targetfile%"=="dict" goto :dict
+set srcfile=%srcfolder%\cmigemo-default-win32\%targetfile%
+goto :nosakura
+
+:dict
+set srcfile=%srcfolder%\cmigemo-default-win32\%targetfile%
+if not exist "%srcfile%" goto :err0
+
+@echo copy from "%srcfile%"
+@echo      to   "%newfile%"
+xcopy /e /i /y "%srcfile%" "%newfile%"
+@if not exist "%newfile%" goto :err
+@echo %newfile%の差し替えに成功しました。
+goto :LOOP
 
 :nosakura
-
 if not exist "%srcfile%" goto :err0
 
 if exist "%oldfile%" del "%oldfile%"
@@ -72,7 +95,7 @@ pause
 goto :LOOP
 
 :LEXIT
-cscript //nologo %~dp0sleep.vbs 2000
+cscript //nologo %~dp0sleep.js 2000
 if "%debuglvl%" == "3" pause
 :end
 exit /b 0
