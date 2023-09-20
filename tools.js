@@ -1616,7 +1616,7 @@ function SaveText(atext, apath, aenc) {
     st = new ActiveXObject("ADODB.Stream");     // ADODB.Stream生成
     st.Type = 2;  // オブジェクトに保存するデータの種類を文字列型に指定する
     st.Charset = aenc; // "utf-8"  '文字コード（Shift_JIS, Unicodeなど）
-    st.LineSeparator = -1; // 改行LF（10）
+    st.LineSeparator = -1; // 改行LF（10）CRLF(-1)
     st.Open;         // Streamのオープン
     st.WriteText(atext.replace("\n", "\r\n"), 0);
     st.SaveToFile(apath, 2);
