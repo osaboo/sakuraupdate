@@ -478,7 +478,7 @@ function PluginSetup(atarget) {
     SaveText(wcmd, wcmdfile, "Shift_JIS");
 
      // mainupdate.bat‚Æfileupdate.bat‚Ì‘Þ”ð
-    FS.CopyFile(PluginDir + "\\sleep.vbs", WorkDir + "\\", true);
+    FS.CopyFile(PluginDir + "\\sleep.js", WorkDir + "\\", true);
     FS.CopyFile(PluginDir + "\\mainupdate.bat", WorkDir + "\\", true);
     FS.CopyFile(PluginDir + "\\fileupdate.bat", WorkDir + "\\", true);
     FS.CopyFile(PluginDir + "\\runas.ps1", WorkDir + "\\", true);
@@ -1040,7 +1040,7 @@ function FileSetup(atargets) {
     SaveText(wcmd, wcmdfile, "Shift_JIS");
 
      // mainupdate.bat‚Æfileupdate.bat‚Ì‘Þ”ð
-    FS.CopyFile(PluginDir + "\\sleep.vbs", WorkDir + "\\", true);
+    FS.CopyFile(PluginDir + "\\sleep.js", WorkDir + "\\", true);
     FS.CopyFile(PluginDir + "\\mainupdate.bat", WorkDir + "\\", true);
     FS.CopyFile(PluginDir + "\\fileupdate.bat", WorkDir + "\\", true);
     FS.CopyFile(PluginDir + "\\runas.ps1", WorkDir + "\\", true);
