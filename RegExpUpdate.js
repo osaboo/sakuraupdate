@@ -31,5 +31,5 @@
         return;
     }
 
-    Tools.FileSetup(["", "bregonig.dll"]);
+    Tools.FileSetup(["bregonig.dll"]);
 }());

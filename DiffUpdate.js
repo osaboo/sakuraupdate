@@ -31,6 +31,6 @@
         return;
     }
 
-    Tools.FileSetup(["", "diff.exe"]);
+    Tools.FileSetup(["diff.exe"]);
 
 }());

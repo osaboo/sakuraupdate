@@ -30,6 +30,6 @@
         return;
     }
 
-    Tools.FileSetup(["", "ctags.exe"]);
+    Tools.FileSetup(["ctags.exe"]);
 
 }());
