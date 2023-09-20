@@ -74,14 +74,14 @@ Sakura-Editor Update Plugin (v20230920 (beta))
 
 1. 次のコマンドがツールメニューに追加されます。
 
-	ソフトウェアの更新
-	 └更新チェック
-	 └サクラエディタ更新
-	 └正規表現ライブラリ更新
-	 └DIFF更新
-	 └CTAGS更新
-	 └MIGEMO更新
-	 └このプラグインの更新
+	ソフトウェアの更新  
+	 └更新チェック  
+	 └サクラエディタ更新  
+	 └正規表現ライブラリ更新  
+	 └DIFF更新  
+	 └CTAGS更新  
+	 └MIGEMO更新  
+	 └このプラグインの更新  
 
 2. 更新チェック  
 	各ソフトウェアの最新版が更新されているかを、まとめて確認します。  
@@ -112,9 +112,9 @@ Sakura-Editor Update Plugin (v20230920 (beta))
 ## オプション設定
 
 1. ダウンロードサイト  
-	GitHub:0 AppVeyor:1 OSDN:2 Custom:3
+	GitHub:0 AppVeyor:1 OSDN:2 Custom:3 
 	から選びます。  
-	初期値: GitHub:0
+	初期値: GitHub:0  
 	※Customは未実装のため現時点では無効
 
 2. GitHub sakura-editor Release URL(API)  
@@ -272,7 +272,7 @@ Sakura-Editor Update Plugin (v20230920 (beta))
   https://ja.wikipedia.org/wiki/Ctags
 
 5. Migemoはローマ字のまま日本語をインクリメンタル検索するためのツールです。<br>
-  Satoru Takabayashi氏が開発・配布しているフリー・ソフトウェアです。 
+  Satoru Takabayashi氏が開発・配布しているフリー・ソフトウェアです。  
   http://0xcc.net/migemo/<br>
   サクラエディタでは、Migemoのdll版であるC/Migemoを使用できます。<br>
   C/Migemoは、MURAOKA Taro (KoRoN)氏が開発・配布しているフリー・ソフトウェアです。  
