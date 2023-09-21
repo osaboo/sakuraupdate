@@ -6,7 +6,8 @@
 
     var checkfreq;
     checkfreq = Plugin.GetOption("サクラエディタ", "CHECKFREQ");
-    //Tools.log("Number(checkfreq) = " + Number(checkfreq), 2);
+    //Editor.InfoMsg("checkfreq = "  + checkfreq);
+    //Editor.InfoMsg("Number(checkfreq) = " + Number(checkfreq));
     if ( !(Number(checkfreq) > 0) ) {
         return;
     }
@@ -16,7 +17,8 @@
 
 	var lastcheck = Plugin.GetOption("サクラエディタ", "LASTCHECK");
 
-    if ( lastcheck != null ) {
+    if ( lastcheck ) {
+        //Editor.InfoMsg(lastcheck);
         var newcheck = new Date(lastcheck);
         newcheck.setDate(newcheck.getDate() + Number(checkfreq));
         if ( new Date() < newcheck ) {
