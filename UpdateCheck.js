@@ -14,9 +14,7 @@
 	// 2重起動をわざとずらすことで先勝ちにする
 	Editor.Sleep(Math.random() * 1000);
 
-	var lastcheck;
-    lastcheck = Plugin.GetOption("サクラエディタ", "LASTCHECK");
-    Plugin.SetOption("サクラエディタ", "LASTCHECK", new Date());
+	var lastcheck = Plugin.GetOption("サクラエディタ", "LASTCHECK");
 
     if ( lastcheck != null ) {
         var newcheck = new Date(lastcheck);
@@ -25,6 +23,8 @@
             return;
         }
     }
+
+    Plugin.SetOption("サクラエディタ", "LASTCHECK", new Date());
 
 	var toolsfile = "script:" + Plugin.GetPluginDir() + "\\tools-js.wsc";
     var Tools = GetObject(toolsfile);

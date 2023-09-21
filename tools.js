@@ -54,7 +54,7 @@ function Init(editor, plugin) {
   Editor = editor;
   Plugin = plugin;
 
-  Version = "v20230920";
+  Version = "v20230921";
 
   DebugLvl = Plugin.GetOption("サクラエディタ", "DEBUGLVL");
 
