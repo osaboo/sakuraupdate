@@ -64,16 +64,16 @@
         wchk3 = Tools.RegExpCheck(amode, wnewver, wurl);
     }
 
-    if ( Plugin.GetOption("サクラエディタ", "DIFFURL") != "" ) {
-        wchk4 = Tools.DiffCheck(amode, wnewver, wurl);
-    }
-
-    if ( Plugin.GetOption("サクラエディタ", "CTAGSURL") != "" ) {
-        wchk5 = Tools.CtagsCheck(amode, wnewver, wurl);
-    }
-
-    if ( Plugin.GetOption("サクラエディタ", "MIGEMOURL") != "" ) {
-        wchk6 = Tools.MigemoCheck(amode, wnewver, wurl);
-    }
+//    if ( Plugin.GetOption("サクラエディタ", "DIFFURL") != "" ) {
+//        wchk4 = Tools.DiffCheck(amode, wnewver, wurl);
+//    }
+//
+//    if ( Plugin.GetOption("サクラエディタ", "CTAGSURL") != "" ) {
+//        wchk5 = Tools.CtagsCheck(amode, wnewver, wurl);
+//    }
+//
+//    if ( Plugin.GetOption("サクラエディタ", "MIGEMOURL") != "" ) {
+//        wchk6 = Tools.MigemoCheck(amode, wnewver, wurl);
+//    }
 
 }());
