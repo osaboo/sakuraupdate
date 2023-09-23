@@ -1427,8 +1427,8 @@ function DownloadFile(aurl, SaveFilePath) {
     req = null;        // 初期化
     req = CreateHttpRequest();
     if ( req == null ) {
-        //DownloadFile = DownloadCURL(aurl, SaveFilePath);
-        return null;
+        return DownloadCURL(aurl, SaveFilePath);
+        //return null;
     }
 
     log("ダウンロード中... " + aurl, 1);
@@ -1452,8 +1452,8 @@ function DownloadFile(aurl, SaveFilePath) {
     } catch(e) {
         log("XMLHTTPRequestでの取得が失敗しました。(" + e.message + ")", 1);
         log("CURL.exeでの取得に切り替えます。", 1);
-        //return DownloadCURL(aurl, SaveFilePath);
-    	return null;
+        return DownloadCURL(aurl, SaveFilePath);
+    	//return null;
     }
 
     log("ステータスコード：" + req.status, 2);
@@ -1473,6 +1473,26 @@ function DownloadFile(aurl, SaveFilePath) {
         return "#ERROR# " + req.status;
     }
 
+}
+
+function DownloadCURL(aurl, SaveFilePath) {
+    var wtmpfile;
+    var wcmd;
+
+    if ( SaveFilePath ) {
+        wtmpfile = SaveFilePath;
+    } else {
+	    wtmpfile = WorkDir + "\\_download.html";
+    }
+
+    if ( IsExistFile(wtmpfile) ) { DeleteFile(wtmpfile) }
+
+    wcmd = CurlExe + (CurlInsecure?" --insecure":"") + " -L \"" + aurl + "\" -o " + wtmpfile;
+    log(">" + wcmd, 1);
+     // DoCmd wcmd, ""
+	WSH.Run(wcmd, 7, true);
+
+    return LoadText(wtmpfile, "utf-8");
 }
 
 // WinHttpRequest/XMLHTTPRequestオブジェクト作成
