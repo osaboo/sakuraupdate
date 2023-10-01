@@ -185,7 +185,7 @@ function SakuraCheck(amode, aver, aurl) {
     log("プレリリースダウンロードフラグ = " + wpre, 2);
 	
     if ( aurl[0].indexOf("github.com") >= 0 ) {
-        if ( wpre == "0" ) { // 未設定時
+        if ( wpre == undefined || wpre == null || wpre == "0" ) { // 未設定時
             if ( WSH.Popup("GitHubのプレリリース版をダウンロードしますか?「はい」で次回以降もプレリリースの更新を反映します。「いいえ」でリリース版のみ反映します。この設定はプラグインのオプションで変更できます。", 0, "ソフトウェアの更新", 4) == 6 ) {
                 wpre = "1"; // プレリリース
             } else {
@@ -507,23 +507,34 @@ function RegExpCheck(amode, aver, aurl) {
 
     wsakurapath = Editor.ExpandParameter("$S");
     wregexppath = FS.GetParentFolderName(wsakurapath) + "\\bregonig.dll";
-    wfilever = FS.GetFileVersion(wregexppath);
     
-    var re;
-    re = new ActiveXObject("VBScript.RegExp");
-    re.Pattern = "(\\d+)\\.(\\d+)\\.\\d+\\.\\d+";
-    re.Global = false;
-    var matchs = re.Execute(wfilever);
-    //log("matchs.Count = '" + wfilever + "'~/" + re.Pattern + "/ -> " + matchs.Count, 2);
-    if ( matchs.Count > 0 ) {
-        if ( matchs(0).SubMatches.Count > 1 ) {
-            //wcurver = Mid(FormatNumber(matchs(0).SubMatches(0) / 100, 2, -1, 0, 0), 3) +
-            //     "." + Mid(FormatNumber(matchs(0).SubMatches(1) / 100, 2, -1, 0, 0), 3);
-            wcurver = [Number(matchs(0).SubMatches(0)), Number(matchs(0).SubMatches(1))];
+    try {
+        wfilever = FS.GetFileVersion(wregexppath);
+
+	    var re;
+	    re = new ActiveXObject("VBScript.RegExp");
+	    re.Pattern = "(\\d+)\\.(\\d+)\\.\\d+\\.\\d+";
+	    re.Global = false;
+	    var matchs = re.Execute(wfilever);
+	    //log("matchs.Count = '" + wfilever + "'~/" + re.Pattern + "/ -> " + matchs.Count, 2);
+	    if ( matchs.Count > 0 ) {
+	        if ( matchs(0).SubMatches.Count > 1 ) {
+	            //wcurver = Mid(FormatNumber(matchs(0).SubMatches(0) / 100, 2, -1, 0, 0), 3) +
+	            //     "." + Mid(FormatNumber(matchs(0).SubMatches(1) / 100, 2, -1, 0, 0), 3);
+	            wcurver = [Number(matchs(0).SubMatches(0)), Number(matchs(0).SubMatches(1))];
+	        }
+	    }
+    } catch(e) {
+        // ファイルがない
+    }
+    
+    if ( amode == 2 ) {
+        if (wfilever){
+            log("配置済みの正規表現ライブラリのバージョン:" + wcurver[0] + "." + wcurver[1], 0);
+        } else {
+            log("正規表現ライブラリは配置されていません", 0);
         }
     }
-
-    if ( amode == 2 ) { log("配置済みの正規表現ライブラリのバージョン:" + wcurver[0] + "." + wcurver[1], 0); }
 
     wurl[0] = Plugin.GetOption("サクラエディタ", "REGEXPURL");
 
@@ -560,8 +571,6 @@ function RegExpDownload(wurl) {
 
     wzipfile = WorkDir + "\\regexp.zip";
 
-    log("typeof=" + new String(wurl), 2);
-    
     //if ( (new String(wurl)).indexOf("bitbucket.org") >= 0 ) {
         wlink = wurl;
     //}
@@ -1361,16 +1370,16 @@ function GetAppVeyor(aurl) {
     var mesg;
     var i;
 
-    wlink = aurl;
+    wlink = aurl[0];
     log("AppVeyor確認中.. " + wlink, 1);
 
 	// projects情報を得る
     wjson = DownloadFile(wlink, "");
-    //log("json = " + wjson);
+    //log("json = " + wjson,2);
     wjson = eval('(' + wjson + ')');
-	//log("build.buildId = " + wjson.build.buildId);
-	//log("build.jobs[0].jobId = " + wjson.build.jobs[0].jobId);
-	//log("build.jobs[0].name = " + wjson.build.jobs[0].name);
+	//log("build.buildId = " + wjson.build.buildId,2);
+	//log("build.jobs[0].jobId = " + wjson.build.jobs[0].jobId,2);
+	//log("build.jobs[0].name = " + wjson.build.jobs[0].name,2);
     //wver = wjson.build.version;
 	var jobId = wjson.build.jobs[0].jobId;
 	
