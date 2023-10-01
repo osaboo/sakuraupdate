@@ -1,5 +1,5 @@
 # sakuraupdate
-Sakura-Editor Update Plugin (v20230921 (beta))
+Sakura-Editor Update Plugin (v20231001 (beta))
 
 プラグインでサクラエディタのバージョンアップ機能を実装してみる
 
@@ -222,7 +222,7 @@ Sakura-Editor Update Plugin (v20230921 (beta))
 
 * なんとかvbsからjsに変更した。(残念ながら技術不足で今時ではない)
   JScriptなのでjsc.exeでコンパイルチェックするようにした。
-  C:\WINDOWS\Microsoft.NET\Framework\v4.0.30319\jsc.exe /warnaserror tools.js
+  %SystemRoot%\Microsoft.NET\Framework\v4.0.30319\jsc.exe /warnaserror %APPDATA%\sakura\plugins\sakuraupdate\tools.js
 
 * 開発版もダウンロードできるようにしてみた。
   注意書きで、開発版であることの注意点を補記した。

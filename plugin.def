@@ -4,7 +4,7 @@ Id=SoftwareUpdate
 Name=ソフトウェアの更新(&W)
 Description=SakuraEditorを自動更新します
 Type=wsh
-Version=v20230921
+Version=v20231001
 Url=https://github.com/osaboo/sakuraupdate/
 Author=osaboo
 
