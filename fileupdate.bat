@@ -47,7 +47,8 @@ taskkill /im %targetfile% 2>nul
 @cscript //nologo %~dp0sleep.js 1000
 
 rem インストーラ起動
-start /WAIT %srcfile%
+if "%setupmode%"=="1" start /WAIT %srcfile% /silent /log="%TEMP%\sakuraupdate\setuplog.txt"
+if not "%setupmode%"=="1" start /WAIT %srcfile%
 rem サクラエディタの更新時はループしない
 goto :LEXIT
 

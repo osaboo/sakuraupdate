@@ -1,5 +1,5 @@
 # sakuraupdate
-Sakura-Editor Update Plugin (v20231001 (beta))
+Sakura-Editor Update Plugin (v20250614 (beta))
 
 プラグインでサクラエディタのバージョンアップ機能を実装してみる
 
@@ -175,11 +175,19 @@ Sakura-Editor Update Plugin (v20231001 (beta))
 13. 最近の更新チェック日  
 	更新チェックした最終日。この日から頻度で設定した日数を経過すると編集開始時に自動チェックします。
 
-14. CURLのinsecureオプション
+14. XMLHTTPRequestを使わずCURLの使用を強制する
+	0または1。1の場合XMLHTTPRequestを使わずにCURLでインターネットからファイルを得る。
+	初期値: 0
+
+15. CURLのinsecureオプション
 	0または1。1の場合CURLに--insecureオプションを付加して実行します。証明書の問題を無視しますのでリスク理解した上で設定のこと。
 	初期値: 0
 
-15. Debug Level (0=NODEBUG)  
+15. サクラエディタのセットモード
+    サクラエディタの更新時の動作を、0=画面応答あり、1=インストーラを自動モードにする
+    初期値: 0
+
+16. Debug Level (0=NODEBUG)  
 	1-3。アウトプットウィンドウに詳細なログを出力します。  
 	初期値: 0
 
@@ -227,6 +235,8 @@ Sakura-Editor Update Plugin (v20231001 (beta))
 * 開発版もダウンロードできるようにしてみた。
   注意書きで、開発版であることの注意点を補記した。
 
+* CURL.exeの添付をやめてWindows標準を使用するようにした。
+
 ## ToDo
 
 * ほんとはチェック・ダウンロード処理はサクラエディタと別プロセスで非同期がいいんだろう
@@ -234,7 +244,7 @@ Sakura-Editor Update Plugin (v20231001 (beta))
 * VirtualStoreが有効になっているか判断して無効化する
 * 処理後のゴミ掃除(%temp%\sakuraupdateを削除する(Cleanup))
 
-## ライセンス表示
+## 著作権表示
 
 0. sakuraupdateは、osabooがzlib/libpngライセンスで開発・配布しているフリー・ソフトウェアです。
    サクラエディタプロジェクト公式のものではなく、個人的に開発・配布しています。
@@ -278,10 +288,7 @@ Sakura-Editor Update Plugin (v20231001 (beta))
   C/Migemoは、MURAOKA Taro (KoRoN)氏が開発・配布しているフリー・ソフトウェアです。  
   http://www.kaoriya.net/software/cmigemo/
 
-6. 同封のcurl.exeはDirk Paehl氏がコンパイル・配布しているものです。  
-  http://www.paehl.com/open_source/?CURL_7.61.0
-
-7. 同封の7za.exeは、GNU LGPLでライセンスされている、Igor Pavlovの著作物です。  
+6. 同封の7za.exeは、GNU LGPLでライセンスされている、Igor Pavlovの著作物です。  
   7-Zip Extra is package of extra modules of 7-Zip.   
   7-Zip Copyright (C) 1999-2018 Igor Pavlov.  
   7-Zip is free software. Read License.txt for more information about license.  

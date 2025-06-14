@@ -4,7 +4,7 @@ Id=SoftwareUpdate
 Name=ソフトウェアの更新(&W)
 Description=SakuraEditorを自動更新します
 Type=wsh
-Version=v20231001
+Version=v20250614
 Url=https://github.com/osaboo/sakuraupdate/
 Author=osaboo
 
@@ -95,15 +95,25 @@ O[13].Label=最近の更新チェック日
 ;Date of last update check
 O[13].Type=Str
 
-O[14].Key=CURLINSECURE
-O[14].Label=CURL insecure option ※要注意 (1=enable --insecure) 証明書エラーを無視するため設定はリスクを理解すること
+O[14].Key=USEONLYCURL
+O[14].Label=XMLHTTPRequestを使わずCURLの使用を強制する (0=無効、1=有効)
 O[14].Type=Str
 O[14].Default=0
 
-O[15].Key=DEBUGLVL
-O[15].Label=Debug Level (0=NODEBUG)
+O[15].Key=CURLINSECURE
+O[15].Label=CURL insecure option ※要注意 (1=enable --insecure) 証明書エラーを無視するため設定はリスクを理解すること
 O[15].Type=Str
 O[15].Default=0
+
+O[16].Key=SETUPMODE
+O[16].Label=サクラエディタのセットモード (0=画面応答あり、1=サイレントモード)
+O[16].Type=Str
+O[16].Default=0
+
+O[17].Key=DEBUGLVL
+O[17].Label=Debug Level (0=NODEBUG)
+O[17].Type=Str
+O[17].Default=0
 
 [Plug]
 EditorStart=UpdateCheck.js

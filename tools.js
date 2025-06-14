@@ -54,7 +54,7 @@ function Init(editor, plugin) {
   Editor = editor;
   Plugin = plugin;
 
-  Version = "v20231001";
+  Version = "v20250614";
 
   DebugLvl = Plugin.GetOption("サクラエディタ", "DEBUGLVL");
 
@@ -71,7 +71,9 @@ function Init(editor, plugin) {
       Plugin.SetOption("サクラエディタ", "CHECKFREQ", "7");
       Plugin.SetOption("サクラエディタ", "DEBUGLVL", "0");
       Plugin.SetOption("サクラエディタ", "USEPREREL", "0");
+      Plugin.SetOption("サクラエディタ", "USEONLYCURL", "0");
       Plugin.SetOption("サクラエディタ", "CURLINSECURE", "0");
+      Plugin.SetOption("サクラエディタ", "SETUPMODE", "0");
       DebugLvl = 0;
   }
 
@@ -83,11 +85,11 @@ function Init(editor, plugin) {
   PluginDir = Plugin.GetPluginDir();
   SakuraDir = FS.GetParentFolderName(Editor.ExpandParameter("$S"));
 
-  CurlExe = "\"" + Plugin.GetPluginDir() + "\\Curl.exe\"";
+  CurlExe = "Curl.exe";
   CurlInsecure = (Plugin.GetOption("サクラエディタ", "CURLINSECURE") == "1");
-     // UnzipExe = """" + Plugin.GetPluginDir() + "\\Unzip.exe"""
+  // UnzipExe = """" + Plugin.GetPluginDir() + "\\Unzip.exe"""
   UnzipExe = "\"" + Plugin.GetPluginDir() + "\\7za.exe\"";
-     // Editor.ActivateWinOutput
+  // Editor.ActivateWinOutput
 
   WSH = new ActiveXObject("Wscript.Shell");
   WorkDir = WSH.ExpandEnvironmentStrings("%TEMP%") + "\\sakuraupdate";
@@ -301,8 +303,16 @@ function SakuraSetup(atarget) {
 
     log("\r\nサクラエディタを更新します。" + wrestart, 0);
 
-    if ( WSH.Popup("サクラエディタを更新します。この画面の後インストーラが起動しますので、インストールを実施してください。" + wrestart, 0, "ソフトウェアの更新", 1) == 2 ) {
-        return;
+    if (Plugin.GetOption("サクラエディタ", "SETUPMODE") == "1") {
+        if ( WSH.Popup("サクラエディタを更新します。この画面の後インストーラが起動し、自動インストールされます。" + "\r\n" +
+                       "自動インストールを止めるにはプラグインの設定でセットアップモードを変更してください" + wrestart, 0, "ソフトウェアの更新", 1) == 2 ) {
+            return;
+        }
+    } else {
+        if ( WSH.Popup("サクラエディタを更新します。この画面の後インストーラが起動しますので、インストールを実施してください。" + "\r\n" +
+                       "自動インストールに変更するにはプラグインの設定でセットアップモードを変更してください"  + wrestart, 0, "ソフトウェアの更新", 1) == 2 ) {
+            return;
+        }
     }
 
     // exe上書き処理
@@ -317,9 +327,10 @@ function SakuraSetup(atarget) {
     programfiles = "C:\\Program Files";
 
     wcmd = "set srcfolder=" + WorkDir + "\\install\n" +
-               "set sakurafolder=" + SakuraDir + "\n" +
-               "set targetfolder=" + SakuraDir + "\n" +
-               "set debuglvl=" + DebugLvl + "\n";
+           "set sakurafolder=" + SakuraDir + "\n" +
+           "set targetfolder=" + SakuraDir + "\n" +
+           "set debuglvl=" + DebugLvl + "\n" +
+           "set setupmode=" + Plugin.GetOption("サクラエディタ", "SETUPMODE") + "\n";
 
     wcmd = wcmd + "set targetfile1=" + atarget + "\n";
 
@@ -1183,7 +1194,8 @@ function GetGitHub(aurl) {
              // "browser_download_url": "../ctags-2021-01-06_p5.9.20210103.0-23-g08b1c490-x86.zip"
              // re.Pattern = """browser_download_url"": ?""([^ ""]+ctags-\d+-\d+-\d+_[0-9a-z.\-]+-x86\.zip)"
              // "browser_download_url": "https://github.com/universal-ctags/ctags-win32/releases/download/2023-01-03/p6.0.20230101.0-1-g13d8e3f/ctags-2023-01-03_p6.0.20230101.0-1-g13d8e3f-clang-x86.zip
-            re.Pattern = "\"browser_download_url\": ?\"([^ \"]+ctags-\\d+-\\d+-\\d+_p[0-9a-z.\\-]+-clang-x86\\.zip)";
+             // "browser_download_url": "https://github.com/universal-ctags/ctags-win32/releases/download/2025-06-13/p6.2.20250608.0-10-g0644fb8/ctags-2025-06-13_p6.2.20250608.0-10-g0644fb8-x86.zip"
+            re.Pattern = "\"browser_download_url\": ?\"([^ \"]+ctags-\\d+-\\d+-\\d+_p[0-9a-z.\\-]+(-clang)?-x86\\.zip)";
             re.Global = true;
             matchs = re.Execute(wpage);
             if ( matchs.Count > 0 ) {
@@ -1195,7 +1207,7 @@ function GetGitHub(aurl) {
             }
 
             if ( wlink != "" ) {
-                re.Pattern = "ctags-(\\d+-\\d+-\\d+)_p[0-9a-z.\\-]+-clang-x86\\.zip";
+                re.Pattern = "ctags-(\\d+-\\d+-\\d+)_p[0-9a-z.\\-]+(-clang)?-x86\\.zip";
                 re.Global = true;
                 matchs = re.Execute(wlink);
                 if ( matchs.Count > 0 ) {
@@ -1433,14 +1445,18 @@ function DownloadFile(aurl, SaveFilePath) {
     var adTypeBinary = 1;
     var adSaveCreateOverWrite = 2;
 
+    log("ダウンロード中... " + aurl, 1);
+
+    if (Plugin.GetOption("サクラエディタ", "USEONLYCURL") == "1") {
+        return DownloadCURL(aurl, SaveFilePath);
+    }
+    
     req = null;        // 初期化
     req = CreateHttpRequest();
     if ( req == null ) {
         return DownloadCURL(aurl, SaveFilePath);
         //return null;
     }
-
-    log("ダウンロード中... " + aurl, 1);
 
     req.open("GET", aurl, false);
 
