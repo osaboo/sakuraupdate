@@ -37,7 +37,7 @@
     // 自動チェックモード
     var amode = 1;
     
-    var wurl = [""];
+    var wurl = ["",""];
     var wnewver = [""]
     var wchk0;
     var wchk1;

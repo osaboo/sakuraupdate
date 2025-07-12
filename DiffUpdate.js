@@ -7,7 +7,7 @@
     Tools.Init(Editor, Plugin);
     
     var wchk;
-    var wurl = [""];
+    var wurl = ["",""];
     var wnewver = [""];
 
     Editor.ActivateWinOutput;

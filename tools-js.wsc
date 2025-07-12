@@ -90,5 +90,11 @@
     <PARAMETER name="atargets"/>
 </method>
 </public>
+<script language="VBScript">
+function VBS_InputBox( prompt, title, defaultValue )
+	VBS_InputBox = InputBox( prompt, title, defaultValue )
+end function
+</script>
 <script language="JScript" src="tools.js"></script>
+
 </component>

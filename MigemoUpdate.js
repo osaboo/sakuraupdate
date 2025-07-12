@@ -15,7 +15,7 @@
     var Tools = GetObject(toolsfile);
     Tools.Init(Editor, Plugin);
     var wchk;
-    var wurl = [""];
+    var wurl = ["",""];
     var wnewver;
 
     // https://files.kaoriya.net/goto/cmigemo_w32"

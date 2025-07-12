@@ -9,6 +9,7 @@ var  SakuraDir;
 
 var  CurlExe;
 var  CurlInsecure;
+var  GitHubToken;
 var  UnzipExe;
 
 var  FS;
@@ -49,19 +50,31 @@ function log(amsg, alvl) {
   }
 }
 
+function getGitHubToken(){
+	if (!GitHubToken) {
+		var token = VBS_InputBox("GitHubのトークンを入力してください。","GitHub トークン","");
+		if (token) {
+			GitHubToken = token;
+		} else {
+//			log("tokenはキャンセル", 0);
+		}
+	}
+	return GitHubToken;
+}
+
 // 初期化
 function Init(editor, plugin) {
   Editor = editor;
   Plugin = plugin;
 
-  Version = "v20250614";
+  Version = "v20250713";
 
   DebugLvl = Plugin.GetOption("サクラエディタ", "DEBUGLVL");
 
   if ( DebugLvl == "" ) { // 初期値が設定されない古いバージョンの場合
       Plugin.SetOption("サクラエディタ", "SITEPRIORITY", "0");
       Plugin.SetOption("サクラエディタ", "GITHUBURL", "https://api.github.com/repos/sakura-editor/sakura/releases/latest");
-      Plugin.SetOption("サクラエディタ", "APPVEYORURL", "https://ci.appveyor.com/api/projects/sakuraeditor/sakura");
+      Plugin.SetOption("サクラエディタ", "GITHUNACTIONSURL", "https://api.github.com/repos/sakura-editor/sakura/actions/runs?branch=master");
       Plugin.SetOption("サクラエディタ", "OSDNURL",  "https://osdn.net/projects/sakura-editor/releases/rss");
       Plugin.SetOption("サクラエディタ", "REGEXPURL", "https://api.bitbucket.org/2.0/repositories/k_takata/bregonig/downloads");
       Plugin.SetOption("サクラエディタ", "DIFFURL", "http://www.ring.gr.jp/archives/text/TeX/ptex-win32/w32/patch-diff-w32.zip");
@@ -90,6 +103,7 @@ function Init(editor, plugin) {
   // UnzipExe = """" + Plugin.GetPluginDir() + "\\Unzip.exe"""
   UnzipExe = "\"" + Plugin.GetPluginDir() + "\\7za.exe\"";
   // Editor.ActivateWinOutput
+  GitHubToken = Plugin.GetOption("サクラエディタ", "GITHUBTOKEN");
 
   WSH = new ActiveXObject("Wscript.Shell");
   WorkDir = WSH.ExpandEnvironmentStrings("%TEMP%") + "\\sakuraupdate";
@@ -168,12 +182,14 @@ function SakuraCheck(amode, aver, aurl) {
 	
     if ( amode == 2 ) { log("このサクラエディタのバージョン:" + wcurver, 0) }
 
-    switch(Plugin.GetOption("サクラエディタ", "SITEPRIORITY")) {
+	var sitePriority = Plugin.GetOption("サクラエディタ", "SITEPRIORITY")
+	
+    switch(sitePriority) {
         case "0":
             aurl[0] = Plugin.GetOption("サクラエディタ", "GITHUBURL");
             break;
         case "1":
-            aurl[0] = Plugin.GetOption("サクラエディタ", "APPVEYORURL");
+            aurl[0] = Plugin.GetOption("サクラエディタ", "GITHUBACTIONSURL");
             break;
         case "2":
             aurl[0] = Plugin.GetOption("サクラエディタ", "OSDNURL");
@@ -186,7 +202,7 @@ function SakuraCheck(amode, aver, aurl) {
     wpre = Plugin.GetOption("サクラエディタ", "USEPREREL");
     log("プレリリースダウンロードフラグ = " + wpre, 2);
 	
-    if ( aurl[0].indexOf("github.com") >= 0 ) {
+    if ( sitePriority == "0" ) {
         if ( wpre == undefined || wpre == null || wpre == "0" ) { // 未設定時
             if ( WSH.Popup("GitHubのプレリリース版をダウンロードしますか?「はい」で次回以降もプレリリースの更新を反映します。「いいえ」でリリース版のみ反映します。この設定はプラグインのオプションで変更できます。", 0, "ソフトウェアの更新", 4) == 6 ) {
                 wpre = "1"; // プレリリース
@@ -203,10 +219,10 @@ function SakuraCheck(amode, aver, aurl) {
         } else {
             aver[0] = GetGitHub(aurl);
         }
-    } else if (aurl[0].indexOf("osdn.net") >= 0) {
+    } else if (sitePriority == "2") {
         aver[0] = GetOSDNRSS(aurl, "sakura");
-    } else if (aurl[0].indexOf("appveyor.com") >= 0) {
-        aver[0] = GetAppVeyor(aurl);
+    } else if (sitePriority == "1" ) {
+        aver[0] = GetGitHubActions(aurl, amode, wcurver);
     }
 
     if ( aver[0] == "" ) {
@@ -233,7 +249,7 @@ function SakuraCheck(amode, aver, aurl) {
 
 // サクラエディタのinstaller.zipダウンロードと、installerの起動
 // installerは、一時フォルダに展開後実行するため、他のモジュールとは別扱い
-
+// wurlは配列で[0]=url,[1]=workflow.id
 function SakuraDownload(wurl) {
     var wlink;
     var wcmd;
@@ -241,35 +257,61 @@ function SakuraDownload(wurl) {
 
     wzipfile = WorkDir + "\\installer.zip";
 
-    wlink = wurl;
+    wlink = wurl[0];
 
     log("サクラエディタをダウンロードします.. " + wlink, 0);
 
-     // wcmd = "bitsadmin.exe /TRANSFER sakura2 " + wurl + " " + wzipfile
-    wcmd = CurlExe + (CurlInsecure?" --insecure":"") + " -L \"" + wlink + "\" -o " + wzipfile;
-    log(">" + wcmd, 1);
-     // DoCmd wcmd, ""
-    WSH.Run(wcmd, 7, true); //
+	if (wlink.indexOf("github.com") >= 0 && wlink.indexOf("actions") >= 0 ){
+		wzipfile = WorkDir + "\\_archive.zip"
+		var rc = CURL(wlink, wzipfile);
+		if (rc != 0) {
+			return null;
+		}
+		
+	    // zip展開
+	    wcmd = UnzipExe + " e -aoa -r " + wzipfile + " -o" + WorkDir + "\\Archive";
+	    log(">" + wcmd, 2);
+	     // DoCmd wcmd, ""
+	    rc = WSH.Run(wcmd, 7, true);
+	    log(">exit code = " + rc, 2);
+		if (rc != 0) {
+			return null;
+		}
+		
+		// zip内のzipを再展開
+	    wcmd = UnzipExe + " e -aoa -r " + WorkDir + "\\Archive\\*Installer.zip -o" + WorkDir + "\\install";
+	    log(">" + wcmd, 2);
+	     // DoCmd wcmd, ""
+	    WSH.Run(wcmd, 7, true);
+	    log(">exit code = " + rc, 2);
 
-    if ( !FS.FileExists(wzipfile) ) {
-        log("ダウンロードできませんでした。", 0);
-        return null;
-    }
+	} else {
+	     // wcmd = "bitsadmin.exe /TRANSFER sakura2 " + wlink + " " + wzipfile
+	    wcmd = CurlExe + (CurlInsecure?" --insecure":"") + " -L \"" + wlink + "\" -o " + wzipfile;
+	    log(">" + wcmd, 1);
+	     // DoCmd wcmd, ""
+	    WSH.Run(wcmd, 7, true); //
 
-    log("ダウンロードファイルを展開します。", 0);
+	    if ( !FS.FileExists(wzipfile) ) {
+	        log("ダウンロードできませんでした。", 0);
+	        return null;
+	    }
 
-    if ( !FS.FileExists(WorkDir + "\\installer.zip") ) {
-        log(WorkDir + "\\installer.zipがダウンロードファイルにありませんでした。", 0);
-        return null;
-    }
+	    log("ダウンロードファイルを展開します。", 0);
 
-    // zip展開
-    // wcmd = UnzipExe + " -o -j " + wzipfile + " */sakura.exe -d " + WorkDir
-    wcmd = UnzipExe + " e -aoa -r " + wzipfile + " -o" + WorkDir + "\\install";
-     // wcmd = UnzipExe + " e -aoa " + wzipfile + " -o" + WorkDir + "\\sakura"
-    log(">" + wcmd, 1);
-     // DoCmd wcmd, ""
-    WSH.Run(wcmd, 7, false);
+	    if ( !FS.FileExists(WorkDir + "\\installer.zip") ) {
+	        log(WorkDir + "\\installer.zipがダウンロードファイルにありませんでした。", 0);
+	        return null;
+	    }
+
+	    // zip展開
+	    // wcmd = UnzipExe + " -o -j " + wzipfile + " */sakura.exe -d " + WorkDir
+	    wcmd = UnzipExe + " e -aoa -r " + wzipfile + " -o" + WorkDir + "\\install";
+	     // wcmd = UnzipExe + " e -aoa " + wzipfile + " -o" + WorkDir + "\\sakura"
+	    log(">" + wcmd, 1);
+	     // DoCmd wcmd, ""
+	    WSH.Run(wcmd, 7, true);
+	}
 
     Editor.Sleep(2000);
 
@@ -306,12 +348,12 @@ function SakuraSetup(atarget) {
     if (Plugin.GetOption("サクラエディタ", "SETUPMODE") == "1") {
         if ( WSH.Popup("サクラエディタを更新します。この画面の後インストーラが起動し、自動インストールされます。" + "\r\n" +
                        "自動インストールを止めるにはプラグインの設定でセットアップモードを変更してください" + wrestart, 0, "ソフトウェアの更新", 1) == 2 ) {
-            return;
+            return false;
         }
     } else {
         if ( WSH.Popup("サクラエディタを更新します。この画面の後インストーラが起動しますので、インストールを実施してください。" + "\r\n" +
                        "自動インストールに変更するにはプラグインの設定でセットアップモードを変更してください"  + wrestart, 0, "ソフトウェアの更新", 1) == 2 ) {
-            return;
+            return false;
         }
     }
 
@@ -354,7 +396,7 @@ function SakuraSetup(atarget) {
     WSH.Run(wcmd, 1, false);
 
     //log("更新処理を終了しました。", 0);
-
+	return true;
 }
 
 // プラグインファイルの更新チェック
@@ -509,11 +551,11 @@ function PluginSetup(atarget) {
 // 戻り値: true=更新あり false=更新なし
 //
 function RegExpCheck(amode, aver, aurl) {
-    var wurl = [""];
+    var wurl = ["",""];
     var wlink;
     var wsakurapath;
     var wregexppath;
-    var wfilever;
+    var wfilever = null;
     var wcurver = ["",""];
 
     wsakurapath = Editor.ExpandParameter("$S");
@@ -655,24 +697,7 @@ function DiffCheck(amode, aver, aurl) {
     
     whead = GetHTTPStatus(aurl[0]);
     if ( whead == null ) {
-        wtmpfile = WorkDir + "\\_temp.htm";
-        DeleteFile(wtmpfile);
-         // curl --head  -s -w "HTTPCODE=%{http_code}"
-        wcmd = CurlExe + (CurlInsecure?" --insecure":"") + " --head -s -L \"" + aurl[0] + "\" -o " + wtmpfile;
-        if ( amode == 2 ) { log(">" + wcmd, 1) }
-        WSH.Run(wcmd, 7, true); //
-        whead = LoadText(wtmpfile, "utf-8");
-
-        log("ステータスコード: " + whead.substring(0, 10), 2);
-
-        if ( whead.indexOf("200 OK") >= 0 ) {
-            wsts = 200;
-        } else {
-            var statusCode = new Number(whead.substring(0,3));
-            wsts = statusCode;
-//        } else {
-//            wsts = 0;
-        }
+        wsts = getCURLStatus(aurl[0]);
     } else {
         wsts = whead.status;
     }
@@ -721,6 +746,36 @@ function GetHTTPStatus(aurl) {
 	//}
     return req; //.status;
 
+}
+
+function getCURLStatus(aurl) {
+    var wsts = null;
+    
+    var wtmpfile = WorkDir + "\\_temp.htm";
+    DeleteFile(wtmpfile);
+     // curl --head  -s -w "HTTPCODE=%{http_code}"
+    var wcmd = CurlExe + (CurlInsecure?" --insecure":"") + " --head -s -L \"" + aurl + "\" -o " + wtmpfile;
+	if (getGitHubToken()) {
+		wcmd = wcmd + " -H \"Authorization: token " + GitHubToken + "\"";
+	}
+    log(">" + wcmd, 2) 
+    var rc = WSH.Run(wcmd, 7, true);
+    var whead = LoadText(wtmpfile, "utf-8");
+
+	var wlines = whead.split("\r\n");
+	for (var wix in wlines) {
+		if (wlines[wix].length > 5) {
+			if (wlines[wix].substring(0,5) == "HTTP/") {
+				var witems = wlines[wix].split(" ");
+				wsts = new Number(witems[1]);
+				log(wsts,2);
+			}
+		}
+	}
+	
+    log("ステータスコード: " + wsts, 2);
+
+	return wsts;
 }
 
 // Diff(差分)ツールのzipダウンロード
@@ -1439,6 +1494,133 @@ function GetAppVeyor(aurl) {
     return wver;
 }
 
+// Get GitHub Actions CI Build
+// amode = 1:自動モード,  2:手動モード
+// aurl[1]にworkflow.idを設定して返る
+function GetGitHubActions(aurl, amode, aver) {
+    var req;
+    var wjson;
+    var wlink;
+    var wver = "";
+    var wtext;
+    var mesg;
+    var i;
+
+    wlink = aurl[0];
+    log("GitHub Actions確認中.. " + wlink, 1);
+
+	// workflow情報を得る
+    wjson = DownloadFile(wlink, "");
+    //log("json = " + wjson,2);
+    wjson = eval('(' + wjson + ')');
+    if (wjson.workflow_runs == undefined) {
+    	return "";
+    }
+    
+	var workflow = null;
+	for (var idx in wjson.workflow_runs) {
+		if (wjson.workflow_runs[idx].name == "build sakura" ) {
+			workflow = wjson.workflow_runs[idx];
+			break;
+		}
+	}
+	if (!workflow) {
+	  return "";
+	}
+	log("workflow " + workflow.id + " " + workflow.name + " " + workflow.artifacts_url, 3);
+	
+	// 自動モード時は、LASTCHECKIDと同じ場合は最新バージョンのままとして返す
+	if (amode == 1) {
+		var wchkid = Plugin.GetOption("サクラエディタ", "LASTCHECKID");
+	    log("workflow.idを前回と比較。" + wchkid + ":" + workflow.id, 2);
+		if (wchkid == workflow.id) {
+		    log("workflow.idが前回と同じため、最新版とみなしてアーティファクトのダウンロードはしない ", 2);
+			return aver;
+		}
+	}
+	
+	// 最新のビルドのartifactsの一覧を得る
+	wlink = workflow.artifacts_url;
+    wjson = DownloadFile(wlink, "");
+	//log(wjson);
+	wjson = eval('(' + wjson + ')');
+	var artifactLog = null;
+	var artifactInstaller = null;
+	for (var idx in wjson.artifacts) {
+		var artifact = wjson.artifacts[idx];
+		if (artifact.name == "Log Win32 Release" ) {
+			artifactLog = artifact;
+		}
+		if (artifact.name == "Installer Win32 Release" ) {
+			artifactInstaller = artifact;
+		}
+	}
+	log("artifactLog " + artifactLog.id + " " + artifactLog.name + " " + artifactLog.archive_download_url, 3);
+	
+	log("Log Win32 Releaseの中のgithash.hからバージョン情報を得る。",3);
+	{
+		wlink = artifactLog.archive_download_url;
+		var wsts = getCURLStatus(wlink);
+		if (wsts != 200) {
+			log("アーティファクトのURLにアクセスできません(HTTP STATUS=" + wsts + ")。GitHubのtokenがプラグインの設定に正しく設定されているか確認してください。", 0);
+			return "";
+		}
+
+		var wzipfile = WorkDir + "\\_archiveLog.zip"
+		var rc = CURL(wlink, wzipfile);
+		if (rc != 0) {
+			log("アーティファクトのダウンロードに失敗しました。",3);
+			return "";
+		}
+		
+	    // zip展開
+	    // wcmd = UnzipExe + " -o -j " + wzipfile + " */sakura.exe -d " + WorkDir
+	    var wcmd = UnzipExe + " e -aoa -r " + wzipfile + " -o" + WorkDir + "\\ArchiveLog";
+	    log(">" + wcmd, 2);
+	     // DoCmd wcmd, ""
+	    rc = WSH.Run(wcmd, 7, true);
+	    log(">exit code = " + rc, 2);
+		if (rc != 0) {
+			log("アーティファクトzipの展開に失敗しました。",3);
+			return "";
+		}
+		
+		// zip内のzipを再展開
+	    wcmd = UnzipExe + " e -aoa -r " + WorkDir + "\\ArchiveLog\\*.zip -o" + WorkDir + "\\ReleaseLog";
+	    log(">" + wcmd, 2);
+	     // DoCmd wcmd, ""
+	    rc = WSH.Run(wcmd, 7, true);
+	    log(">exit code = " + rc, 2);
+		if (rc != 0) {
+			log("アーティファクトzipの展開に失敗しました。",3);
+			return "";
+		}
+
+		var githash = LoadText(WorkDir + "\\ReleaseLog\\githash.h", "utf-8");
+		//log(githash);
+
+	    var re;
+	    re = new ActiveXObject("VBScript.RegExp");
+	    re.Pattern = "#define BUILD_VERSION ([0-9]+)";
+		
+	    re.Global = true;
+	    var matchs = re.Execute(githash);
+	    if ( matchs.Count > 0 ) {
+			log("見つかったバージョン情報:" + matchs(0).value, 2);
+	        if ( matchs(0).SubMatches.Count > 0 ) {
+	            wver = matchs(0).SubMatches(0);
+	            wver = "2.4.2." + wver;
+	        }
+	    }
+	}
+	
+	log("artifactInstaller " + artifactInstaller.id + " " + artifactInstaller.name + " " + artifactInstaller.archive_download_url, 3);
+	aurl[0] = artifactInstaller.archive_download_url;
+	aurl[1] = workflow.id;
+	
+    return wver;
+}
+
 // @see https://www.ka-net.org/blog/?p=4855#HttpRequest
 function DownloadFile(aurl, SaveFilePath) {
     var req; // As Object
@@ -1513,11 +1695,41 @@ function DownloadCURL(aurl, SaveFilePath) {
     if ( IsExistFile(wtmpfile) ) { DeleteFile(wtmpfile) }
 
     wcmd = CurlExe + (CurlInsecure?" --insecure":"") + " -L \"" + aurl + "\" -o " + wtmpfile;
+	if (getGitHubToken()) {
+		wcmd = wcmd + " -H \"Authorization: token " + GitHubToken + "\"";
+	}
     log(">" + wcmd, 1);
      // DoCmd wcmd, ""
 	WSH.Run(wcmd, 7, true);
 
     return LoadText(wtmpfile, "utf-8");
+}
+
+function CURL(aurl, SaveFilePath) {
+    var wtmpfile;
+    var wcmd;
+
+    if ( SaveFilePath ) {
+        wtmpfile = SaveFilePath;
+    } else {
+	    wtmpfile = WorkDir + "\\_download.html";
+    }
+
+    if ( IsExistFile(wtmpfile) ) { DeleteFile(wtmpfile) }
+
+    // -L リダイレクトがあったらリダイレクト先の情報を取る
+    // -s 余計な出力をしない
+    wcmd = CurlExe + (CurlInsecure?" --insecure":"") + " -L \"" + aurl + "\" -o " + wtmpfile;
+	if (getGitHubToken()) {
+		wcmd = wcmd + " -H \"Authorization: token " + GitHubToken + "\"";
+	}
+    log(">" + wcmd, 1);
+     // DoCmd wcmd, ""
+    // 7:ウィンドウを最小化ウィンドウとして表示します。アクティブなウィンドウは切り替わりません。
+    // true:起動したコマンドの終了待ちをする
+	var rc = WSH.Run(wcmd, 7, true);
+	log(">exit code = " + rc, 1);
+	return rc;
 }
 
 // WinHttpRequest/XMLHTTPRequestオブジェクト作成
@@ -1639,6 +1851,7 @@ function LoadText(afile, aenc) {
     st.Charset = aenc; // "utf-8"  '文字コード（Shift_JIS, Unicodeなど）
     st.LineSeparator = 10; // 改行LF（10）
     try {
+      //log("LoadText " + afile);
       st.Open;         // Streamのオープン
       st.LoadFromFile(afile); // ファイル読み込み
       wbuff = st.ReadText(-1);

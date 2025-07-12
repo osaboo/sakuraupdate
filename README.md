@@ -1,5 +1,5 @@
 # sakuraupdate
-Sakura-Editor Update Plugin (v20250614 (beta))
+Sakura-Editor Update Plugin (v20250713 (beta))
 
 プラグインでサクラエディタのバージョンアップ機能を実装してみる
 
@@ -20,18 +20,27 @@ Sakura-Editor Update Plugin (v20250614 (beta))
 	自動チェックは初期設定で7日単位で、無効にすることもできます。  
 	手動によるチェックもできます。
 
-3. サクラエディタのプレリリース版およびAppVeyorでの自動ビルド版を反映可能です。
+3. サクラエディタのプレリリース版およびGitHubActionsでの自動ビルド版を反映可能です。
 
 	2019.3.27からリリースされているプレリリース版をダウンロード可能です。  
 	オプションの「プレリリース版のダウンロード可否」で設定を変更できます。
 	
-	AppVeyorでの自動ビルド版をダウンロード可能です。
-	オプションの「ダウンロードサイト」でAppVeyorを選択してください。
+	GitHubActionsでの自動ビルド版をダウンロード可能です。
+	オプションの「ダウンロードサイト」でGitHubActionsを選択してください。
 	
-	★開発版利用の注意事項★
-	AppVeyorビルド版は、正式リリース前の開発版のため、動作が予告なく変更されたり、不具合がある可能性があります。
+	★開発版利用の注意事項★  
+	GitHubActionsの自動ビルド版をダウンロードするには、GitHubのアカウントが必要になります。  
+	GitHubアカウントを取得し、アカウントの設定から
+	Fine-grained personal access tokensあるいはPersonal access tokenを
+	生成してプラグインに設定するか、自動ビルド版のチェック時の都度ダイアログでtokenを入力してください。  
+	※トークンはパスワードと同等のセキュリティ情報のため、設定した場合他のアプリが読み取られる等リスクの可能性があります。リスクを許容の上設定ください。  
+
+	tokenの生成手順については、
+	https://docs.github.com/ja/authentication/keeping-your-account-and-data-secure/managing-your-personal-access-tokens
+	を参照ください。
+	
+	またGitHubActionsビルド版は、正式リリース前の開発版のため、動作が予告なく変更されたり、不具合がある可能性があります。
 	不具合を報告する場合は使用バージョンを確認し「開発版を利用していること」を添えて報告しましょう。
-	あとAppVeyorの仕様でビルド後一定期間でファイルが消えると思うので、いつでもダウンロードできるわけではないはず。
 
 4. 更新バッチが動作する際に、PowerShellの実行で実行警告が出ることがあります。  
 
@@ -112,7 +121,7 @@ Sakura-Editor Update Plugin (v20250614 (beta))
 ## オプション設定
 
 1. ダウンロードサイト  
-	GitHub:0 AppVeyor:1 OSDN:2 Custom:3 
+	GitHub:0 GitHubActions:1 OSDN:2 Custom:3 
 	から選びます。  
 	初期値: GitHub:0  
 	※Customは未実装のため現時点では無効
@@ -121,73 +130,81 @@ Sakura-Editor Update Plugin (v20250614 (beta))
 	ダウンロード対象を、このURLから検索します。  
 	初期値:https://api.github.com/repos/sakura-editor/sakura/releases/latest
 
-3. AppVeyor sakura-editor Project URL(API)  
+3. GitHubActions sakura-editor Project URL(API)  
 	ダウンロード対象を、このURLから検索します。  
-	初期値:https://ci.appveyor.com/api/projects/sakuraeditor/sakura
+	初期値:https://api.github.com/repos/sakura-editor/sakura/actions/runs?branch=master
 
-4. OSDNのSakura Editor Downloads RSS  
+4. GitHub Token  
+	GitHubのアカウントに紐づいたトークン文字列  
+	※トークンはパスワードと同等のセキュリティ情報のため、ここで設定した内容が他のアプリが読み取られる等リスクの可能性があります。リスクを許容の上設定ください。  
+	初期値はなし
+
+5. OSDNのSakura Editor Downloads RSS  
 	ダウンロード対象を、このURLから検索します。  
 	初期値:https://osdn.net/projects/sakura-editor/releases/rss
 
-5. GitHubプレリリース版のダウンロード可否  
+6. GitHubプレリリース版のダウンロード可否  
     未設定:0 プレリリースもダウンロード:1 リリース版のみ:2  
     から選びます。1の場合、サクラエディタのプレリリース版が出ていればダウンロードします。  
     更新チェック時に初回のみ画面で選択します。  
     初期値：0
 
-6. 正規表現ライブラリのリリースURL  
+7. 正規表現ライブラリのリリースURL  
 	正規表現ライブラリのダウンロード対象を、このURLから検索します。  
 	(未指定時は自動チェック対象外。未指定時も手動更新ではSFから自動取得)  
 	初期値:https://api.bitbucket.org/2.0/repositories/k_takata/bregonig/downloads
 
-7. DIFFのリリースURL  
+8. DIFFのリリースURL  
 	DIFFのダウンロード対象のURLを指定します。  
 	(未指定時は取得しない)  
 	初期値:http://www.ring.gr.jp/archives/text/TeX/ptex-win32/w32/patch-diff-w32.zip  
 	一度配置されると、自動チェックではバージョンアップしない。手動更新で更新可能。
 
-8. CTAGSのリリースURL  
+9. CTAGSのリリースURL  
 	CTAGSのダウンロード対象のURLを指定します。  
 	(未指定時は取得しない)  
 	初期値:https://api.github.com/repos/universal-ctags/ctags-win32/releases  
 	他に設定可能な値:http://hp.vector.co.jp/authors/VA025040/ctags/  
 	一度配置されると、自動チェックではバージョンアップしない。手動更新で更新可能。
 
-9. MIGEMOのリリースURL  
+10. MIGEMOのリリースURL  
 	MIGEMOのダウンロード対象のURLを指定します。  
 	(未指定時は取得しない)  
 	初期値:https://files.kaoriya.net/goto/cmigemo_w32  
 	一度配置されると、自動チェックではバージョンアップしない。手動更新で更新可能。
 
-10. 独自リリース用URL(file:// or http://)  
+11. 独自リリース用URL(file:// or http://)  
 	社内ネット等インターネット以外からダウンロードする際のURL  
 	※未実装のため現時点では無効  
 	初期値はダミー
 
-11. プラグインのリリースURL  
+12. プラグインのリリースURL  
 	このプラグインを更新するためのURL  
 	初期値:https://api.github.com/repos/osaboo/sakuraupdate/releases
 
-12. 更新チェックの頻度(単位=日、空白=自動チェックしない)  
+13. 更新チェックの頻度(単位=日、空白=自動チェックしない)  
 	日単位で自動チェック頻度を指定します。  
 	初期値: 7(日)
 
-13. 最近の更新チェック日  
+14. 最近の更新チェック日  
 	更新チェックした最終日。この日から頻度で設定した日数を経過すると編集開始時に自動チェックします。
 
-14. XMLHTTPRequestを使わずCURLの使用を強制する  
+15. 最後にダウンロードしたGitHubActionsのワークフローID
+	GitHubActionsへの接続頻度を軽減するためのチェック用。自動的に更新されます。
+	
+16. XMLHTTPRequestを使わずCURLの使用を強制する  
 	0または1。1の場合XMLHTTPRequestを使わずにCURLでインターネットからファイルを得る。  
 	初期値: 0
 
-15. CURLのinsecureオプション  
+17. CURLのinsecureオプション  
 	0または1。1の場合CURLに--insecureオプションを付加して実行します。証明書の問題を無視しますのでリスク理解した上で設定のこと。  
 	初期値: 0
 
-15. サクラエディタのセットモード  
+18. サクラエディタのセットモード  
     サクラエディタの更新時の動作を、0=画面応答あり、1=インストーラを自動モードにする  
     初期値: 0
 
-16. Debug Level (0=NODEBUG)  
+19. Debug Level (0=NODEBUG)  
 	1-3。アウトプットウィンドウに詳細なログを出力します。  
 	初期値: 0
 
@@ -236,6 +253,10 @@ Sakura-Editor Update Plugin (v20250614 (beta))
   注意書きで、開発版であることの注意点を補記した。
 
 * CURL.exeの添付をやめてWindows標準を使用するようにした。
+
+* 2025/6/24くらいから自動ビルドがAppVeyorからGitHubActionsに移行していた。
+GitHubActionsのアーティファクトのダウンロードにはGitHubのアカウントが必要になるため、トークンを設定するようにしたが、
+毎回接続するのもいやなので"build sakura"のワークフローIDが変わらないうちはバージョンが変わってないとみなすようにした。トークンを設定しない場合は毎回入力するようにした。
 
 ## ToDo
 
