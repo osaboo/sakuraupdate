@@ -67,7 +67,7 @@ function Init(editor, plugin) {
   Editor = editor;
   Plugin = plugin;
 
-  Version = "v20250713";
+  Version = "v20250714";
 
   DebugLvl = Plugin.GetOption("サクラエディタ", "DEBUGLVL");
 
@@ -144,22 +144,32 @@ function GetOSInfo() {
     return ret;
 }
 
-// WorkDirを消す afileony=trueでファイルのみ消す
+// WorkDirを消す afileony=trueでファイルのみ消す。
 function WorkCleanup(afileonly) {
 
-  if ( IsExistDir(WorkDir + "\\install") ) {
-      log("installワークディレクトリ消去。" + WorkDir + "\\install", 3);
-      DeleteFile(WorkDir + "\\install\\*.*");
-      DeleteDir(WorkDir + "\\install");
-  }
+//  if ( IsExistDir(WorkDir + "\\install") ) {
+//      log("installワークディレクトリ消去。" + WorkDir + "\\install", 3);
+//      DeleteFile(WorkDir + "\\install\\*.*");
+//      DeleteDir(WorkDir + "\\install");
+//  }
 
+  if ( !(WorkDir && WorkDir.endsWith("temp")) ){
+  	return;
+  }
+  
   if ( IsExistDir(WorkDir) ) {
     if ( afileonly ) {
-      log("ワークディレクトリ消去。" + WorkDir, 2);
+      log("ワークディレクトリ消去(ファイルのみ) " + WorkDir, 2);
       DeleteFile( WorkDir + "\\*.*");
     } else {
+      log("ワークディレクトリ消去(フォルダ全て) " + WorkDir, 2);
       DeleteDir(WorkDir);
     }
+  }
+
+  if ( ! IsExistDir(WorkDir) ) {
+    log("更新作業用フォルダを再作成します", 2);
+    CreateDir(WorkDir);
   }
 
 }

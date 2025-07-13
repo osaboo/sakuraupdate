@@ -51,7 +51,7 @@
     wtargets = [];
 
      // WorkDirを空にする。
-    Tools.WorkCleanup(true);
+    Tools.WorkCleanup(false);
 
     wchk0 = Tools.PluginCheck(amode, wnewver, wurl);
     if ( wchk0 == true ) {
@@ -60,10 +60,10 @@
 
     wchk1 = Tools.SakuraCheck(amode, wnewver, wurl);
 
-    if ( Plugin.GetOption("サクラエディタ", "REGEXPURL") != "" ) {
-        wchk3 = Tools.RegExpCheck(amode, wnewver, wurl);
-    }
-
+//    if ( Plugin.GetOption("サクラエディタ", "REGEXPURL") != "" ) {
+//        wchk3 = Tools.RegExpCheck(amode, wnewver, wurl);
+//    }
+//
 //    if ( Plugin.GetOption("サクラエディタ", "DIFFURL") != "" ) {
 //        wchk4 = Tools.DiffCheck(amode, wnewver, wurl);
 //    }

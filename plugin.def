@@ -4,7 +4,7 @@ Id=SoftwareUpdate
 Name=ソフトウェアの更新(&W)
 Description=SakuraEditorを自動更新します
 Type=wsh
-Version=v20250713
+Version=v20250714
 Url=https://github.com/osaboo/sakuraupdate/
 Author=osaboo
 
@@ -59,7 +59,7 @@ O[6].Select=未設定:0|プレリリースもダウンロード:1|リリース版のみ:2
 O[6].Default=0
 
 O[7].Key=REGEXPURL
-O[7].Label=正規表現ライブラリのリリースURL(未指定時はSFから自動取得)
+O[7].Label=正規表現ライブラリのリリースURL(未指定時は取得しない)
 O[7].Type=Str
 O[7].Default=https://api.bitbucket.org/2.0/repositories/k_takata/bregonig/downloads
 

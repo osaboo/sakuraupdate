@@ -28,7 +28,7 @@
     Tools.log("\n★★sakuraupdate " + Tools.Version + "★★", 0);
 
      // WorkDirを空にする。
-    Tools.WorkCleanup(true);
+    Tools.WorkCleanup(false);
 
     Tools.log("\nプラグインの最新バージョンを確認します。", 0);
     wchk0 = Tools.PluginCheck(amode, wnewver, wurl);

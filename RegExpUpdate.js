@@ -16,7 +16,7 @@
     Tools.log("正規表現ライブラリを最新バージョンに更新します。", 0);
 
      // WorkDirを空にする。
-    Tools.WorkCleanup(true);
+    Tools.WorkCleanup(false);
 
     wchk = Tools.RegExpCheck(2, wnewver, wurl);
     if ( wchk == null ) { return; }

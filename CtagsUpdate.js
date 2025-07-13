@@ -24,7 +24,7 @@
     }
 
      // WorkDir‚ğ‹ó‚É‚·‚éB
-    Tools.WorkCleanup(true);
+    Tools.WorkCleanup(false);
 
     if ( Tools.CtagsDownload(wurl[0]) == false ) {
         return;

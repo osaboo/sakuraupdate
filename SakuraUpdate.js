@@ -18,7 +18,7 @@
     Tools.log("サクラエディタを最新バージョンに更新します。", 0);
 
      // WorkDirを空にする。
-    Tools.WorkCleanup(true);
+    Tools.WorkCleanup(false);
 
     wchk = Tools.SakuraCheck(2, wnewver, wurl);
     if ( wchk == null ) { return; }

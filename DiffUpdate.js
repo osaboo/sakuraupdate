@@ -16,7 +16,7 @@
     Tools.log("Diff(差分)ツールを配置します。", 0);
 
      // WorkDirを空にする。
-    Tools.WorkCleanup(true);
+    Tools.WorkCleanup(false);
 
     wchk = Tools.DiffCheck(2, wnewver, wurl);
     if ( wchk == null ) { return; }
