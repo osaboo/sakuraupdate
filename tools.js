@@ -153,7 +153,7 @@ function WorkCleanup(afileonly) {
 //      DeleteDir(WorkDir + "\\install");
 //  }
 
-  if ( !(WorkDir && WorkDir.endsWith("temp")) ){
+   if (WorkDir && WorkDir.indexOf("sakuraupdate") < 0){
   	return;
   }
   
