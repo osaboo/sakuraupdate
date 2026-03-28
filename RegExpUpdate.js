@@ -22,10 +22,13 @@
     if ( wchk == null ) { return; }
 
     if ( wchk == false ) {
-        if ( Tools.WSH.Popup("すでに最新版ですが、更新しますか?", 0, "ソフトウェアの更新", 4) == 7 ) {
+        if ( Tools.WSH.Popup("すでに配置済みですが、更新しますか?", 0, "ソフトウェアの更新", 4) == 7 ) {
             return;
         }
     }
+
+     // WorkDirを空にする。
+    Tools.WorkCleanup(false);
 
     if ( Tools.RegExpDownload(wurl[0]) == false ) {
         return;

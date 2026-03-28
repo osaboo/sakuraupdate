@@ -27,6 +27,9 @@
         }
     }
 
+    // WorkDir‚ğ‹ó‚É‚·‚éB
+    Tools.WorkCleanup(false);
+
     if ( Tools.DiffDownload(wurl[0]) == false ) {
         return;
     }

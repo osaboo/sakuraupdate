@@ -1,5 +1,5 @@
 # sakuraupdate
-Sakura-Editor Update Plugin (v20250714 (beta))
+Sakura-Editor Update Plugin (v20260328 (beta))
 
 プラグインでサクラエディタのバージョンアップ機能を実装してみる
 
@@ -121,7 +121,7 @@ Sakura-Editor Update Plugin (v20250714 (beta))
 ## オプション設定
 
 1. ダウンロードサイト  
-	GitHub:0 GitHubActions:1 OSDN:2 Custom:3 
+	GitHub:0 GitHubActions:1 Custom:3 
 	から選びます。  
 	初期値: GitHub:0  
 	※Customは未実装のため現時点では無効
@@ -139,72 +139,68 @@ Sakura-Editor Update Plugin (v20250714 (beta))
 	※トークンはパスワードと同等のセキュリティ情報のため、ここで設定した内容が他のアプリが読み取られる等リスクの可能性があります。リスクを許容の上設定ください。  
 	初期値はなし
 
-5. OSDNのSakura Editor Downloads RSS  
-	ダウンロード対象を、このURLから検索します。  
-	初期値:https://osdn.net/projects/sakura-editor/releases/rss
-
-6. GitHubプレリリース版のダウンロード可否  
+5. GitHubプレリリース版のダウンロード可否  
     未設定:0 プレリリースもダウンロード:1 リリース版のみ:2  
     から選びます。1の場合、サクラエディタのプレリリース版が出ていればダウンロードします。  
     更新チェック時に初回のみ画面で選択します。  
     初期値：0
 
-7. 正規表現ライブラリのリリースURL  
+6. 正規表現ライブラリのリリースURL  
 	正規表現ライブラリのダウンロード対象を、このURLから検索します。  
-	(未指定時は自動チェック対象外。未指定時も手動更新ではSFから自動取得)  
-	初期値:https://api.bitbucket.org/2.0/repositories/k_takata/bregonig/downloads
+	(未指定時は取得しない)
+	初期値:https://bitbucket.org/k_takata/bregonig/downloads/bron420.zip
+	一度配置されると、自動チェックではバージョンアップしない。手動更新で更新可能。
 
-8. DIFFのリリースURL  
+7. DIFFのリリースURL  
 	DIFFのダウンロード対象のURLを指定します。  
 	(未指定時は取得しない)  
 	初期値:http://www.ring.gr.jp/archives/text/TeX/ptex-win32/w32/patch-diff-w32.zip  
 	一度配置されると、自動チェックではバージョンアップしない。手動更新で更新可能。
 
-9. CTAGSのリリースURL  
+8. CTAGSのリリースURL  
 	CTAGSのダウンロード対象のURLを指定します。  
 	(未指定時は取得しない)  
 	初期値:https://api.github.com/repos/universal-ctags/ctags-win32/releases  
-	他に設定可能な値:http://hp.vector.co.jp/authors/VA025040/ctags/  
 	一度配置されると、自動チェックではバージョンアップしない。手動更新で更新可能。
 
-10. MIGEMOのリリースURL  
+9. MIGEMOのリリースURL  
 	MIGEMOのダウンロード対象のURLを指定します。  
 	(未指定時は取得しない)  
 	初期値:https://files.kaoriya.net/goto/cmigemo_w32  
 	一度配置されると、自動チェックではバージョンアップしない。手動更新で更新可能。
 
-11. 独自リリース用URL(file:// or http://)  
+10. 独自リリース用URL(file:// or http://)  
 	社内ネット等インターネット以外からダウンロードする際のURL  
 	※未実装のため現時点では無効  
 	初期値はダミー
 
-12. プラグインのリリースURL  
+11. プラグインのリリースURL  
 	このプラグインを更新するためのURL  
 	初期値:https://api.github.com/repos/osaboo/sakuraupdate/releases
 
-13. 更新チェックの頻度(単位=日、空白=自動チェックしない)  
+12. 更新チェックの頻度(単位=日、空白=自動チェックしない)  
 	日単位で自動チェック頻度を指定します。  
 	初期値: 7(日)
 
-14. 最近の更新チェック日  
+13. 最近の更新チェック日  
 	更新チェックした最終日。この日から頻度で設定した日数を経過すると編集開始時に自動チェックします。
 
-15. 最後にダウンロードしたGitHubActionsのワークフローID
+14. 最後にダウンロードしたGitHubActionsのワークフローID
 	GitHubActionsへの接続頻度を軽減するためのチェック用。自動的に更新されます。
 	
-16. XMLHTTPRequestを使わずCURLの使用を強制する  
+15. XMLHTTPRequestを使わずCURLの使用を強制する  
 	0または1。1の場合XMLHTTPRequestを使わずにCURLでインターネットからファイルを得る。  
 	初期値: 0
 
-17. CURLのinsecureオプション  
+16. CURLのinsecureオプション  
 	0または1。1の場合CURLに--insecureオプションを付加して実行します。証明書の問題を無視しますのでリスク理解した上で設定のこと。  
 	初期値: 0
 
-18. サクラエディタのセットモード  
+17. サクラエディタのセットモード  
     サクラエディタの更新時の動作を、0=画面応答あり、1=インストーラを自動モードにする  
     初期値: 0
 
-19. Debug Level (0=NODEBUG)  
+18. Debug Level (0=NODEBUG)  
 	1-3。アウトプットウィンドウに詳細なログを出力します。  
 	初期値: 0
 
@@ -257,6 +253,11 @@ Sakura-Editor Update Plugin (v20250714 (beta))
 * 2025/6/24くらいから自動ビルドがAppVeyorからGitHubActionsに移行していた。
 GitHubActionsのアーティファクトのダウンロードにはGitHubのアカウントが必要になるため、トークンを設定するようにしたが、
 毎回接続するのもいやなので"build sakura"のワークフローIDが変わらないうちはバージョンが変わってないとみなすようにした。トークンを設定しない場合は毎回入力するようにした。
+
+* OSDNが2025/3/31に完全停止していた。機能から削除した。
+
+* grepライブラリK.Takata's software: bregonig.dllがgithubに移行していた。がソースのみぽい。
+バイナリはbitbacketのままだが、こちらもリストアップするにはサインアップが必要ぽい。取り込みURLを固定化する。
 
 ## ToDo
 

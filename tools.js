@@ -29,7 +29,7 @@ Array.prototype.indexOf = function(obj, start){
 
 String.prototype.endsWith = function(searchString, position) {
     var s = this.toString();
-    if (position === null || position > s.length) {
+    if (position === undefined || position === null || position > s.length) {
       position = s.length;
     }
     position -= searchString.length;
@@ -42,7 +42,7 @@ function log(amsg, alvl) {
   if ( DebugLvl == "" ) {
     return;
   }
-  if (!alvl) {
+  if (alvl == undefined) {
     alvl = 0;
   }
   if ( (DebugLvl + 0) >= (alvl + 0) ) {
@@ -75,8 +75,7 @@ function Init(editor, plugin) {
       Plugin.SetOption("サクラエディタ", "SITEPRIORITY", "0");
       Plugin.SetOption("サクラエディタ", "GITHUBURL", "https://api.github.com/repos/sakura-editor/sakura/releases/latest");
       Plugin.SetOption("サクラエディタ", "GITHUNACTIONSURL", "https://api.github.com/repos/sakura-editor/sakura/actions/runs?branch=master");
-      Plugin.SetOption("サクラエディタ", "OSDNURL",  "https://osdn.net/projects/sakura-editor/releases/rss");
-      Plugin.SetOption("サクラエディタ", "REGEXPURL", "https://api.bitbucket.org/2.0/repositories/k_takata/bregonig/downloads");
+      Plugin.SetOption("サクラエディタ", "REGEXPURL", "https://bitbucket.org/k_takata/bregonig/downloads/bron420.zip");
       Plugin.SetOption("サクラエディタ", "DIFFURL", "http://www.ring.gr.jp/archives/text/TeX/ptex-win32/w32/patch-diff-w32.zip");
       Plugin.SetOption("サクラエディタ", "CTAGSURL", "https://api.github.com/repos/universal-ctags/ctags-win32/releases");
       Plugin.SetOption("サクラエディタ", "MIGEMOURL", "https://files.kaoriya.net/goto/cmigemo_w32");
@@ -153,7 +152,7 @@ function WorkCleanup(afileonly) {
 //      DeleteDir(WorkDir + "\\install");
 //  }
 
-   if (WorkDir && WorkDir.indexOf("sakuraupdate") < 0){
+  if ( WorkDir == undefined || !WorkDir.endsWith("sakuraupdate") ){
   	return;
   }
   
@@ -201,9 +200,6 @@ function SakuraCheck(amode, aver, aurl) {
         case "1":
             aurl[0] = Plugin.GetOption("サクラエディタ", "GITHUBACTIONSURL");
             break;
-        case "2":
-            aurl[0] = Plugin.GetOption("サクラエディタ", "OSDNURL");
-            break;
         case "3":
             aurl[0] = Plugin.GetOption("サクラエディタ", "CUSTOMURL");
             break;
@@ -229,8 +225,6 @@ function SakuraCheck(amode, aver, aurl) {
         } else {
             aver[0] = GetGitHub(aurl);
         }
-    } else if (sitePriority == "2") {
-        aver[0] = GetOSDNRSS(aurl, "sakura");
     } else if (sitePriority == "1" ) {
         aver[0] = GetGitHubActions(aurl, amode, wcurver);
     }
@@ -599,27 +593,36 @@ function RegExpCheck(amode, aver, aurl) {
         }
     }
 
-    wurl[0] = Plugin.GetOption("サクラエディタ", "REGEXPURL");
+    aurl[0] = Plugin.GetOption("サクラエディタ", "REGEXPURL");
+    aver = "";
 
-    if ( wurl[0].indexOf("api.bitbucket.org") >= 0 ) {
-        aver = GetBitBucket(wurl);
+    if ( aurl[0] == "" ) {
+        return null;
     }
 
-    if ( aver == "" ) {
+    var whead;
+    var wsts;
+    
+    whead = GetHTTPStatus(aurl[0]);
+    if ( whead == null || whead.status != 200) {
+        wsts = getCURLStatus(aurl[0]);
+    } else {
+        wsts = whead.status;
+    }
+
+    if ( wsts == 200 || wsts == 302 ) {
+        aver[0] = "any date";
+    } else {
         if ( amode == 2 ) { log("×最新版を確認できませんでした。", 0); }
         return null;
     }
 
-    aurl[0] = wurl[0];
-
-    if ( amode == 2 ) { log("最新の正規表現ライブラリのバージョン:" + aver[0] + "." + aver[1], 0); }
-
-    if ( aver[0] <= wcurver[0] && aver[1] <= wcurver[1] ) {
-        if ( amode == 2 ) { log("●正規表現ライブラリは最新バージョンです。", 0); }
+    if (wfilever){
+        if ( amode == 2 ) { log("●正規表現ライブラリは配置済みです。", 0); }
         return false;
     }
 
-    log("★正規表現ライブラリの新バージョンがリリースされています。", 0);
+    log("★正規表現ライブラリがダウンロード可能です。", 0);
 
     return true;
 
@@ -751,9 +754,9 @@ function GetHTTPStatus(aurl) {
     log("ステータスコード：" + req.status, 2);
     
     var headers = req.getAllResponseHeaders();
-    //for (var h in headers) {
-    //  log("レスポンスヘッダ: " + headers);
-	//}
+    for (var h in headers) {
+      log("レスポンスヘッダ: " + headers, 3);
+	}
     return req; //.status;
 
 }
@@ -765,7 +768,7 @@ function getCURLStatus(aurl) {
     DeleteFile(wtmpfile);
      // curl --head  -s -w "HTTPCODE=%{http_code}"
     var wcmd = CurlExe + (CurlInsecure?" --insecure":"") + " --head -s -L \"" + aurl + "\" -o " + wtmpfile;
-	if (getGitHubToken()) {
+	if (aurl.indexOf("github.com")>=0 && getGitHubToken()) {
 		wcmd = wcmd + " -H \"Authorization: token " + GitHubToken + "\"";
 	}
     log(">" + wcmd, 2) 
@@ -774,10 +777,13 @@ function getCURLStatus(aurl) {
 
 	var wlines = whead.split("\r\n");
 	for (var wix in wlines) {
+		log("head[" + wix + "] " + wlines[wix],3);
 		if (wlines[wix].length > 5) {
 			if (wlines[wix].substring(0,5) == "HTTP/") {
 				var witems = wlines[wix].split(" ");
-				wsts = new Number(witems[1]);
+				if (witems[1] == "200" || witems[1] == "302") {
+					wsts = new Number(witems[1]);
+				}
 				log(wsts,2);
 			}
 		}
@@ -1287,113 +1293,6 @@ function GetGitHub(aurl) {
     return wver;
 }
 
-// Get GetOSDNRSS RSS
-function GetOSDNRSS(aurl, apath) {
-    var rCode;
-    var ItemFile;
-    var i;
-    var wlink;
-    var wurl;
-    var wver = "";
-    var wcmd;
-    var wtmpfile;
-
-    wlink = aurl[0];
-    if (apath == "sakura2") { wlink = aurl[0] + "?path=/sakura2"; }
-    
-    log("OSDN 確認中... " + wlink,1);
-
-    //wtmpfile = WorkDir & "\_temp.htm"
-    //wcmd = CurlExe & " -L """ & wlink & """ -o " & wtmpfile
-    //log ">" & wcmd, 1
-    //'DoCmd wcmd, ""
-    //WSH.Run wcmd, 7, True '
-
-	var xmldata = DownloadFile(wlink, "");
-	//log(xmldata);
-
-	if (xmldata == null){
-		return "";
-	}
-	
-	var XmlDoc = new ActiveXObject("Microsoft.XMLDOM");
-    XmlDoc.async = false;
-    rCode = XmlDoc.loadXML(xmldata);
-
-    //取得確認
-    if (XmlDoc.parseError.errorCode != 0) { //ロード失敗
-        log("読み込めませんでした。ErrorCode:" & XmlDoc.parseError.errorCode, 0);
-        log("エラー内容:" & XmlDoc.parseError.reason, 0); //エラー内容を出力
-        return "";
-    }
-    
-    switch(apath) {
-        case "sakura":
-	        ItemFile = XmlDoc.selectNodes("//osdn:file");
-
-	        wlink = "";
-	        
-	        for(var i = 0 ; i <= ItemFile.length - 1; i++){
-	            wurl = ItemFile(i).getAttribute("url");
-	        	log(wurl, 2);
-	        	if (wurl.indexOf("sakura-tag-v2") >= 0 && wurl.indexOf("Installer.zip") >= 0) {
-	                wlink = wurl;
-	                break;
-	   			}
-	        }
-	        
-	    	if (wlink != "") {
-	            var re, match, matchs;
-	            re = new ActiveXObject("VBScript.RegExp");
-	            
-                // sakura pre-release "https://github.com/sakura-editor/sakura/releases/download/v2.4.0-alpha1/sakura-tag-v2.4.0-alpha1-build1699-2582c34c-Win32-Release-Exe.zip"
-                re.Pattern = "tag-v([0-9]+\\.[0-9]+\\.[0-9]+)-.*build([0-9]+)";
-                matchs = re.Execute(wlink);
-                if ( matchs.Count > 0 ) {
-                    if ( matchs(0).SubMatches.Count > 1 ) {
-                        wver = matchs(0).SubMatches(0) + "." + matchs(0).SubMatches(1);
-                    }
-                }
-	            
-	            log("見つかったファイル:" + wlink, 2);
-	            aurl[0] = wlink;
-	    	}
-    		break;
-        case "sakura2":
-	        ItemFile = XmlDoc.selectNodes("//osdn:file");
-
-	        wlink = "";
-	        
-	        for(var i = 0 ; i <= ItemFile.length - 1; i++){
-	            wurl = ItemFile(i).getAttribute("url");
-	        	log(wurl, 2);
-	        	if (wurl.indexOf("sakura2-") >= 0 && wurl.indexOf(".zip") >= 0) {
-	                wlink = wurl;
-	                break;
-	   			}
-	        }
-	        
-	    	if (wlink != "") {
-	            var re, match, matchs;
-	            re = new ActiveXObject("VBScript.RegExp");
-	            
-	            re.Pattern = "[0-9]+-[0-9]+-[0-9]+-[0-9]+";
-	            re.Global = true;
-	            matchs = re.execute(wlink);
-	            if ( matchs.count > 0 ) {
-	                wver = matchs(0).value;
-	                wver = wver.replace(/-/g, ".");
-			    }
-	            
-	            log("見つかったファイル:" + wlink, 2);
-	            aurl[0] = wlink;
-	    	}
-    		break;
-	}
-	
-    return wver;
-}
-
 // Get BitBucket Release API
 function GetBitBucket(aurl) {
     var req;
@@ -1431,73 +1330,6 @@ function GetBitBucket(aurl) {
             //wver = Mid(FormatNumber(wver.substring(0,1) / 100, 2, -1, 0, 0), 3) +
             // "." + Mid(FormatNumber(wver.substring(1) / 100, 2, -1, 0, 0), 3);
             log("version match = " + wver[0] + "." + wver[1], 2);
-        }
-    }
-
-    return wver;
-}
-
-// Get AppVeyor CI Build
-function GetAppVeyor(aurl) {
-    var req;
-    var wjson;
-    var wlink;
-    var wver = "";
-    var wtext;
-    var mesg;
-    var i;
-
-    wlink = aurl[0];
-    log("AppVeyor確認中.. " + wlink, 1);
-
-	// projects情報を得る
-    wjson = DownloadFile(wlink, "");
-    //log("json = " + wjson,2);
-    wjson = eval('(' + wjson + ')');
-	//log("build.buildId = " + wjson.build.buildId,2);
-	//log("build.jobs[0].jobId = " + wjson.build.jobs[0].jobId,2);
-	//log("build.jobs[0].name = " + wjson.build.jobs[0].name,2);
-    //wver = wjson.build.version;
-	var jobId = wjson.build.jobs[0].jobId;
-	
-	// 最新のビルドのartifactsの一覧を得る
-	wlink = "https://ci.appveyor.com/api/buildjobs/" + jobId + "/artifacts";
-    wjson = DownloadFile(wlink, "");
-	//log(wjson);
-	wjson = eval('(' + wjson + ')');
-	var fileName = "";
-	for (var af in wjson) {
-		fileName = wjson[af].fileName;
-		//log("artifacts[" + af + "].fileName = " + fileName);
-		if (fileName && fileName.indexOf("Win32-Release-Installer.zip") >= 0 && fileName.indexOf("zip.md5") < 0) {
-			log("見つかったファイル:" + fileName, 2);
-			break;
-		}
-		fileName = "";
-	}
-	
-	if (fileName == "") {
-		return "";
-	}
-	
-	aurl[0] = wlink + "/" + fileName;
-
-	// SHA256.txtを得て、バージョン情報を得る
-	wlink = "https://ci.appveyor.com/api/buildjobs/" + jobId + "/artifacts/sha256.txt";
-    wtext = DownloadFile(wlink, "");
-
-	// sha256.txtの中のsakura_install2-4-2-xxxx-x86.exeを探す
-    var re;
-    re = new ActiveXObject("VBScript.RegExp");
-    re.Pattern = "sakura_install(2-[0-9]+-[0-9]+-[0-9]+)-x86\.exe";
-	
-    re.Global = true;
-    var matchs = re.Execute(wtext);
-    if ( matchs.Count > 0 ) {
-		log("見つかったファイル名:" + matchs(0).value, 2);
-        if ( matchs(0).SubMatches.Count > 0 ) {
-            wver = matchs(0).SubMatches(0);
-            wver = wver.replace(/-/g, ".");
         }
     }
 
@@ -1619,7 +1451,7 @@ function GetGitHubActions(aurl, amode, aver) {
 			log("見つかったバージョン情報:" + matchs(0).value, 2);
 	        if ( matchs(0).SubMatches.Count > 0 ) {
 	            wver = matchs(0).SubMatches(0);
-	            wver = "2.4.2." + wver;
+	            wver = "2.4.3." + wver;
 	        }
 	    }
 	}
@@ -1705,7 +1537,7 @@ function DownloadCURL(aurl, SaveFilePath) {
     if ( IsExistFile(wtmpfile) ) { DeleteFile(wtmpfile) }
 
     wcmd = CurlExe + (CurlInsecure?" --insecure":"") + " -L \"" + aurl + "\" -o " + wtmpfile;
-	if (getGitHubToken()) {
+	if (aurl.indexOf("github.com")>=0 && getGitHubToken()) {
 		wcmd = wcmd + " -H \"Authorization: token " + GitHubToken + "\"";
 	}
     log(">" + wcmd, 1);
@@ -1730,7 +1562,7 @@ function CURL(aurl, SaveFilePath) {
     // -L リダイレクトがあったらリダイレクト先の情報を取る
     // -s 余計な出力をしない
     wcmd = CurlExe + (CurlInsecure?" --insecure":"") + " -L \"" + aurl + "\" -o " + wtmpfile;
-	if (getGitHubToken()) {
+	if (aurl.indexOf("github.com")>=0 && getGitHubToken()) {
 		wcmd = wcmd + " -H \"Authorization: token " + GitHubToken + "\"";
 	}
     log(">" + wcmd, 1);
@@ -1773,15 +1605,24 @@ function CreateHttpRequest() {  // As Object
 
   progIDs = ["Msxml2.ServerXMLHTTP.6.0","Msxml2.ServerXMLHTTP","Msxml2.XMLHTTP"];
 
-  for ( var i = 0; i <= progIDs.length ; i++ ) {
-    try {
-      ret = new ActiveXObject(progIDs[i]);
-      log("XMLHTTPRequestを" + progIDs[i] + "で初期化しました。", 2);
-      break;
-    } catch(e) {
-      log("XMLHTTPRequestを" + progIDs[i] + "で初期化に失敗しました:" + e.message, 2);
-      // for(k in e) { log("error e." + k + ": " + e[k]);}
-    }
+//  try {
+//    ret = new XMLHTTPRequest();
+//      log("XMLHTTPRequestを生成しました。", 2);
+//  } catch(e) {
+//      log("XMLHTTPRequestの生成に失敗しました:" + e.message, 2);
+//  }
+  
+  if (ret == null) {
+      for ( var i = 0; i <= progIDs.length ; i++ ) {
+        try {
+          ret = new ActiveXObject(progIDs[i]);
+          log("XMLHTTPRequestを" + progIDs[i] + "で初期化しました。", 2);
+          break;
+        } catch(e) {
+          log("XMLHTTPRequestを" + progIDs[i] + "で初期化に失敗しました:" + e.message, 2);
+          // for(k in e) { log("error e." + k + ": " + e[k]);}
+        }
+      }
   }
   
   if (ret == null) {
